@@ -14,6 +14,7 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5';
 const MAX_PDF_MB = Number(process.env.MAX_PDF_MB || 25);
 const ACCESS_CODE = process.env.ACCESS_CODE || '';
 const DAILY_CAP = Number(process.env.DAILY_MODEL_CAP || 400);
+const NAVIGATOR_URL = (process.env.NAVIGATOR_URL || '').replace(/\/+$/, '');
 
 app.use(express.json({ limit: `${MAX_PDF_MB * 1.5 + 2}mb` }));
 app.use(express.text({ limit: '50mb', type: ['text/*', 'application/x-bibtex'] }));
@@ -51,7 +52,7 @@ const wrap = (fn) => (req, res) => fn(req, res).catch((e) => { console.error(e);
 
 // ---- config & knowledge ----
 app.get('/healthz', (_, res) => res.send('ok'));
-app.get('/api/config', (_, res) => res.json({ store: storeMode, requiresAccessCode: !!ACCESS_CODE, serverKeyAvailable: !!process.env.ANTHROPIC_API_KEY, model: MODEL, maxPdfMb: MAX_PDF_MB, knowledgeVersion: KNOWLEDGE_VERSION, dimensions }));
+app.get('/api/config', (_, res) => res.json({ navigatorUrl: NAVIGATOR_URL, store: storeMode, requiresAccessCode: !!ACCESS_CODE, serverKeyAvailable: !!process.env.ANTHROPIC_API_KEY, model: MODEL, maxPdfMb: MAX_PDF_MB, knowledgeVersion: KNOWLEDGE_VERSION, dimensions }));
 app.get('/api/knowledge', (_, res) => res.json({ dimensions, cards, sources, benchmarks }));
 app.get('/api/benchmarks', (_, res) => res.json(benchmarks));
 app.post('/api/check-code', (req, res) => res.json({ ok: !ACCESS_CODE || req.body?.code === ACCESS_CODE }));

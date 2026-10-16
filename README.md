@@ -57,6 +57,11 @@ See [docs/DEPLOY.md](docs/DEPLOY.md): GitHub → Render (Blueprint from `render.
 | `CONTACT_EMAIL` | — | sent to OpenAlex for the polite pool |
 | `MAX_PDF_MB` | `25` | largest PDF accepted |
 | `DAILY_MODEL_CAP` | `400` | model calls per day on the server key |
+| `NAVIGATOR_URL` | — | public URL of a Replication Navigator deployment; adds “Plan this test” links from untested assumptions that open the Navigator with the claim, the assumption to vary and the original study pre-filled |
+
+## Hand-off to Replication Navigator
+
+Every untested assumption in the coverage map (step 4) and in the next-tests list (step 6) carries a **Plan this test →** link when `NAVIGATOR_URL` is set. It opens Replication Navigator with `?plan=<base64 JSON>`; the Navigator pre-fills the target study and claim (stage 1) and the aim (stage 2) with the assumption to vary, and records the hand-off. The researcher then plans, preregisters and runs the test there; the result is returned to the map by tagging the new study in step 4.
 
 ## Data model
 

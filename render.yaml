@@ -19,3 +19,5 @@ services:
         sync: false
       - key: CONTACT_EMAIL
         sync: false
+      - key: NAVIGATOR_URL
+        sync: false
