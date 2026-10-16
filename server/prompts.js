@@ -1,44 +1,43 @@
-// Prompts for the three model steps. Every output item carries a verbatim quote and page so a
-// human can check it; items are created with status "ai" and must be confirmed by a person.
+// Prompts for the model steps. Every output item carries a verbatim quote and page so a person can
+// check it; items are created with status "ai" and must be confirmed by a person.
+//
+// v0.2 focus: PREDICTIONS (what the paper set out to test) and RESEARCH DESIGNS (how it tested
+// them), across studies. Findings are recorded as the result of a test, never as the claim.
 
-export const EXTRACT_PROMPT = `You are reading one empirical paper for a field-level map of diagnostic coverage. Extract ONLY what the paper states. Do not evaluate, do not guess, use null when something is not reported. Every item needs a short verbatim quote (8–30 words) and the page it appears on, so a reader can verify it.
+export const DESIGN_FIELDS = ['data_source', 'sample', 'period', 'iv_measure', 'dv_measure', 'estimator', 'controls', 'functional_form', 'identification'];
 
-Work in three parts.
+export const EXTRACT_PROMPT = `You are reading one paper for a field-level map of predictions and the research designs used to test them. Extract ONLY what the paper states. Do not evaluate, do not guess; use null when something is not reported. Every item needs a short verbatim quote (8–30 words) and the page it appears on.
 
-PART 1 — CLAIMS. List the paper's core empirical claims (usually 1–4): the relationships it tests and reports as findings. Write each claim as one plain sentence of the form "X is associated with / causes Y (direction)". Mark the main claim.
+PART 0 — PAPER TYPE. Classify: "empirical" (reports new data analysis), "conceptual" (theory or propositions without new data), "review" (literature review or meta-analysis), "methods", "other".
 
-PART 2 — ASSUMPTIONS. For each claim, list the consequential assumptions on which the reported result rests, in five dimensions:
-- theory: the mechanism or causal story, and rival explanations that the design does or does not rule out
-- constructs: how each key concept is operationalised and whether the measure captures it
-- design: sample, data source, time window, design (cross-sectional, panel, experiment), statistical power
-- analysis: model specification, controls, fixed effects, exclusions, transformations, lags, estimators
-- context: country, period, industry, institutional setting
-For each assumption give: the assumption in one sentence (what must be true for the result to carry its interpretation); dimension; consequentiality 1–3 (3 = if this assumption fails, the claim's interpretation changes; 1 = minor); whether the paper itself varied or tested it (varied: "yes" | "partly" | "no"), with how; a quote; a page.
+PART 1 — PREDICTIONS. List the predictions the paper sets out to test or proposes (hypotheses, propositions, research questions turned into expected relationships). Write each as one sentence of the form "X → Y (direction)" plus a plain statement, e.g. "CEO narcissism → firm risk-taking (positive)". Rules:
+- A prediction is what the authors expected BEFORE seeing the data, not the result. If the paper states hypotheses, use them (keep their labels, e.g. H1). If it has no hypotheses (abductive or exploratory), state the relationship it set out to examine at the level of the constructs, e.g. "TMT gender diversity → firm performance (positive)", NOT at the level of specific measures or results.
+- Keep predictions at the construct level. Different measures of the same construct are design choices, not different predictions.
+- Mark the 1–3 predictions that the paper's contribution rests on as "core": true. Mark whether each is a main effect, a moderation (boundary condition), a mediation (mechanism), or a null/no-effect prediction.
+- Note which earlier work the prediction builds on, if the paper says so ("builds_on": short citation strings as written in the paper, or []).
 
-PART 3 — ANALYSIS CHOICES. List every analytical decision the authors made or mention as an alternative (sample restrictions, variable definitions, controls, model type, fixed effects, clustering, lags, outlier handling, winsorisation, subsamples, robustness checks). For each: category; description; the options considered or reported (the chosen one first); whether the result was reported for alternatives; quote; page.
+PART 2 — TESTS. For EACH prediction that the paper tests empirically, describe the research design used to test it, with these fields (null if not reported): data_source; sample (population, unit of analysis, N, restrictions); period (years, countries, industries, settings); iv_measure (how X was operationalised); dv_measure (how Y was operationalised); estimator (model and whether between- or within-unit variance is used); controls (list of control variables and fixed effects); functional_form (linear, curvilinear, interactions, lags); identification (how endogeneity or causality is handled, or "none"). Then the result: direction found ("positive" | "negative" | "null" | "mixed"), whether it was statistically supported ("supported" | "not supported" | "partly"), the key statistic or effect size as reported, quote, page. If a prediction is tested with several specifications, give the main one and list the alternatives under "robustness" (short strings).
+
+PART 3 — ANALYTICAL CHOICES. List every analytical decision the authors made or mention as an alternative (sample restrictions, variable definitions, controls, model type, fixed effects, clustering, lags, outlier handling, winsorisation, subsamples, robustness checks). For each: category; description; the options considered (chosen first); whether results for alternatives were reported; quote; page.
 
 Return ONLY a JSON object:
 {
   "citation": "APA reference with DOI if shown",
-  "summary": "two sentences: what the paper tests and what it finds",
-  "data_source": "datasets used, with years and countries",
-  "claims": [
-    { "key": "c1", "text": "...", "main": true, "effect": "key statistic or effect size as reported, or null", "quote": "...", "page": 3,
-      "assumptions": [
-        { "key": "c1-a1", "dimension": "theory|constructs|design|analysis|context", "text": "...", "consequential": 1, "varied": "yes|partly|no", "how": "... or null", "quote": "...", "page": 5 }
-      ] }
+  "paper_type": "empirical|conceptual|review|methods|other",
+  "summary": "two sentences: what the paper set out to test and what it found",
+  "predictions": [
+    { "key": "p1", "label": "H1 or null", "text": "X → Y (direction)", "statement": "one plain sentence", "x": "construct X", "y": "construct Y", "direction": "positive|negative|null|conditional", "kind": "main|moderation|mediation|null", "core": true, "builds_on": [], "quote": "...", "page": 4,
+      "test": { "data_source": "...", "sample": "...", "period": "...", "iv_measure": "...", "dv_measure": "...", "estimator": "...", "controls": ["..."], "functional_form": "...", "identification": "...", "result_direction": "positive", "support": "supported", "statistic": "b = 0.12, p < .01", "robustness": ["firm fixed effects"], "quote": "...", "page": 12 } }
   ],
   "choices": [
     { "key": "ch1", "category": "sample|variables|controls|model|estimation|exclusions|robustness|other", "description": "...", "options": ["chosen", "alternative"], "alternatives_reported": true, "quote": "...", "page": 7 }
   ]
-}`;
+}
+For a conceptual or review paper, "test" is null for every prediction and "choices" may be empty.`;
 
-export const TAG_PROMPT = `You are checking which assumptions of an existing claim a paper has tested. You will receive (a) the claim and its list of assumptions, each with an id, and (b) a paper (attached). For EACH assumption id, say whether this paper deliberately varied, tested or relaxed that assumption, compared with the original study the claim comes from.
-
-Rules: use ONLY what the paper states; "varied" means the paper changed or tested that assumption (a different measure, sample, period, specification, mechanism test), not merely mentioned it; if the paper did not vary it, say "no" and leave how/quote null; every "yes" or "partly" needs a verbatim quote (8–30 words) and page; give the result for that assumption: "supports" (the claim held under the variation), "contradicts", "mixed", or "na".
-
-Return ONLY a JSON object:
-{ "citation": "APA reference of the attached paper", "tags": [ { "assumption": "<id>", "varied": "yes|partly|no", "how": "...|null", "result": "supports|contradicts|mixed|na", "quote": "...|null", "page": 4 } ] }`;
+export const CONSOLIDATE_PROMPT = `You are consolidating predictions across studies in one field. You will receive list C (canonical predictions already in the map, each with an id) and list N (new predictions extracted from one paper, each with a key). For each item in N, decide whether it states the SAME prediction as an item in C: same constructs X and Y at the construct level and compatible direction, even if worded differently or measured differently. Different measures of the same construct are the same prediction. A moderation or mediation of the same X → Y is a DIFFERENT prediction from the main effect.
+Return ONLY a JSON object: { "map": [ { "n": "<N key>", "c": "<C id or null>", "confidence": "high|medium|low", "note": "short phrase" } ] }
+Do not invent keys or ids.`;
 
 export const COMPARE_PROMPT = `You are aligning two lists of analytical choices for the same set of studies: list R (a published reference map, written by human researchers) and list A (produced by an AI from the papers). For each item in R, find the item(s) in A that describe the same choice (same decision, even if worded differently). Return ONLY a JSON object:
 { "matches": [ { "r": "<R key>", "a": ["<A key>", ...], "confidence": "high|medium|low", "note": "one short phrase on the match or mismatch" } ], "added": [ "<A keys not covered by any R item>" ] }

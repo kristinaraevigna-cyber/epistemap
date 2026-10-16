@@ -36,23 +36,27 @@ try {
   await page.waitForSelector('button[data-import]', { timeout: 15000 });
   await page.screenshot({ path: path.join(shots, 'e2e-2-studies.png') });
   await page.click('button[data-import]'); await wait(300);
-  // claims
-  await page.click('li[data-step=claims]'); await page.waitForSelector('[data-confirm-all]');
-  await page.screenshot({ path: path.join(shots, 'e2e-3-claims.png') });
-  await page.click('[data-confirm-all]'); await wait(200);
-  const nConf = await page.locator('.status.confirmed').count(); if (nConf < 6) throw new Error('confirm all failed ' + nConf);
-  // coach: starter question streams a grounded answer with clickable citations
+  // predictions: confirm all, tick core
+  await page.click('li[data-step=predictions]'); await page.waitForSelector('#confirmAllP');
+  await page.screenshot({ path: path.join(shots, 'e2e-3-predictions.png') });
+  await page.click('#confirmAllP'); await wait(200);
+  if ((await page.locator('.status.confirmed').count()) < 2) throw new Error('confirm all failed');
+  if (!(await page.locator('input[data-core-p]:checked').count())) throw new Error('core prediction not ticked from extraction');
+  // coach on predictions step
   await page.click('#starters button'); await page.waitForSelector('#chat .cite', { timeout: 15000 }); await page.waitForSelector('#chat .msg.bot .meta', { timeout: 15000 });
   if (!(await page.locator('#chat .cite.bad').count())) throw new Error('invalid citation not marked');
   await page.click('#chat .cite:not(.bad)'); await page.waitForSelector('#modal .card-view'); await page.click('#modal [data-close]');
   await page.screenshot({ path: path.join(shots, 'e2e-3b-coach.png') });
-  // coverage: tag a new PDF against the claim
-  await page.click('li[data-step=coverage]'); await page.waitForSelector('#tagForm');
-  await page.setInputFiles('#tagForm input[name=pdf]', pdfPath); await page.click('#tagForm button:not([type=button])');
-  await page.waitForSelector('button[data-vc]', { timeout: 15000 });
-  await page.screenshot({ path: path.join(shots, 'e2e-4-coverage.png'), fullPage: true });
-  const vc = page.locator('button[data-vc]'); const n = await vc.count(); for (let i = 0; i < n; i++) await page.locator('button[data-vc]').first().click();
-  if (!(await page.locator('.cell.covered').count())) throw new Error('no covered cells after confirming');
+  // second study: same PDF again as a new study → consolidation merges p1, adds p2 as new (mock maps first only)
+  await page.click('li[data-step=studies]'); await page.waitForSelector('#fileNew', { state: 'attached' }); await page.setInputFiles('#fileNew', pdfPath);
+  await page.waitForFunction(() => document.querySelectorAll('button[data-import]').length >= 1, null, { timeout: 15000 }); await page.click('button[data-import]'); await wait(500);
+  // designs
+  await page.click('li[data-step=designs]'); await page.waitForSelector('.card table');
+  const rows = await page.locator('.card .cell').count(); if (rows < 9) throw new Error('design map rows missing: ' + rows);
+  await page.screenshot({ path: path.join(shots, 'e2e-4-designs.png'), fullPage: true });
+  for (const d of await page.locator('.panel details').all()) { if (!(await d.getAttribute('open'))) await d.locator('summary').click(); }
+  const n = await page.locator('button[data-act=confirm][data-kind=test]').count(); for (let i = 0; i < n; i++) await page.locator('button[data-act=confirm][data-kind=test]').first().click();
+  const nPred = (await (await fetch(`${base}/api/fields`)).json()); if (nPred[0].predictions !== 3) { const fx = await (await fetch(`${base}/api/fields/${nPred[0].id}`)).json(); throw new Error('expected 3 predictions after consolidation, got ' + nPred[0].predictions + ' :: ' + fx.predictions.map((x) => x.text.slice(0, 30) + '@' + x.study).join(' | ') + ' studies=' + fx.studies.map((x) => x.id + ':' + !!x.extraction + ':' + !!x.imported).join(',')); }
   // choices benchmark
   await page.click('li[data-step=choices]'); await page.waitForSelector('#loadBench');
   await page.click('#loadBench'); await wait(200); await page.click('#saveRef'); await wait(200);
@@ -62,9 +66,9 @@ try {
   await page.click('li[data-step=export]'); await page.waitForSelector('#notes');
   await page.screenshot({ path: path.join(shots, 'e2e-6-export.png'), fullPage: true });
   await wait(1200); // debounced save
-  const saved = await (await fetch(`${base}/api/fields`)).json(); if (saved[0].claims !== 1) throw new Error('field not saved');
+  const saved = await (await fetch(`${base}/api/fields`)).json(); if (!(saved[0].predictions >= 2)) throw new Error('field not saved: ' + JSON.stringify(saved[0]));
   // mobile check
-  await page.setViewportSize({ width: 390, height: 800 }); await page.click('li[data-step=coverage]'); await wait(300);
+  await page.setViewportSize({ width: 390, height: 800 }); await page.click('li[data-step=designs]'); await wait(300);
   const sw = await page.evaluate(() => document.documentElement.scrollWidth); if (sw > 400) { const who = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((el) => el.getBoundingClientRect().right > 400 && el.getBoundingClientRect().width > 0).slice(0, 8).map((el) => el.tagName + '#' + el.id + '.' + el.className + ' ' + Math.round(el.getBoundingClientRect().right)).join(' | ')); throw new Error('horizontal overflow on mobile: ' + sw + ' :: ' + who); }
   await page.screenshot({ path: path.join(shots, 'e2e-7-mobile.png') });
   if (errors.length) throw new Error('console errors: ' + errors.join(' | '));

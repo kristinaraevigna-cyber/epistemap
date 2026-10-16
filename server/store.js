@@ -51,29 +51,30 @@ export async function initStore() {
 }
 
 export function newField(name, description = '') {
-  return { id: randomUUID(), name, description, created: new Date().toISOString(), studies: [], claims: [], assumptions: [], coverage: [], choices: [], reference: [], matches: [], notes: '' };
+  return { id: randomUUID(), name, description, created: new Date().toISOString(), schema: 2, studies: [], predictions: [], tests: [], claims: [], assumptions: [], coverage: [], choices: [], reference: [], matches: [], notes: '' };
 }
 
 export async function listFields() {
   if (pool) {
     const { rows } = await pool.query('SELECT id, name, version, updated_at, jsonb_array_length(doc->\'studies\') AS studies, jsonb_array_length(doc->\'claims\') AS claims FROM cm_fields ORDER BY updated_at DESC');
-    return rows.map((r) => ({ id: r.id, name: r.name, version: r.version, updated: r.updated_at, studies: Number(r.studies), claims: Number(r.claims) }));
+    return rows.map((r) => ({ id: r.id, name: r.name, version: r.version, updated: r.updated_at, studies: Number(r.studies), predictions: Number(r.predictions), claims: Number(r.claims) }));
   }
   const out = [];
   for (const f of await readdir(dir)) {
     if (!f.endsWith('.json')) continue;
     const d = JSON.parse(await readFile(path.join(dir, f), 'utf8'));
-    out.push({ id: d.id, name: d.name, version: d.version || 1, updated: d.updated || d.created, studies: d.studies.length, claims: d.claims.length });
+    out.push({ id: d.id, name: d.name, version: d.version || 1, updated: d.updated || d.created, studies: d.studies.length, predictions: (d.predictions || []).length, claims: d.claims.length });
   }
   return out.sort((a, b) => String(b.updated).localeCompare(String(a.updated)));
 }
 
+const migrate = (d) => d ? { predictions: [], tests: [], ...d, schema: 2 } : d;
 export async function getField(id) {
   if (pool) {
     const { rows } = await pool.query('SELECT doc, version FROM cm_fields WHERE id = $1', [id]);
-    return rows[0] ? { ...rows[0].doc, version: rows[0].version } : null;
+    return rows[0] ? migrate({ ...rows[0].doc, version: rows[0].version }) : null;
   }
-  try { return JSON.parse(await readFile(path.join(dir, `${id}.json`), 'utf8')); } catch { return null; }
+  try { return migrate(JSON.parse(await readFile(path.join(dir, `${id}.json`), 'utf8'))); } catch { return null; }
 }
 
 // Optimistic concurrency: a save must carry the version it was loaded with.

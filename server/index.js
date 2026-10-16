@@ -2,8 +2,8 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initStore, storeMode, newField, listFields, getField, saveField, deleteField, logEvent, exportAll } from './store.js';
-import { dimensions, cards, sources, benchmarks, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
-import { EXTRACT_PROMPT, TAG_PROMPT, COMPARE_PROMPT, parseJsonLoose } from './prompts.js';
+import { dimensions, designDimensions, cards, sources, benchmarks, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
+import { EXTRACT_PROMPT, CONSOLIDATE_PROMPT, COMPARE_PROMPT, parseJsonLoose } from './prompts.js';
 import { searchOpenAlex, localCitations, parseExport, mergeStudies } from './corpus.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -64,7 +64,7 @@ const wrap = (fn) => (req, res) => fn(req, res).catch((e) => { console.error(e);
 
 // ---- config & knowledge ----
 app.get('/healthz', (_, res) => res.send('ok'));
-app.get('/api/config', (_, res) => res.json({ navigatorUrl: NAVIGATOR_URL, store: storeMode, requiresAccessCode: !!ACCESS_CODE, serverKeyAvailable: !!process.env.ANTHROPIC_API_KEY, model: MODEL, maxPdfMb: MAX_PDF_MB, knowledgeVersion: KNOWLEDGE_VERSION, dimensions }));
+app.get('/api/config', (_, res) => res.json({ navigatorUrl: NAVIGATOR_URL, store: storeMode, requiresAccessCode: !!ACCESS_CODE, serverKeyAvailable: !!process.env.ANTHROPIC_API_KEY, model: MODEL, maxPdfMb: MAX_PDF_MB, knowledgeVersion: KNOWLEDGE_VERSION, dimensions, designDimensions }));
 app.get('/api/knowledge', (_, res) => res.json({ dimensions, cards, sources, benchmarks }));
 app.get('/api/benchmarks', (_, res) => res.json(benchmarks));
 app.post('/api/check-code', (req, res) => res.json({ ok: !ACCESS_CODE || req.body?.code === ACCESS_CODE }));
@@ -77,7 +77,7 @@ app.put('/api/fields/:id', wrap(async (req, res) => { guard(req); const doc = re
 app.delete('/api/fields/:id', wrap(async (req, res) => { guard(req); await deleteField(req.params.id); res.json({ ok: true }); }));
 
 // ---- corpus ----
-app.post('/api/openalex/search', wrap(async (req, res) => { guard(req); const { query, fromYear, toYear, perPage, page } = req.body || {}; if (!query) return res.status(400).json({ error: 'query required' }); res.json(await searchOpenAlex({ query, fromYear, toYear, perPage, page })); }));
+app.post('/api/openalex/search', wrap(async (req, res) => { guard(req); const { query, fromYear, toYear, perPage, page, sort } = req.body || {}; if (!query) return res.status(400).json({ error: 'query required' }); const allowed = { cites: 'cited_by_count:desc', recent: 'publication_date:desc', relevance: 'relevance_score:desc' }; res.json(await searchOpenAlex({ query, fromYear, toYear, perPage, page, sort: allowed[sort] || allowed.cites })); }));
 app.post('/api/corpus/parse', wrap(async (req, res) => { guard(req); const text = typeof req.body === 'string' ? req.body : req.body?.text; const studies = parseExport(text, req.get('x-filename') || ''); res.json({ studies }); }));
 app.post('/api/corpus/local-cites', wrap(async (req, res) => res.json({ studies: localCitations(req.body.studies || []) })));
 // helper used by the client to merge without duplicates (kept server-side so the rule is in one place)
@@ -90,20 +90,21 @@ app.post('/api/extract', wrap(async (req, res) => {
   if (!pdfBase64) return res.status(400).json({ error: 'pdfBase64 required' });
   const out = await callModel({ key, system: systemBlocks(), content: [pdfBlock(pdfBase64), { type: 'text', text: EXTRACT_PROMPT }], maxTokens: 12000 });
   const json = parseJsonLoose(out.text);
-  await logEvent(fieldId, 'extract', { studyId, claims: json.claims?.length, choices: json.choices?.length, usage: out.usage, model: out.model, stop: out.stop });
+  await logEvent(fieldId, 'extract', { studyId, type: json.paper_type, predictions: json.predictions?.length, choices: json.choices?.length, usage: out.usage, model: out.model, stop: out.stop });
   res.json({ extraction: json, model: out.model, stop: out.stop });
 }));
 
-app.post('/api/tag', wrap(async (req, res) => {
+app.post('/api/consolidate', wrap(async (req, res) => {
   const { key } = resolveKey(req);
-  const { pdfBase64, fieldId, studyId, claim, assumptions } = req.body || {};
-  if (!pdfBase64 || !claim || !assumptions?.length) return res.status(400).json({ error: 'pdfBase64, claim and assumptions required' });
-  const list = assumptions.map((a) => `- id ${a.id} [${a.dimension}]: ${a.text}`).join('\n');
-  const text = `${TAG_PROMPT}\n\nCLAIM: ${claim.text}\nORIGINAL STUDY: ${claim.study || 'see claim'}\nASSUMPTIONS:\n${list}`;
-  const out = await callModel({ key, system: systemBlocks(), content: [pdfBlock(pdfBase64), { type: 'text', text }], maxTokens: 6000 });
+  const { fieldId, canonical, incoming } = req.body || {};
+  if (!incoming?.length) return res.json({ map: [] });
+  if (!canonical?.length) return res.json({ map: incoming.map((n) => ({ n: n.key, c: null, confidence: 'high', note: 'first in map' })) });
+  const C = canonical.map((c) => `C ${c.id}: ${c.text}${c.kind ? ` [${c.kind}]` : ''}`).join('\n');
+  const N = incoming.map((n) => `N ${n.key}: ${n.text}${n.kind ? ` [${n.kind}]` : ''}`).join('\n');
+  const out = await callModel({ key, system: [{ type: 'text', text: 'You consolidate predictions across studies for a field map. Be literal and conservative: merge only when constructs and direction match.' }], content: [{ type: 'text', text: `${CONSOLIDATE_PROMPT}\n\nLIST C:\n${C}\n\nLIST N:\n${N}` }], maxTokens: 3000 });
   const json = parseJsonLoose(out.text);
-  await logEvent(fieldId, 'tag', { studyId, claim: claim.id, n: json.tags?.length, usage: out.usage });
-  res.json({ tags: json.tags || [], citation: json.citation || null });
+  await logEvent(fieldId, 'consolidate', { c: canonical.length, n: incoming.length, merged: (json.map || []).filter((m) => m.c).length, usage: out.usage });
+  res.json({ map: json.map || [] });
 }));
 
 app.post('/api/compare', wrap(async (req, res) => {
@@ -158,18 +159,18 @@ app.post('/api/flag', wrap(async (req, res) => { const { fieldId, cardId, step, 
 
 // ---- exports ----
 app.get('/api/fields/:id/export.json', wrap(async (req, res) => { const f = await getField(req.params.id); if (!f) return res.status(404).end(); res.setHeader('content-disposition', `attachment; filename="${(f.name || 'field').replace(/[^\w-]+/g, '_')}.json"`); res.json(f); }));
-app.get('/api/fields/:id/coverage.csv', wrap(async (req, res) => {
+app.get('/api/fields/:id/designs.csv', wrap(async (req, res) => {
   const f = await getField(req.params.id); if (!f) return res.status(404).end();
-  const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const rows = [['claim_id', 'claim', 'assumption_id', 'dimension', 'assumption', 'consequential', 'assumption_status', 'study_id', 'study', 'year', 'varied', 'how', 'result', 'quote', 'page', 'coverage_status']];
-  const sById = new Map(f.studies.map((s) => [s.id, s]));
-  for (const a of f.assumptions) {
-    const c = f.claims.find((x) => x.id === a.claim) || {};
-    const cov = f.coverage.filter((x) => x.assumption === a.id);
-    if (!cov.length) rows.push([c.id, c.text, a.id, a.dimension, a.text, a.consequential, a.status, '', '', '', '', '', '', '', '', '']);
-    for (const x of cov) { const s = sById.get(x.study) || {}; rows.push([c.id, c.text, a.id, a.dimension, a.text, a.consequential, a.status, x.study, s.title, s.year, x.varied, x.how, x.result, x.quote, x.page, x.status]); }
+  const esc = (v) => `"${String(Array.isArray(v) ? v.join('; ') : v ?? '').replace(/"/g, '""')}"`;
+  const dd = designDimensions.map((d) => d.id);
+  const rows = [['prediction_id', 'prediction', 'kind', 'core', 'prediction_status', 'study_id', 'study', 'year', 'label', ...dd, 'result_direction', 'support', 'statistic', 'quote', 'page', 'test_status']];
+  const sById = new Map((f.studies || []).map((s) => [s.id, s]));
+  for (const p of f.predictions || []) {
+    const ts = (f.tests || []).filter((t) => t.prediction === p.id);
+    if (!ts.length) rows.push([p.id, p.text, p.kind, p.core ? 1 : 0, p.status, '', '', '', '', ...dd.map(() => ''), '', '', '', '', '', '']);
+    for (const t of ts) { const s = sById.get(t.study) || {}; const d = t.design || {}; rows.push([p.id, p.text, p.kind, p.core ? 1 : 0, p.status, t.study, s.title, s.year, t.label, ...dd.map((k) => d[k]), t.result?.direction, t.result?.support, t.result?.statistic, t.result?.quote, t.result?.page, t.status]); }
   }
-  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', 'attachment; filename="coverage.csv"');
+  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', 'attachment; filename="designs.csv"');
   res.send(rows.map((r) => r.map(esc).join(',')).join('\n'));
 }));
 app.get('/api/admin/export', wrap(async (req, res) => { if (!process.env.ADMIN_TOKEN || req.get('x-admin-token') !== process.env.ADMIN_TOKEN) return res.status(401).json({ error: 'admin token required' }); res.json(await exportAll()); }));

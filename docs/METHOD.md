@@ -1,23 +1,27 @@
-# Method notes (v0.1)
+# Method notes (v0.2)
 
 These notes record the design decisions behind Coverage Map so they can go into the technical appendix of the Organization Science proposal.
 
+## 0. Change of focus in v0.2 (16 October 2026)
+
+After the team reviewed v0.1, the instrument was refocused on empirical work. v0.1 decomposed each claim into assumptions across five dimensions; that produced many one-off, conceptual items and was dominated by reviews and theory papers. v0.2 extracts **predictions** (what a study set out to test, X → Y at the construct level) and the **research design** used in each test, and lines them up across studies. This is the raw material of a multiverse / specification map (Berchicci & King, 2022; Götz et al., 2026): the core predictions, and the range of designs used to test them. The five-dimension lens stays in the evidence base as a secondary, conceptual view.
+
 ## 1. Unit of analysis
 
-The unit is the **claim–assumption pair**, not the paper. A claim is one empirical relationship a study reports ("corporate social performance is positively associated with financial performance"). Its assumptions are the conditions under which the reported result carries its interpretation, sorted into five dimensions (theory, constructs, design and sample, analysis, context). A study *covers* an assumption when it deliberately varied, tested or relaxed it relative to the original.
+The unit is the **prediction–test pair**. A prediction is a hypothesis or proposition (labelled where the paper labels it; for hypothesis-free papers, the relationship the authors set out to examine). A test is one empirical examination of that prediction in one study, described on nine design dimensions (data source, sample and level, period and context, measure of X, measure of Y, estimator and variance, controls and fixed effects, functional form and timing, identification), with its result (direction, support, statistic). Different measures of the same construct are design options, not different predictions; a moderation or mediation of X → Y is a different prediction from the main effect.
 
-Diagnostic coverage of a claim = (number of confirmed assumptions varied by at least one study) / (number of confirmed assumptions), reported unweighted and weighted by consequentiality (1–3).
+A prediction is **core** when it recurs across studies and later work builds on it (the person decides; the import shows recurrence counts and `builds_on` citations). A design decision **matters** when studies that made it differently reached different results; step 6 ranks these, mixed results first.
 
 ## 2. Where the human is in the loop
 
 | Step | AI proposes | Person decides |
 |---|---|---|
 | 1 Corpus | candidate studies, citation counts | field boundary, core set |
-| 2 Studies | claims, assumptions, choices with quotes | — (review in step 3) |
-| 3 Claims | — | confirm / edit / reject each item; consequentiality |
-| 4 Coverage | which assumptions a study varied, with quotes | confirm / reject each tag |
+| 2 Studies | paper type; predictions; the design and result of each test; choices, with quotes; which predictions are the same as existing ones | — (review in step 3) |
+| 3 Predictions | merge proposals | confirm / edit / merge / reject; mark core |
+| 4 Design map | — | confirm / edit / reject each test |
 | 5 Choice space | alignment of AI-found choices with a reference | override matches; final benchmark coding |
-| 6 Export | ranking of untested assumptions | what to test next |
+| 6 Export | ranking of design decisions that vary, mixed results first | what to test next; hand-off to Replication Navigator |
 
 Every proposal carries `status: "ai"` until a person confirms it. Confirmed and rejected items are kept, so the agreement between AI proposals and human decisions can be computed from the exported JSON (acceptance rate per dimension, per study).
 

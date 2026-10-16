@@ -6,28 +6,34 @@ Replications are usually counted per paper. Coverage Map records something more 
 
 This is a separate project from [Replication Navigator](https://github.com/kristinaraevigna-cyber/replication-navigator) (single-study planning). It reuses the Navigator's verified evidence base but shares no code, so the two can evolve independently.
 
-## The idea in one table
+## What it maps (v0.2: empirical focus)
 
-| Dimension | Question the assumption answers | Grounding |
-|---|---|---|
-| Theory | Does the proposed mechanism hold, and do rival explanations predict the same result? | Irvine (2021); Anderson & Maxwell (2016) |
-| Constructs | Do the results depend on how the concepts were operationalised? | Flake et al. (2022) |
-| Design and sample | Do they depend on the sample, data source, time window or design? | Brandt et al. (2014); Bonett (2021) |
-| Analysis | Do they hold across reasonable analytical choices? | Götz et al. (2026); Berchicci & King (2022) |
-| Context | Do they generalise to other periods, countries and settings? | Delios et al. (2022) |
+The unit is the **prediction** (X → Y, direction, at the construct level): what a study set out to test, not what it found. For every prediction the map records each **test** of it, described on nine research-design dimensions, with the result:
 
-**Diagnostic coverage** of a claim = the share of its consequential assumptions that at least one study has deliberately varied (reported unweighted and weighted by consequentiality).
+| Dimension | Question |
+|---|---|
+| Data source | Which dataset(s) provided the observations? |
+| Sample and level | Which population, unit of analysis and restrictions? |
+| Period and context | Which years, countries, industries, settings? |
+| Measure of X | How was the predictor operationalised? |
+| Measure of Y | How was the outcome operationalised? |
+| Estimator and variance | Which estimator; between- or within-unit variance? |
+| Controls and fixed effects | Which controls and fixed effects? |
+| Functional form and timing | Linear, curvilinear, moderated; lags? |
+| Identification strategy | How is causality or endogeneity addressed? |
+
+Lined up across studies, this shows which predictions **recur** (core), which design decisions **differ** between studies, and where the **results disagree**. Those are the inputs to a multiverse or specification map (Berchicci & King, 2022; Götz et al., 2026), and the design decisions a next test should vary. The earlier assumption-based decomposition (theory, constructs, design, analysis, context) remains in the evidence base as a secondary, conceptual lens.
 
 ## The six steps
 
-1. **Corpus.** Search OpenAlex (open, no account) or upload a Web of Science / Scopus / BibTeX export (the formats bibliometrix reads). Local citation counts help identify core studies. A person marks the core set.
-2. **Studies.** Upload each core study's PDF. The model extracts the claims, the assumptions behind each claim in the five dimensions, and the analytical choices, each with a verbatim quote and page number. PDFs are read once and not stored.
-3. **Claims and assumptions.** A person confirms, edits or rejects every item. Only confirmed items enter the map.
-4. **Coverage map.** Tag further studies (replications, extensions) against a claim: the model proposes which assumptions each study varied, with quotes; a person confirms. The map shows covered, partly covered and untested assumptions, ordered by consequentiality.
-5. **Choice space.** The analytical choices found across the papers form the choice space for a multiverse. Paste a reference list (the Berchicci & King 2022 window of model uncertainty ships as a built-in benchmark) and align it with what the AI found: found, missed, added.
-6. **Export.** JSON of the whole field (re-importable), a CSV of assumption × study rows for R or Python, and a list of the most informative next tests.
+1. **Corpus.** Search OpenAlex (phrases in quotes; OR / AND / NOT) or upload a Web of Science / Scopus / BibTeX export. Sort by citations, citations per year (age-adjusted) or year; reviews are flagged; local citation counts show bibliographic coupling. A person marks the core empirical studies.
+2. **Studies.** Upload each core study's PDF. The model classifies the paper (empirical, conceptual, review), extracts its predictions, the design used to test each one, the result, and the analytical choices, each with a verbatim quote and page. PDFs are read once and not stored.
+3. **Predictions.** On import, the model proposes which of the paper's predictions are the same as ones already in the map (same constructs and direction; different measures are design choices, not different predictions). A person confirms, edits, merges or rejects, and marks the **core** predictions: those that recur and that later work builds on.
+4. **Design map.** For each core prediction, a table of the nine dimensions × the options used across studies, with each study's result. Dimensions with several options and mixed results are the design decisions that matter.
+5. **Choice space.** The analytical choices found across papers, and the benchmark against a reference list (the Berchicci & King 2022 window of model uncertainty is built in): found, missed, added.
+6. **Export.** Core predictions, the design decisions ranked (mixed results first), a JSON of the field, and a CSV of prediction × study × design for R or Python.
 
-An **AI coach** sits beside every step, as in Replication Navigator: it streams short, answer-first replies, sees the field's claims, assumptions and coverage (not the PDFs), may only use the 322 evidence cards, cites card ids that the server validates, and lets users open the cited card or flag a citation. Every AI proposal is created with status `ai` and must be confirmed by a person. The model is grounded in the same 322 verified evidence cards as Replication Navigator (`knowledge/evidence-cards.json`; `scripts/verify_cards.py` checks every quote against its PDF page).
+An **AI coach** sits beside every step, as in Replication Navigator: it streams short, answer-first replies, sees the field's predictions, tests and designs (not the PDFs), may only use the 322 evidence cards, cites card ids that the server validates, and lets users open the cited card or flag a citation. Every AI proposal is created with status `ai` and must be confirmed by a person.
 
 ## Running locally
 
@@ -63,11 +69,11 @@ See [docs/DEPLOY.md](docs/DEPLOY.md): GitHub → Render (Blueprint from `render.
 
 ## Hand-off to Replication Navigator
 
-Every untested assumption in the coverage map (step 4) and in the next-tests list (step 6) carries a **Plan this test →** link when `NAVIGATOR_URL` is set. It opens Replication Navigator with `?plan=<base64 JSON>`; the Navigator pre-fills the target study and claim (stage 1) and the aim (stage 2) with the assumption to vary, and records the hand-off. The researcher then plans, preregisters and runs the test there; the result is returned to the map by tagging the new study in step 4.
+Every core prediction (steps 4 and 6) and every design dimension that varies across studies carries a **Plan this test →** link when `NAVIGATOR_URL` is set. It opens Replication Navigator with `?plan=<base64 JSON>`; the Navigator pre-fills the target study and the prediction (stage 1), the existing evidence and design range, and the aim (stage 2): which design decision to vary. The researcher plans, preregisters and runs the test there; the finished study is then read into the map in step 2 like any other.
 
 ## Data model
 
-A field is one JSON document: `studies[]`, `claims[]`, `assumptions[]` (dimension, consequential 1–3, quote, page, status), `coverage[]` (assumption × study: varied yes/partly/no, how, result, quote, page, status, origin), `choices[]`, `reference[]`, `matches[]`, `notes`. Saves use optimistic versioning so two people can work on the same field.
+A field is one JSON document (`schema: 2`): `studies[]` (with `paper_type`, `cites_per_year`, `is_review`), `predictions[]` (text X → Y, statement, kind main/moderation/mediation/null, direction, core, builds_on, sources, quote, page, status), `tests[]` (prediction × study: `design{data_source, sample, period, iv_measure, dv_measure, estimator, controls[], functional_form, identification}`, `result{direction, support, statistic, quote, page}`, robustness, status), `choices[]`, `reference[]`, `matches[]`, `notes`; the v0.1 arrays `claims[]`, `assumptions[]`, `coverage[]` are kept for older fields. Saves use optimistic versioning so two people can work on the same field.
 
 ## Benchmarks
 

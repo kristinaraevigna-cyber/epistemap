@@ -47,24 +47,28 @@ test('corpus parsing and merge', async () => {
   const r3 = await fetch(base + '/api/corpus/parse', { method: 'POST', headers: { 'content-type': 'text/plain' }, body: wos }); const p3 = await r3.json(); assert.equal(p3.studies[0].title, 'Fourth'); assert.equal(p3.studies[0].cited_by, 7);
 });
 
-test('extract → tag → compare → exports', async () => {
+test('extract → consolidate → compare → exports', async () => {
   const f = (await j('/api/fields', { name: 'Flow' })).body;
-  const x = await j('/api/extract', { pdfBase64: PDF, fieldId: f.id }); assert.equal(x.status, 200); assert.equal(x.body.extraction.claims.length, 1); assert.equal(x.body.extraction.choices.length, 3);
+  const x = await j('/api/extract', { pdfBase64: PDF, fieldId: f.id }); assert.equal(x.status, 200); assert.equal(x.body.extraction.paper_type, 'empirical'); assert.equal(x.body.extraction.predictions.length, 2); assert.ok(x.body.extraction.predictions[0].test.dv_measure);
   const bad = await j('/api/extract', { pdfBase64: Buffer.from('not a pdf').toString('base64') }); assert.equal(bad.status, 400);
-  const as = [{ id: 'a_1', dimension: 'theory', text: 't' }, { id: 'a_2', dimension: 'context', text: 'c' }];
-  const t = await j('/api/tag', { pdfBase64: PDF, fieldId: f.id, claim: { id: 'c1', text: 'CSP → CFP' }, assumptions: as }); assert.equal(t.body.tags.length, 2); assert.equal(t.body.tags[1].varied, 'yes');
+  const c0 = await j('/api/consolidate', { fieldId: f.id, canonical: [], incoming: [{ key: 'p1', text: 'A → B' }] }); assert.equal(c0.body.map[0].c, null);
+  const c1 = await j('/api/consolidate', { fieldId: f.id, canonical: [{ id: 'p_x', text: 'A → B' }], incoming: [{ key: 'p1', text: 'A → B (+)' }, { key: 'p2', text: 'C → D' }] }); assert.equal(c1.body.map[0].c, 'p_x'); assert.equal(c1.body.map[1].c, null);
   const cmp = await j('/api/compare', { fieldId: f.id, reference: [{ key: 'r1', category: 'sample', description: 'Exclude financials' }, { key: 'r2', category: 'model', description: 'Firm FE' }], choices: [{ key: 'ch1@s', category: 'sample', description: 'Exclude financial firms', options: [] }] });
   assert.equal(cmp.body.matches.length, 2); assert.equal(cmp.body.matches[1].a.length, 0);
-  // build a doc with coverage and export csv
   f.studies.push({ id: 's1', title: 'Doe 2015', authors: 'Doe', year: 2015, core: true });
-  f.claims.push({ id: 'c1', study: 's1', text: 'CSP → CFP', status: 'confirmed' });
-  f.assumptions.push({ id: 'a_1', claim: 'c1', dimension: 'theory', text: 'trust', consequential: 3, status: 'confirmed' });
-  f.coverage.push({ id: 'v1', assumption: 'a_1', study: 's1', varied: 'yes', how: 'x', result: 'supports', quote: 'q', page: 3, status: 'confirmed' });
+  f.predictions.push({ id: 'p1', study: 's1', text: 'CSP → CFP (+)', kind: 'main', core: true, status: 'confirmed' });
+  f.tests.push({ id: 't1', prediction: 'p1', study: 's1', design: { data_source: 'KLD', sample: 'US firms', period: '1995–2010', iv_measure: 'KLD index', dv_measure: 'ROA', estimator: 'OLS', controls: ['size', 'leverage'], functional_form: 'linear', identification: 'none' }, result: { direction: 'positive', support: 'supported', statistic: 'b=0.1', quote: 'q', page: 3 }, status: 'confirmed' });
   await j(`/api/fields/${f.id}`, { doc: f, version: 1 }, 'PUT');
-  const csv = await (await fetch(`${base}/api/fields/${f.id}/coverage.csv`)).text(); assert.ok(csv.includes('"trust"')); assert.ok(csv.split('\n').length === 2);
-  const ex = await (await fetch(`${base}/api/fields/${f.id}/export.json`)).json(); assert.equal(ex.name, 'Flow');
+  const csv = await (await fetch(`${base}/api/fields/${f.id}/designs.csv`)).text(); assert.ok(csv.includes('"ROA"')); assert.ok(csv.includes('"size; leverage"')); assert.equal(csv.split('\n').length, 2);
+  const ex = await (await fetch(`${base}/api/fields/${f.id}/export.json`)).json(); assert.equal(ex.name, 'Flow'); assert.equal(ex.schema, 2);
   const adm = await j('/api/admin/export', null, 'GET', { 'x-admin-token': 'adm' }); assert.ok(adm.body.fields.length >= 2); assert.ok(adm.body.events.some((e) => e.type === 'extract'));
   const noadm = await j('/api/admin/export'); assert.equal(noadm.status, 401);
+});
+
+test('OpenAlex query normalisation', async () => {
+  const { normaliseQuery } = await import('../server/corpus.js');
+  assert.equal(normaliseQuery('greenwashing or "green washing" and firms'), 'greenwashing OR "green washing" AND firms');
+  assert.equal(normaliseQuery('  upper echelons  '), 'upper echelons');
 });
 
 test('explain validates citations', async () => {

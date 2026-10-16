@@ -26,24 +26,24 @@
 <main id="home" class="home">
   <section class="hero">
     <div class="hero-text">
-      <p class="eyebrow">An instrument for meta-research</p>
-      <h1>Which assumptions of a claim has the evidence tested?</h1>
-      <p class="lede">Replications are counted. What they test is rarely examined. Coverage Map breaks each core claim of a field into its assumptions, reads the studies to record which assumptions each one varied, and shows where the next test would be most informative. The AI proposes with a quote and page; you confirm every item.</p>
+      <p class="eyebrow">An instrument for meta-research · empirical focus</p>
+      <h1>Which predictions does a field rest on, and how have they been tested?</h1>
+      <p class="lede">Coverage Map reads a field's core empirical studies, extracts the predictions they set out to test (X → Y) and the research design each one used, and lines them up: which predictions recur, which design decisions differ across studies, and where the results disagree. That is the raw material for a multiverse, and for choosing the next test. The AI proposes with a quote and page; you confirm every item.</p>
       <form id="newField" class="row hero-form">
         <input id="newName" placeholder="Name a field, e.g. Social and financial performance" required aria-label="Field name">
         <button type="submit">Create field</button>
       </form>
     </div>
-    <figure class="hero-fig" aria-label="Example coverage map: one claim, five dimensions">
-      <div class="mini-claim">Corporate social performance → financial performance</div>
+    <figure class="hero-fig" aria-label="Example design map: one prediction, design dimensions across six studies">
+      <div class="mini-claim">Social performance → financial performance (+) · 6 studies</div>
       <div class="mini-grid">
-        <div class="mini-cell none"><b>0/2</b><span>Theory</span></div>
-        <div class="mini-cell partly"><b>1/3</b><span>Constructs</span></div>
-        <div class="mini-cell covered"><b>2/2</b><span>Design</span></div>
-        <div class="mini-cell covered"><b>4/4</b><span>Analysis</span></div>
-        <div class="mini-cell partly"><b>1/2</b><span>Context</span></div>
+        <div class="mini-cell covered"><b>1</b><span>Data source</span></div>
+        <div class="mini-cell partly"><b>5</b><span>Measure of X</span></div>
+        <div class="mini-cell partly"><b>2</b><span>Measure of Y</span></div>
+        <div class="mini-cell none"><b>2 ≠</b><span>Estimator</span></div>
+        <div class="mini-cell partly"><b>3</b><span>Form</span></div>
       </div>
-      <figcaption>Red cells with high consequentiality are the field's most informative next tests.</figcaption>
+      <figcaption>Cells show how many options studies used; red where the results disagree. Those are the design decisions that matter.</figcaption>
     </figure>
   </section>
 
@@ -53,15 +53,15 @@
   </section>
 
   <section class="steps-grid" aria-label="How it works">
-    <article class="step-card"><span class="num">1</span><h3>Corpus</h3><p>Find the field's core studies with OpenAlex or a Web of Science / Scopus export. You decide which are core.</p></article>
-    <article class="step-card"><span class="num">2</span><h3>Studies</h3><p>Upload a PDF. The model extracts claims, their assumptions in five dimensions, and every analytical choice, each with a quote and page.</p></article>
-    <article class="step-card"><span class="num">3</span><h3>Claims</h3><p>Confirm, edit or reject each claim and assumption. Set how consequential each assumption is.</p></article>
-    <article class="step-card"><span class="num">4</span><h3>Coverage map</h3><p>Tag further studies against a claim. See which assumptions are covered, partly covered or untested.</p></article>
+    <article class="step-card"><span class="num">1</span><h3>Corpus</h3><p>Bound the field with OpenAlex or a Web of Science / Scopus export: seminal, recent and rising studies; reviews flagged. You decide which are core.</p></article>
+    <article class="step-card"><span class="num">2</span><h3>Studies</h3><p>Upload a PDF. The model extracts the predictions the paper set out to test, the design used for each, the result, and the analytical choices, with quotes and pages.</p></article>
+    <article class="step-card"><span class="num">3</span><h3>Predictions</h3><p>Confirm each prediction (X → Y at the construct level), merge the same prediction across studies, and mark the core ones.</p></article>
+    <article class="step-card"><span class="num">4</span><h3>Design map</h3><p>For each core prediction, the range of designs used across studies (data, sample, period, measures, estimator, controls, form, identification) and the result under each.</p></article>
     <article class="step-card"><span class="num">5</span><h3>Choice space</h3><p>Compare the analytical choices the AI found with a published reference map (Berchicci &amp; King, 2022 is built in).</p></article>
-    <article class="step-card"><span class="num">6</span><h3>Export</h3><p>Diagnostic coverage per claim, the most informative next tests, JSON and CSV for analysis.</p></article>
+    <article class="step-card"><span class="num">6</span><h3>Export</h3><p>Core predictions, the design decisions that matter most, a hand-off into Replication Navigator, and JSON and CSV for a multiverse.</p></article>
   </section>
 
-  <p class="foot muted small">Papers are read once by the model and are not stored. Fields are saved on the server so a team can work on them together. Grounded in 322 verified evidence cards from the replication-methods literature.</p>
+  <p class="foot muted small">Papers are read once by the model and are not stored. Fields are saved on the server so a team can work on them together. Grounded in 322 verified evidence cards from the replication-methods literature. Built to feed Replication Navigator, which plans the test.</p>
 </main>
 
 <div id="work" class="work" hidden>
@@ -70,8 +70,8 @@
     <ol id="steps" class="steps">
       <li data-step="corpus"><span class="n">1</span><span class="lbl">Corpus<small id="c-corpus"></small></span></li>
       <li data-step="studies"><span class="n">2</span><span class="lbl">Studies<small id="c-studies"></small></span></li>
-      <li data-step="claims"><span class="n">3</span><span class="lbl">Claims &amp; assumptions<small id="c-claims"></small></span></li>
-      <li data-step="coverage"><span class="n">4</span><span class="lbl">Coverage map<small id="c-coverage"></small></span></li>
+      <li data-step="predictions"><span class="n">3</span><span class="lbl">Predictions<small id="c-predictions"></small></span></li>
+      <li data-step="designs"><span class="n">4</span><span class="lbl">Design map<small id="c-designs"></small></span></li>
       <li data-step="choices"><span class="n">5</span><span class="lbl">Choice space<small id="c-choices"></small></span></li>
       <li data-step="export"><span class="n">6</span><span class="lbl">Export<small id="c-export"></small></span></li>
     </ol>

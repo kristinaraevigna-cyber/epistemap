@@ -1,0 +1,11 @@
+[
+  { "id": "data_source", "name": "Data source", "question": "Which dataset(s) or data collection provided the observations?", "examples": ["Compustat + KLD", "ExecuComp", "hand-collected survey", "lab experiment"], "cards": ["brandt2014", "forrt2025"] },
+  { "id": "sample", "name": "Sample and level", "question": "Which population, unit of analysis and sample restrictions?", "examples": ["S&P 500 firms", "firm-year panel", "excluding financial firms", "CEOs of listed firms"], "cards": ["bonett2021", "brandt2014"] },
+  { "id": "period", "name": "Period and context", "question": "Which years, countries, industries or settings?", "examples": ["1995–2010", "US only", "manufacturing", "post-crisis"], "cards": ["forrt2025", "isager2021"] },
+  { "id": "iv_measure", "name": "Measure of X", "question": "How was the predictor (independent variable) operationalised?", "examples": ["KLD expert-weighted index", "binary DSI membership", "narcissism from speech", "overconfidence from option holding"], "cards": ["flake2023"] },
+  { "id": "dv_measure", "name": "Measure of Y", "question": "How was the outcome operationalised?", "examples": ["ROA", "Tobin's q", "market value added", "survey-rated performance"], "cards": ["flake2023"] },
+  { "id": "estimator", "name": "Estimator and variance", "question": "Which estimator, and between- or within-unit variance?", "examples": ["OLS cross-section", "firm fixed effects", "random effects", "GMM", "2SLS / instrument"], "cards": ["forrt2025", "bonett2021"] },
+  { "id": "controls", "name": "Controls and fixed effects", "question": "Which control variables and fixed effects?", "examples": ["size", "leverage", "R&D intensity", "year FE", "industry FE"], "cards": ["forrt2025"] },
+  { "id": "functional_form", "name": "Functional form and timing", "question": "Linear, curvilinear, moderated; lags and lead structure?", "examples": ["linear", "quadratic", "interaction with R&D", "one-year lag", "lagged DV"], "cards": ["anderson2016", "bonett2021"] },
+  { "id": "identification", "name": "Identification strategy", "question": "How is causality or endogeneity addressed?", "examples": ["none (correlational)", "instrument", "natural experiment", "difference-in-differences", "randomised experiment"], "cards": ["irvine2021", "anderson2016"] }
+]
