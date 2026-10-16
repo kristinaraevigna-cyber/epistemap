@@ -71,3 +71,14 @@ test('explain validates citations', async () => {
   const e = await j('/api/explain', { question: 'what is construct validity?' }); assert.equal(e.status, 200);
   assert.deepEqual(e.body.citations.map((c) => c.valid), [true, false]);
 });
+
+test('coach streams NDJSON with validated citations', async () => {
+  const f = (await j('/api/fields', { name: 'Coach' })).body;
+  const r = await fetch(base + '/api/coach', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ fieldId: f.id, step: 'claims', sessionId: 's1', messages: [{ role: 'user', content: 'Is this assumption well formed?' }] }) });
+  assert.equal(r.status, 200); assert.ok(r.headers.get('content-type').includes('ndjson'));
+  const lines = (await r.text()).trim().split('\n').map((l) => JSON.parse(l));
+  const done = lines.find((l) => l.type === 'done'); assert.ok(done); assert.ok(lines.filter((l) => l.type === 'delta').length > 3);
+  assert.deepEqual(done.citations.map((c) => [c.id, c.valid]), [['flake2023-01', true], ['isager2021-02', true], ['fake2020-01', false]]);
+  const empty = await j('/api/coach', { fieldId: f.id, step: 'claims', messages: [] }); assert.equal(empty.status, 400);
+  const fl = await j('/api/flag', { fieldId: f.id, cardId: 'fake2020-01', step: 'claims' }); assert.equal(fl.body.ok, true);
+});

@@ -81,6 +81,20 @@
     </div>
   </nav>
   <section id="panel" class="panel"></section>
+  <aside id="coach" class="coach" aria-label="AI coach">
+    <div class="coach-head">
+      <div><strong>AI coach</strong><div id="coachStep" class="small muted">Grounded in 322 evidence cards</div></div>
+      <button id="coachClose" class="ghost small" aria-label="Close coach">×</button>
+    </div>
+    <div id="starters" class="starters"></div>
+    <div id="chat" class="chat"></div>
+    <form id="coachForm" class="coach-form">
+      <textarea id="coachInput" rows="2" placeholder="Ask about this step or this field…" aria-label="Message to the coach"></textarea>
+      <button id="coachSend">Send</button>
+    </form>
+    <p class="small muted coach-foot">The coach cites evidence cards like <code>[isager2021-02]</code>; click one to read the source. It sees your field, not your PDFs. It can be wrong: you confirm every decision.</p>
+  </aside>
+  <button id="coachOpen" class="coach-fab" aria-label="Open AI coach">Coach</button>
 </div>
 
 <dialog id="settings">

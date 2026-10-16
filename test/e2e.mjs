@@ -41,6 +41,11 @@ try {
   await page.screenshot({ path: path.join(shots, 'e2e-3-claims.png') });
   await page.click('[data-confirm-all]'); await wait(200);
   const nConf = await page.locator('.status.confirmed').count(); if (nConf < 6) throw new Error('confirm all failed ' + nConf);
+  // coach: starter question streams a grounded answer with clickable citations
+  await page.click('#starters button'); await page.waitForSelector('#chat .cite', { timeout: 15000 }); await page.waitForSelector('#chat .msg.bot .meta', { timeout: 15000 });
+  if (!(await page.locator('#chat .cite.bad').count())) throw new Error('invalid citation not marked');
+  await page.click('#chat .cite:not(.bad)'); await page.waitForSelector('#modal .card-view'); await page.click('#modal [data-close]');
+  await page.screenshot({ path: path.join(shots, 'e2e-3b-coach.png') });
   // coverage: tag a new PDF against the claim
   await page.click('li[data-step=coverage]'); await page.waitForSelector('#tagForm');
   await page.setInputFiles('#tagForm input[name=pdf]', pdfPath); await page.click('#tagForm button:not([type=button])');
@@ -60,7 +65,7 @@ try {
   const saved = await (await fetch(`${base}/api/fields`)).json(); if (saved[0].claims !== 1) throw new Error('field not saved');
   // mobile check
   await page.setViewportSize({ width: 390, height: 800 }); await page.click('li[data-step=coverage]'); await wait(300);
-  const sw = await page.evaluate(() => document.documentElement.scrollWidth); if (sw > 400) throw new Error('horizontal overflow on mobile: ' + sw);
+  const sw = await page.evaluate(() => document.documentElement.scrollWidth); if (sw > 400) { const who = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((el) => el.getBoundingClientRect().right > 400 && el.getBoundingClientRect().width > 0).slice(0, 8).map((el) => el.tagName + '#' + el.id + '.' + el.className + ' ' + Math.round(el.getBoundingClientRect().right)).join(' | ')); throw new Error('horizontal overflow on mobile: ' + sw + ' :: ' + who); }
   await page.screenshot({ path: path.join(shots, 'e2e-7-mobile.png') });
   if (errors.length) throw new Error('console errors: ' + errors.join(' | '));
   console.log('E2E OK, screenshots in', shots);

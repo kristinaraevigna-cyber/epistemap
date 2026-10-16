@@ -53,7 +53,7 @@ async function route() {
   STEP = m[2] || 'corpus';
   $('#home').hidden = true; $('#work').hidden = false; $('#fieldName').textContent = F.name; $('#fieldName').hidden = false;
   document.querySelectorAll('#steps li').forEach((li) => li.classList.toggle('active', li.dataset.step === STEP));
-  updateCounts(); renderStep(); $('#panel').scrollTop = 0; window.scrollTo(0, 0);
+  updateCounts(); renderStep(); $('#panel').scrollTop = 0; window.scrollTo(0, 0); renderStarters(); renderChat();
 }
 window.addEventListener('hashchange', route);
 $('#steps').addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) location.hash = `field/${F.id}/${li.dataset.step}`; });
@@ -308,3 +308,71 @@ function renderExport(p) {
 
 // ---------- boot ----------
 (async () => { CFG = await api('/api/config'); const d = $('#dbState'); d.hidden = false; d.textContent = CFG.store === 'postgres' ? 'Database connected' : 'File storage'; d.classList.toggle('files', CFG.store !== 'postgres'); route(); })();
+
+// ================= AI coach =================
+const STARTERS = {
+  corpus: ['How do I decide which studies are core?', 'Is this field too broad or too narrow?', 'What makes a study worth re-examining?'],
+  studies: ['What should I check in an extraction before importing it?', 'The paper reports several studies; which claim should I keep?'],
+  claims: ['Is this assumption well formed?', 'How do I set consequentiality?', 'Which dimension does this assumption belong to?', 'Review my decomposition'],
+  coverage: ['What counts as "varying" an assumption?', 'Which untested cell matters most here?', 'How should I tag a conceptual replication?'],
+  choices: ['Which choices form a reasonable multiverse?', 'How do I judge a missed vs an added choice?'],
+  export: ['What is the most informative next test?', 'Draft a one-paragraph justification for the next test', 'How should I report diagnostic coverage?']
+};
+const CHAT = {}; // step -> messages[]
+let CARDS = null, streaming = false;
+const SESSION = (() => { try { let s = sessionStorage.getItem('cm.sid'); if (!s) { s = uid('cm_'); sessionStorage.setItem('cm.sid', s); } return s; } catch { return uid('cm_'); } })();
+async function cardsIndex() { if (CARDS) return CARDS; const k = await api('/api/knowledge'); CARDS = { byId: new Map(k.cards.map((c) => [c.id, c])), src: new Map(k.sources.map((s) => [s.key, s])) }; return CARDS; }
+function mdLite(text) {
+  const lines = esc(text).split('\n'); let out = '', inList = false;
+  for (const l of lines) {
+    const li = /^\s*[-•*]\s+(.*)/.exec(l);
+    if (li) { if (!inList) { out += '<ul>'; inList = true; } out += `<li>${li[1]}</li>`; continue; }
+    if (inList) { out += '</ul>'; inList = false; }
+    if (l.trim()) out += `<p>${l}</p>`;
+  }
+  if (inList) out += '</ul>';
+  return out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/\[([a-z]+\d{4}-\d{2,3})\]/g, (m, id) => `<a class="cite" data-card="${id}">${id}</a>`);
+}
+function renderChat() {
+  const box = $('#chat'); const msgs = CHAT[STEP] || [];
+  box.innerHTML = msgs.length ? msgs.map((m, i) => m.role === 'user' ? `<div class="msg user">${esc(m.content)}</div>` : `<div class="msg bot ${m.error ? 'err' : ''}" data-i="${i}">${m.error ? esc(m.error) : mdLite(m.content)}${m.done ? `<div class="meta">${m.citations?.some((c) => !c.valid) ? '<span style="color:var(--bad)">Some citations do not exist in the evidence base.</span>' : ''}${m.stop === 'max_tokens' ? '<button class="small ghost" data-cont="1">Continue</button>' : ''}<button class="small ghost" data-flag="' + i + '" title="Flag a citation that does not support the claim">Flag</button></div>` : ''}</div>`).join('') : `<div class="msg bot">Hi. I can see this field's claims, assumptions and coverage. Ask me about this step, or pick a question above.</div>`;
+  box.querySelectorAll('.cite').forEach((el) => { if (CARDS && !CARDS.byId.has(el.dataset.card)) el.classList.add('bad'); });
+  box.scrollTop = box.scrollHeight;
+}
+function renderStarters() { $('#starters').innerHTML = (STARTERS[STEP] || []).map((q) => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join(''); $('#coachStep').textContent = `Step ${{ corpus: 1, studies: 2, claims: 3, coverage: 4, choices: 5, export: 6 }[STEP] || 1} · grounded in 322 evidence cards`; }
+async function ask(text, cont = false) {
+  if (streaming || !F) return;
+  const msgs = (CHAT[STEP] ||= []);
+  if (cont) msgs.push({ role: 'user', content: 'Please continue from where you stopped.' }); else msgs.push({ role: 'user', content: text });
+  const bot = { role: 'assistant', content: '', done: false }; msgs.push(bot); renderChat(); streaming = true; busy($('#coachSend'), true, '…');
+  const live = $('#chat .msg.bot:last-child'); live && live.classList.add('typing');
+  try {
+    const r = await fetch('/api/coach', { method: 'POST', headers: headers(), body: JSON.stringify({ fieldId: F.id, step: STEP, sessionId: SESSION, messages: msgs.filter((m) => m !== bot).map((m) => ({ role: m.role, content: m.content })) }) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || `Request failed (${r.status})`); }
+    const reader = r.body.getReader(); const dec = new TextDecoder(); let buf = '';
+    while (true) { const { value, done } = await reader.read(); if (done) break; buf += dec.decode(value, { stream: true }); const lines = buf.split('\n'); buf = lines.pop();
+      for (const l of lines) { if (!l.trim()) continue; const ev = JSON.parse(l);
+        if (ev.type === 'delta') { bot.content += ev.text; const el = $('#chat .msg.bot:last-child'); if (el) { el.innerHTML = mdLite(bot.content); el.classList.add('typing'); $('#chat').scrollTop = $('#chat').scrollHeight; } }
+        else if (ev.type === 'done') { bot.done = true; bot.citations = ev.citations; bot.stop = ev.stop; }
+        else if (ev.type === 'error') { bot.error = ev.error; bot.done = true; } } }
+    if (!bot.done) bot.done = true;
+  } catch (e) { bot.error = e.message; bot.done = true; }
+  finally { streaming = false; busy($('#coachSend'), false); await cardsIndex().catch(() => null); renderChat(); }
+}
+async function showCard(id) {
+  const k = await cardsIndex(); const c = k.byId.get(id);
+  if (!c) return modal(`<div class="card-view"><h4>${esc(id)}</h4><p style="color:var(--bad)">This card id does not exist in the evidence base. The coach should not have cited it; please flag the reply.</p><menu><button data-close class="ghost">Close</button></menu></div>`);
+  const src = k.src.get(c.source) || {};
+  modal(`<div class="card-view"><span class="dim">${esc(c.stage)} · ${esc(c.kind)}</span><h4>${esc(c.title)} <span class="muted small">[${esc(c.id)}]</span></h4><p>${esc(c.guidance)}</p><p><strong>Action:</strong> ${esc(c.action)}</p><span class="quote">“${esc(c.quote)}” (${esc(src.short || c.source)}, p. ${c.printed_page ?? c.pdf_page})</span><p class="small muted">${esc(src.citation || '')}${src.url ? ` · <a href="${esc(src.url)}" target="_blank" rel="noopener">source</a>` : ''}</p><menu><button data-close class="ghost">Close</button></menu></div>`);
+}
+$('#coachForm').addEventListener('submit', (e) => { e.preventDefault(); const t = $('#coachInput').value.trim(); if (!t) return; $('#coachInput').value = ''; ask(t); });
+$('#coachInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#coachForm').requestSubmit(); } });
+$('#starters').addEventListener('click', (e) => { const q = e.target.dataset.q; if (q) ask(q); });
+$('#chat').addEventListener('click', async (e) => {
+  const t = e.target;
+  if (t.dataset.card) return showCard(t.dataset.card);
+  if (t.dataset.cont) return ask('', true);
+  if (t.dataset.flag !== undefined) { const m = (CHAT[STEP] || [])[Number(t.dataset.flag)]; const ids = (m?.citations || []).map((c) => c.id); const id = prompt(`Which citation does not support the claim?${ids.length ? `\n${ids.join(', ')}` : ''}`, ids[0] || ''); if (!id) return; await api('/api/flag', { fieldId: F.id, cardId: id, step: STEP }); toast('Thanks, flagged for review.'); }
+});
+$('#coachOpen').addEventListener('click', () => $('#coach').classList.add('open'));
+$('#coachClose').addEventListener('click', () => $('#coach').classList.remove('open'));

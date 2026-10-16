@@ -27,7 +27,7 @@ This is a separate project from [Replication Navigator](https://github.com/krist
 5. **Choice space.** The analytical choices found across the papers form the choice space for a multiverse. Paste a reference list (the Berchicci & King 2022 window of model uncertainty ships as a built-in benchmark) and align it with what the AI found: found, missed, added.
 6. **Export.** JSON of the whole field (re-importable), a CSV of assumption × study rows for R or Python, and a list of the most informative next tests.
 
-Every AI proposal is created with status `ai` and must be confirmed by a person. The model is grounded in the same 322 verified evidence cards as Replication Navigator (`knowledge/evidence-cards.json`; `scripts/verify_cards.py` checks every quote against its PDF page).
+An **AI coach** sits beside every step, as in Replication Navigator: it streams short, answer-first replies, sees the field's claims, assumptions and coverage (not the PDFs), may only use the 322 evidence cards, cites card ids that the server validates, and lets users open the cited card or flag a citation. Every AI proposal is created with status `ai` and must be confirmed by a person. The model is grounded in the same 322 verified evidence cards as Replication Navigator (`knowledge/evidence-cards.json`; `scripts/verify_cards.py` checks every quote against its PDF page).
 
 ## Running locally
 
@@ -56,7 +56,9 @@ See [docs/DEPLOY.md](docs/DEPLOY.md): GitHub → Render (Blueprint from `render.
 | `ACCESS_CODE` | — | optional: required to create, edit and run the model; leave empty for open access |
 | `CONTACT_EMAIL` | — | sent to OpenAlex for the polite pool |
 | `MAX_PDF_MB` | `25` | largest PDF accepted |
-| `DAILY_MODEL_CAP` | `400` | model calls per day on the server key |
+| `DAILY_MODEL_CAP` | `400` | model calls per day on the server key (extraction, tagging, comparison and coach) |
+| `COACH_PER_HOUR` | `60` | coach messages per session per hour on the server key |
+| `COACH_MAX_TOKENS` | `1200` | maximum length of a coach reply |
 | `NAVIGATOR_URL` | — | public URL of a Replication Navigator deployment; adds “Plan this test” links from untested assumptions that open the Navigator with the claim, the assumption to vary and the original study pre-filled |
 
 ## Hand-off to Replication Navigator

@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initStore, storeMode, newField, listFields, getField, saveField, deleteField, logEvent, exportAll } from './store.js';
-import { dimensions, cards, sources, benchmarks, groundingBlock, extractCitations, KNOWLEDGE_VERSION } from './knowledge.js';
+import { dimensions, cards, sources, benchmarks, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
 import { EXTRACT_PROMPT, TAG_PROMPT, COMPARE_PROMPT, parseJsonLoose } from './prompts.js';
 import { searchOpenAlex, localCitations, parseExport, mergeStudies } from './corpus.js';
 
@@ -14,6 +14,9 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5';
 const MAX_PDF_MB = Number(process.env.MAX_PDF_MB || 25);
 const ACCESS_CODE = process.env.ACCESS_CODE || '';
 const DAILY_CAP = Number(process.env.DAILY_MODEL_CAP || 400);
+const COACH_MAX_TOKENS = Number(process.env.COACH_MAX_TOKENS || 1200);
+const coachHits = new Map(); // sessionId -> timestamps (per-hour limit on the server key)
+function coachLimited(sid) { const now = Date.now(); const arr = (coachHits.get(sid) || []).filter((t) => now - t < 3600e3); arr.push(now); coachHits.set(sid, arr); return arr.length > Number(process.env.COACH_PER_HOUR || 60); }
 const NAVIGATOR_URL = (process.env.NAVIGATOR_URL || '').replace(/\/+$/, '');
 
 // Accept gzip-compressed JSON bodies (the client compresses field saves, which are large).
@@ -122,6 +125,36 @@ app.post('/api/explain', wrap(async (req, res) => {
   const out = await callModel({ key, system: systemBlocks('Answer in under 150 words, plain language, and cite evidence card ids in [brackets] for every methodological claim. If the evidence base does not cover the question, say so.'), content: [{ type: 'text', text: q }], maxTokens: 600 });
   res.json({ text: out.text, citations: extractCitations(out.text) });
 }));
+
+// ---- coach (streams NDJSON: {type:'delta',text} ... {type:'done',citations,stop,model}) ----
+app.post('/api/coach', wrap(async (req, res) => {
+  const { key, own } = resolveKey(req);
+  const { fieldId, step, messages, sessionId } = req.body || {};
+  if (!own && coachLimited(sessionId || req.ip)) return res.status(429).json({ error: 'Coach limit reached for this hour. Add your own key in Settings or try later.' });
+  const convo = (Array.isArray(messages) ? messages : []).slice(-12).map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content || '').slice(0, 6000) }));
+  const merged = []; for (const m of convo) { const last = merged[merged.length - 1]; if (last && last.role === m.role) last.content += '\n\n' + m.content; else merged.push({ ...m }); }
+  if (!merged.length || merged[merged.length - 1].role !== 'user') return res.status(400).json({ error: 'Nothing to answer.' });
+  const field = fieldId ? await getField(fieldId) : null;
+  const upstream = await fetch(`${API_BASE}/v1/messages`, { method: 'POST', headers: hdr(key), body: JSON.stringify({ model: MODEL, max_tokens: COACH_MAX_TOKENS, temperature: 0.3, stream: true, system: coachSystemBlocks(field, step), messages: merged }) });
+  if (!upstream.ok) { const j = await upstream.json().catch(() => ({})); return res.status(upstream.status === 401 ? 401 : 502).json({ error: j.error?.message || `Model API error ${upstream.status}` }); }
+  used++;
+  res.setHeader('content-type', 'application/x-ndjson'); res.setHeader('cache-control', 'no-cache'); res.flushHeaders?.();
+  const send = (o) => res.write(JSON.stringify(o) + '\n');
+  let text = '', stop = null, model = null, buf = ''; const dec = new TextDecoder();
+  try {
+    for await (const chunk of upstream.body) {
+      buf += dec.decode(chunk, { stream: true }); const parts = buf.split('\n\n'); buf = parts.pop();
+      for (const part of parts) { const line = part.split('\n').find((l) => l.startsWith('data:')); if (!line) continue; let ev; try { ev = JSON.parse(line.slice(5).trim()); } catch { continue; }
+        if (ev.type === 'message_start') model = ev.message?.model || model;
+        else if (ev.type === 'content_block_delta' && ev.delta?.type === 'text_delta') { text += ev.delta.text; send({ type: 'delta', text: ev.delta.text }); }
+        else if (ev.type === 'message_delta') stop = ev.delta?.stop_reason || stop; }
+    }
+  } catch (e) { send({ type: 'error', error: 'The connection to the AI service was interrupted.' }); }
+  const citations = extractCitations(text);
+  await logEvent(fieldId, 'coach', { step, invalid: citations.filter((c) => !c.valid).map((c) => c.id), n: citations.length, stop, chars: text.length });
+  send({ type: 'done', citations, stop, model }); res.end();
+}));
+app.post('/api/flag', wrap(async (req, res) => { const { fieldId, cardId, step, note } = req.body || {}; await logEvent(fieldId, 'citation_flag', { cardId: String(cardId || '').slice(0, 40), step, note: String(note || '').slice(0, 500) }); res.json({ ok: true }); }));
 
 // ---- exports ----
 app.get('/api/fields/:id/export.json', wrap(async (req, res) => { const f = await getField(req.params.id); if (!f) return res.status(404).end(); res.setHeader('content-disposition', `attachment; filename="${(f.name || 'field').replace(/[^\w-]+/g, '_')}.json"`); res.json(f); }));

@@ -4,6 +4,15 @@ const port = Number(process.argv[2] || 4020);
 http.createServer((req, res) => {
   let b = ''; req.on('data', (d) => (b += d)); req.on('end', () => {
     const j = JSON.parse(b); const txt = JSON.stringify(j.messages[0].content);
+    if (j.stream) {
+      res.setHeader('content-type', 'text/event-stream');
+      const ctx = (j.system || []).map((x) => x.text).join(' '); const hasCtx = ctx.includes('<field_context>');
+      const text = `Short answer for this field (context: ${hasCtx}). Vary the construct first [flake2023-01].\n\n- Check consequentiality [isager2021-02]\n- Fake [fake2020-01]`;
+      const ev = (o) => res.write(`event: ${o.type}\ndata: ${JSON.stringify(o)}\n\n`);
+      ev({ type: 'message_start', message: { model: 'mock' } });
+      (async () => { for (const w of text.match(/.{1,10}/gs)) { ev({ type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text: w } }); await new Promise((r) => setTimeout(r, 5)); } ev({ type: 'message_delta', delta: { stop_reason: 'end_turn' } }); ev({ type: 'message_stop' }); res.end(); })();
+      return;
+    }
     let out;
     if (txt.includes('PART 1 — CLAIMS')) out = { citation: 'Doe, J., & Roe, R. (2015). Social performance pays. Strategic Management Journal, 36(1), 1–20.', summary: 'Tests whether CSR ratings predict ROA in US firms. Finds a positive association.', data_source: 'KLD and Compustat, US listed firms 1995–2010',
       claims: [{ key: 'c1', text: 'Corporate social performance is positively associated with financial performance.', main: true, effect: 'b = 0.12, p < .01', quote: 'social performance is positively related to subsequent financial performance', page: 2,
