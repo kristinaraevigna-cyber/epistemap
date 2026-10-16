@@ -1,0 +1,18 @@
+{
+  "name": "coverage-map",
+  "version": "0.1.0",
+  "description": "An AI-enabled instrument for mapping the diagnostic coverage of replication across a field.",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch --env-file=.env server/index.js",
+    "test": "node --test test/api.test.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}

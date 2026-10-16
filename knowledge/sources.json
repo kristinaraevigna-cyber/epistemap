@@ -1,0 +1,69 @@
+[
+  {
+    "key": "forrt2025",
+    "short": "Röseler, Wallrich et al. (2025)",
+    "citation": "Röseler, L., Wallrich, L., et al. (2025). Handbook for Reproduction and Replication Studies (v1.0). Framework for Open and Reproducible Research Training (FORRT).",
+    "url": "https://doi.org/10.5281/zenodo.16990115",
+    "access": "open",
+    "page_note": "printed_page = handbook page number; pdf_page = page index in the v1.0 PDF."
+  },
+  {
+    "key": "brandt2014",
+    "short": "Brandt et al. (2014)",
+    "citation": "Brandt, M. J., IJzerman, H., Dijksterhuis, A., Farach, F. J., Geller, J., Giner-Sorolla, R., Grange, J. A., Perugini, M., Spies, J. R., & van 't Veer, A. (2014). The Replication Recipe: What makes for a convincing replication? Journal of Experimental Social Psychology, 50, 217–224.",
+    "url": "https://doi.org/10.1016/j.jesp.2013.10.005",
+    "access": "publisher",
+    "extra": "Replication Recipe pre-registration template on OSF: https://osf.io/4jd46/"
+  },
+  {
+    "key": "bonett2021",
+    "short": "Bonett (2021)",
+    "citation": "Bonett, D. G. (2021). Design and analysis of replication studies. Organizational Research Methods, 24(3), 513–529.",
+    "url": "https://doi.org/10.1177/1094428120911088",
+    "access": "publisher"
+  },
+  {
+    "key": "anderson2016",
+    "short": "Anderson & Maxwell (2016)",
+    "citation": "Anderson, S. F., & Maxwell, S. E. (2016). There's more than one way to conduct a replication study: Beyond statistical significance. Psychological Methods, 21(1), 1–12.",
+    "url": "https://doi.org/10.1037/met0000051",
+    "access": "publisher"
+  },
+  {
+    "key": "irvine2021",
+    "short": "Irvine (2021)",
+    "citation": "Irvine, E. (2021). The role of replication studies in theory building. Perspectives on Psychological Science, 16(4), 844–853.",
+    "url": "https://doi.org/10.1177/1745691620970558",
+    "access": "publisher"
+  },
+  {
+    "key": "flake2023",
+    "short": "Flake et al. (2022)",
+    "citation": "Flake, J. K., Davidson, I. J., Wong, O., & Pek, J. (2022). Construct validity and the validity of replication studies: A systematic review. American Psychologist, 77(4), 576–588.",
+    "url": "https://doi.org/10.1037/amp0001006",
+    "access": "publisher",
+    "page_note": "Page numbers refer to the accepted-manuscript (preprint) PDF, not the published article. Verify against the version of record before publication."
+  },
+  {
+    "key": "isager2021",
+    "short": "Isager et al. (2023)",
+    "citation": "Isager, P. M., van Aert, R. C. M., Bahník, Š., Brandt, M. J., DeSoto, K. A., Giner-Sorolla, R., Krueger, J. I., Perugini, M., Ropovik, I., van 't Veer, A. E., Vranka, M., & Lakens, D. (2023). Deciding what to replicate: A decision model for replication study selection under resource and knowledge constraints. Psychological Methods, 28(2), 438–451.",
+    "url": "https://doi.org/10.1037/met0000438",
+    "access": "publisher",
+    "page_note": "printed_page refers to the online-first pagination (1–14)."
+  },
+  {
+    "key": "obenauer2024",
+    "short": "Obenauer (2024)",
+    "citation": "Obenauer, W. G. (2024). Designing, executing, and publishing replication research. Journal of Management Scientific Reports.",
+    "url": "https://doi.org/10.1177/27550311241232661",
+    "access": "publisher"
+  },
+  {
+    "key": "schwab2023",
+    "short": "Schwab et al. (2023)",
+    "citation": "Schwab, A., Aguinis, H., Bamberger, P., Hodgkinson, G. P., Shapiro, D. L., Starbuck, W. H., & Tsui, A. S. (2023). How replication studies can improve doctoral student education. Journal of Management Scientific Reports, 1(1), 18–41.",
+    "url": "https://doi.org/10.1177/27550311231156880",
+    "access": "publisher"
+  }
+]

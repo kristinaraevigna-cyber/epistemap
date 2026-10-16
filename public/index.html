@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coverage Map</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><strong>Coverage Map</strong><span class="muted">Which assumptions of a claim has the evidence tested?</span></div>
+  <div class="top-right">
+    <span id="fieldName" class="pill" hidden></span>
+    <button id="settingsBtn" class="ghost">Settings</button>
+  </div>
+</header>
+
+<main id="home" class="home">
+  <section class="hero">
+    <h1>Map what a field's evidence has and has not tested</h1>
+    <p>For each core claim in a field, Coverage Map breaks the claim into its assumptions (theory, constructs, design and sample, analysis, context), records which studies varied each one, and shows where the next test would be most informative. The AI reads papers and proposes; you confirm every item.</p>
+  </section>
+  <section class="card">
+    <h2>Your fields</h2>
+    <ul id="fieldList" class="list"></ul>
+    <form id="newField" class="row">
+      <input id="newName" placeholder="Field name, e.g. Social and financial performance" required>
+      <button type="submit">Create field</button>
+    </form>
+  </section>
+  <section class="card muted small">
+    <p><strong>How it works.</strong> 1 Corpus: find the field's core studies (OpenAlex, or a Web of Science / Scopus export). 2 Studies: upload PDFs; the AI extracts claims, assumptions and analysis choices with page-referenced quotes. 3 Claims: confirm or edit the decomposition. 4 Coverage: tag which studies varied each assumption; see the map. 5 Choice space: compare AI-found analysis choices with a reference map (benchmark). 6 Export.</p>
+    <p>Papers are read once by the model and not stored. Fields are saved on the server so a team can work on them together.</p>
+  </section>
+</main>
+
+<div id="work" class="work" hidden>
+  <nav class="side">
+    <a href="#home" class="back">← All fields</a>
+    <ol id="steps" class="steps">
+      <li data-step="corpus"><span>1</span>Corpus</li>
+      <li data-step="studies"><span>2</span>Studies</li>
+      <li data-step="claims"><span>3</span>Claims &amp; assumptions</li>
+      <li data-step="coverage"><span>4</span>Coverage map</li>
+      <li data-step="choices"><span>5</span>Choice space</li>
+      <li data-step="export"><span>6</span>Export</li>
+    </ol>
+    <div class="side-foot">
+      <div id="saveState" class="muted small">Saved</div>
+      <a href="#" id="exportJson" class="small">Download field (JSON)</a>
+    </div>
+  </nav>
+  <section id="panel" class="panel"></section>
+</div>
+
+<dialog id="settings">
+  <form method="dialog" class="dlg">
+    <h3>Settings</h3>
+    <label>Access code (if your facilitator gave you one)<input id="accessCode" autocomplete="off"></label>
+    <label>Your own Anthropic API key (optional; kept only in this browser tab)<input id="userKey" type="password" autocomplete="off"></label>
+    <p class="small muted" id="cfgInfo"></p>
+    <menu><button value="cancel" class="ghost">Close</button><button value="ok">Save</button></menu>
+  </form>
+</dialog>
+
+<dialog id="modal"><div id="modalBody" class="dlg"></div></dialog>
+<div id="toast" class="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

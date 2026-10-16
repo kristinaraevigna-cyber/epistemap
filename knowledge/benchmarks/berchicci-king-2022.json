@@ -1,0 +1,35 @@
+{
+  "id": "berchicci-king-2022",
+  "name": "Berchicci & King (2022): window of model uncertainty for the SP–FP link",
+  "citation": "Berchicci, L., & King, A. A. (2022). Building knowledge by mapping model uncertainty in six studies of social and financial performance. Strategic Management Journal, 43(7), 1317–1343. https://doi.org/10.1002/smj.3374",
+  "note": "Paraphrased from Section 3.1 ('The window of model uncertainty') and Figure 1 of the published article. The authors identify five prominent modelling differences across six quasi-replications of Waddock & Graves (1997); the sample period is a sixth, which they fix for the main analysis. The product of options gives 5,760 models, 3,680 after removing redundant specifications. Use this list as the reference (R) in step 5 to benchmark what the AI finds in the six papers.",
+  "studies": [
+    "Waddock, S. A., & Graves, S. B. (1997). The corporate social performance–financial performance link. Strategic Management Journal, 18(4), 303–319.",
+    "McWilliams, A., & Siegel, D. (2000). Corporate social responsibility and financial performance: Correlation or misspecification? Strategic Management Journal, 21(5), 603–609.",
+    "Hillman, A. J., & Keim, G. D. (2001). Shareholder value, stakeholder management, and social issues: What's the bottom line? Strategic Management Journal, 22(2), 125–139.",
+    "Hull, C. E., & Rothenberg, S. (2008). Firm performance: The interactions of corporate social performance with innovation and industry differentiation. Strategic Management Journal, 29(7), 781–789.",
+    "Barnett, M. L., & Salomon, R. M. (2012). Does it pay to be really good? Addressing the shape of the relationship between social and financial performance. Strategic Management Journal, 33(11), 1304–1320.",
+    "Zhao, X., & Murrell, A. J. (2016). Revisiting the corporate social performance–financial performance link: A replication of Waddock and Graves. Strategic Management Journal, 37(11), 2378–2388."
+  ],
+  "reference": [
+    { "key": "r1", "category": "variables", "description": "Outcome variable: accounting measure of financial performance (return on assets) vs market measure (market value added / market-to-book)", "section": "3.1.1" },
+    { "key": "r2", "category": "variables", "description": "Predictor construction from KLD: expert-weighted scale (Waddock & Graves)", "section": "3.1.2" },
+    { "key": "r3", "category": "variables", "description": "Predictor construction from KLD: topics weighted by number of measures (Hull & Rothenberg)", "section": "3.1.2" },
+    { "key": "r4", "category": "variables", "description": "Predictor construction from KLD: two sub-scales, stakeholder management and social issue participation (Hillman & Keim)", "section": "3.1.2" },
+    { "key": "r5", "category": "variables", "description": "Predictor construction from KLD: unitary (equal) weights across measures (Barnett & Salomon)", "section": "3.1.2" },
+    { "key": "r6", "category": "variables", "description": "Predictor construction from KLD: binary indicator of inclusion in the Domini Social Index (McWilliams & Siegel)", "section": "3.1.2" },
+    { "key": "r7", "category": "model", "description": "Functional form: linear relationship", "section": "3.1.3" },
+    { "key": "r8", "category": "model", "description": "Functional form: curvilinear (quadratic) relationship (Barnett & Salomon)", "section": "3.1.3" },
+    { "key": "r9", "category": "model", "description": "Functional form: moderation by firm R&D intensity and industry advertising intensity (interaction terms) (Hull & Rothenberg)", "section": "3.1.3" },
+    { "key": "r10", "category": "estimation", "description": "Level of informative variance: between-firm (cross-sectional) vs within-firm (firm fixed effects with lag structure)", "section": "3.1.4" },
+    { "key": "r11", "category": "controls", "description": "Control for firm size", "section": "3.1.5" },
+    { "key": "r12", "category": "controls", "description": "Control for risk (debt / assets)", "section": "3.1.5" },
+    { "key": "r13", "category": "controls", "description": "Control for R&D intensity (McWilliams & Siegel)", "section": "3.1.5" },
+    { "key": "r14", "category": "controls", "description": "Control for advertising intensity (McWilliams & Siegel)", "section": "3.1.5" },
+    { "key": "r15", "category": "controls", "description": "Year fixed effects included or not", "section": "3.1.5" },
+    { "key": "r16", "category": "controls", "description": "Industry dummies included or not", "section": "3.1.5" },
+    { "key": "r17", "category": "controls", "description": "Lagged dependent variable included or not", "section": "3.1.5" },
+    { "key": "r18", "category": "sample", "description": "Sample time period (differs across the six studies; fixed to the full panel in the main analysis, relaxed in Appendix S3)", "section": "3.1.6" },
+    { "key": "r19", "category": "sample", "description": "Sample restriction: firms with KLD coverage and Compustat financials (restricted sample used for the model space)", "section": "3.2.1" }
+  ]
+}

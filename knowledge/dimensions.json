@@ -1,0 +1,47 @@
+[
+  {
+    "id": "theory",
+    "name": "Theory",
+    "question": "Does the proposed mechanism hold, and do competing explanations predict the same result?",
+    "examples": ["the effect runs through a named mediator", "reverse causality is ruled out", "a rival theory predicts the opposite sign"],
+    "card_stages": ["aim", "foundations"],
+    "card_sources": ["irvine2021", "anderson2016"],
+    "literature": "Irvine (2021); Anderson & Maxwell (2016)"
+  },
+  {
+    "id": "constructs",
+    "name": "Constructs",
+    "question": "Do the results depend on how the concepts were operationalised?",
+    "examples": ["a ratings-based score captures the construct", "a single-item measure is adequate", "the scale is valid in the study population"],
+    "card_stages": ["measures"],
+    "card_sources": ["flake2023"],
+    "literature": "Flake et al. (2022)"
+  },
+  {
+    "id": "design",
+    "name": "Design and sample",
+    "question": "Do the results depend on the sample, data source, time window or design?",
+    "examples": ["large listed firms in one database", "a cross-sectional design captures a causal process", "the sample is large enough to detect the effect"],
+    "card_stages": ["sample", "differences"],
+    "card_sources": ["brandt2014", "bonett2021"],
+    "literature": "Brandt et al. (2014); Bonett (2021)"
+  },
+  {
+    "id": "analysis",
+    "name": "Analysis",
+    "question": "Do the results hold across reasonable analytical choices (models, controls, exclusions, transformations)?",
+    "examples": ["one model specification with a fixed set of controls", "a particular treatment of outliers", "a specific lag structure"],
+    "card_stages": ["analysis", "reproduce"],
+    "card_sources": ["forrt2025", "bonett2021", "anderson2016"],
+    "literature": "Götz et al. (2026); Berchicci & King (2022); Steegen et al. (2016)"
+  },
+  {
+    "id": "context",
+    "name": "Context",
+    "question": "Do the results generalise to other periods, countries and settings?",
+    "examples": ["one country and period", "a particular institutional setting", "a specific industry"],
+    "card_stages": ["differences", "target"],
+    "card_sources": ["brandt2014", "forrt2025", "isager2021"],
+    "literature": "Delios et al. (2022)"
+  }
+]

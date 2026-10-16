@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: coverage-map
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: ACCESS_CODE
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
