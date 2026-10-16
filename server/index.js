@@ -16,6 +16,15 @@ const ACCESS_CODE = process.env.ACCESS_CODE || '';
 const DAILY_CAP = Number(process.env.DAILY_MODEL_CAP || 400);
 const NAVIGATOR_URL = (process.env.NAVIGATOR_URL || '').replace(/\/+$/, '');
 
+// Accept gzip-compressed JSON bodies (the client compresses field saves, which are large).
+import { gunzipSync } from 'node:zlib';
+app.use((req, res, next) => {
+  if (req.get('content-encoding') !== 'gzip') return next();
+  const chunks = []; req.on('data', (c) => chunks.push(c)); req.on('end', () => {
+    try { req.body = JSON.parse(gunzipSync(Buffer.concat(chunks)).toString('utf8')); req.headers['content-encoding'] = 'identity'; req._body = true; next(); }
+    catch (e) { res.status(400).json({ error: 'Bad compressed body' }); }
+  });
+});
 app.use(express.json({ limit: `${MAX_PDF_MB * 1.5 + 2}mb` }));
 app.use(express.text({ limit: '50mb', type: ['text/*', 'application/x-bibtex'] }));
 app.use(express.static(path.join(__dirname, '..', 'public')));

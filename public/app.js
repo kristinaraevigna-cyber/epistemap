@@ -14,8 +14,14 @@ function headers() {
   if (code) h['x-access-code'] = code; if (key) h['x-user-key'] = key;
   return h;
 }
-async function api(path, body, method) {
-  const r = await fetch(path, { method: method || (body ? 'POST' : 'GET'), headers: headers(), body: body ? JSON.stringify(body) : undefined });
+async function gzipBody(text) {
+  if (typeof CompressionStream === 'undefined' || text.length < 4000) return null;
+  try { const cs = new CompressionStream('gzip'); const w = cs.writable.getWriter(); w.write(new TextEncoder().encode(text)); w.close(); return await new Response(cs.readable).arrayBuffer(); } catch { return null; }
+}
+async function api(path, body, method, opts = {}) {
+  let payload = body ? JSON.stringify(body) : undefined; const h = headers();
+  if (payload && opts.compress) { const gz = await gzipBody(payload); if (gz) { payload = gz; h['content-encoding'] = 'gzip'; } }
+  const r = await fetch(path, { method: method || (body ? 'POST' : 'GET'), headers: h, body: payload, keepalive: !!opts.keepalive });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || `Request failed (${r.status})`);
   return j;
@@ -24,20 +30,26 @@ function toast(msg, err) { const t = $('#toast'); t.textContent = msg; t.classNa
 function busy(btn, on, label) { if (!btn) return; if (on) { btn.dataset.l = btn.textContent; btn.textContent = label || 'Working…'; btn.disabled = true; } else { btn.textContent = btn.dataset.l || btn.textContent; btn.disabled = false; } }
 
 // ---------- persistence ----------
-function markDirty() { const e = $('#saveState'); e.textContent = 'Saving…'; e.className = 'save-state dirty'; clearTimeout(saveTimer); saveTimer = setTimeout(save, 800); updateCounts(); }
+let lastSaved = '', saving = false, saveAgain = false;
+function markDirty() { const e = $('#saveState'); e.textContent = 'Saving…'; e.className = 'save-state dirty'; clearTimeout(saveTimer); saveTimer = setTimeout(save, 350); updateCounts(); }
 async function save() {
   if (!F) return;
-  try { const { version } = await api(`/api/fields/${F.id}`, { doc: F, version: VERSION }, 'PUT'); VERSION = version; $('#saveState').textContent = 'Saved'; $('#saveState').className = 'save-state'; }
+  if (saving) { saveAgain = true; return; }
+  const snap = JSON.stringify(F);
+  if (snap === lastSaved) { $('#saveState').textContent = 'Saved'; $('#saveState').className = 'save-state'; return; }
+  saving = true;
+  try { const { version } = await api(`/api/fields/${F.id}`, { doc: F, version: VERSION }, 'PUT', { compress: true }); VERSION = version; lastSaved = snap; $('#saveState').textContent = 'Saved'; $('#saveState').className = 'save-state'; }
   catch (e) { $('#saveState').textContent = 'Not saved'; $('#saveState').className = 'save-state err'; toast(e.message, true); }
+  finally { saving = false; if (saveAgain) { saveAgain = false; save(); } }
 }
-window.addEventListener('pagehide', () => { if (saveTimer) { clearTimeout(saveTimer); navigator.sendBeacon && save(); } });
+window.addEventListener('pagehide', () => { if (F && JSON.stringify(F) !== lastSaved) { clearTimeout(saveTimer); api(`/api/fields/${F.id}`, { doc: F, version: VERSION }, 'PUT', { keepalive: true }).catch(() => {}); } });
 
 // ---------- routing ----------
 async function route() {
   const h = location.hash.replace(/^#/, '');
   const m = /^field\/([^/]+)(?:\/(\w+))?/.exec(h);
   if (!m) { F = null; $('#work').hidden = true; $('#home').hidden = false; $('#fieldName').hidden = true; return renderHome(); }
-  if (!F || F.id !== m[1]) { F = await api(`/api/fields/${m[1]}`); VERSION = F.version || 1; }
+  if (!F || F.id !== m[1]) { F = await api(`/api/fields/${m[1]}`); VERSION = F.version || 1; lastSaved = JSON.stringify(F); }
   STEP = m[2] || 'corpus';
   $('#home').hidden = true; $('#work').hidden = false; $('#fieldName').textContent = F.name; $('#fieldName').hidden = false;
   document.querySelectorAll('#steps li').forEach((li) => li.classList.toggle('active', li.dataset.step === STEP));
