@@ -9,10 +9,13 @@ let pool = null;
 const dir = path.resolve(process.env.DATA_DIR || './data/fields');
 const eventsFile = path.resolve(process.env.DATA_DIR || './data', 'events.jsonl');
 
+export let storeMode = 'files';
 export async function initStore() {
   if (process.env.DATABASE_URL) {
+    try {
     const { default: pg } = await import('pg');
-    pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.PGSSL === 'disable' ? false : { rejectUnauthorized: false } });
+    pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.PGSSL === 'disable' ? false : { rejectUnauthorized: false }, connectionTimeoutMillis: 15000, max: 3 });
+    pool.on('error', (e) => console.error('[store] pool error', e.message));
     await pool.query(`CREATE TABLE IF NOT EXISTS cm_fields (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -30,8 +33,18 @@ export async function initStore() {
     // this server (table owner) keeps full access.
     await pool.query('ALTER TABLE cm_fields ENABLE ROW LEVEL SECURITY');
     await pool.query('ALTER TABLE cm_events ENABLE ROW LEVEL SECURITY');
+    storeMode = 'postgres';
     console.log('[store] using Postgres');
-  } else {
+    return;
+    } catch (e) {
+      // Typical cause on Render: the direct Supabase host (db.<ref>.supabase.co) is IPv6-only, which Render
+      // cannot reach. Use the Session pooler string (aws-0-<region>.pooler.supabase.com:5432) instead.
+      console.error(`[store] Postgres unavailable (${e.code || e.message}); falling back to JSON files. Fields saved now will NOT persist across restarts on Render. Check DATABASE_URL: use the Supabase Session pooler string.`);
+      try { await pool?.end(); } catch {}
+      pool = null;
+    }
+  }
+  {
     await mkdir(dir, { recursive: true });
     console.log(`[store] using ${dir}`);
   }

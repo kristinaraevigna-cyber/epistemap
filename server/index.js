@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { initStore, newField, listFields, getField, saveField, deleteField, logEvent, exportAll } from './store.js';
+import { initStore, storeMode, newField, listFields, getField, saveField, deleteField, logEvent, exportAll } from './store.js';
 import { dimensions, cards, sources, benchmarks, groundingBlock, extractCitations, KNOWLEDGE_VERSION } from './knowledge.js';
 import { EXTRACT_PROMPT, TAG_PROMPT, COMPARE_PROMPT, parseJsonLoose } from './prompts.js';
 import { searchOpenAlex, localCitations, parseExport, mergeStudies } from './corpus.js';
@@ -51,7 +51,7 @@ const wrap = (fn) => (req, res) => fn(req, res).catch((e) => { console.error(e);
 
 // ---- config & knowledge ----
 app.get('/healthz', (_, res) => res.send('ok'));
-app.get('/api/config', (_, res) => res.json({ requiresAccessCode: !!ACCESS_CODE, serverKeyAvailable: !!process.env.ANTHROPIC_API_KEY, model: MODEL, maxPdfMb: MAX_PDF_MB, knowledgeVersion: KNOWLEDGE_VERSION, dimensions }));
+app.get('/api/config', (_, res) => res.json({ store: storeMode, requiresAccessCode: !!ACCESS_CODE, serverKeyAvailable: !!process.env.ANTHROPIC_API_KEY, model: MODEL, maxPdfMb: MAX_PDF_MB, knowledgeVersion: KNOWLEDGE_VERSION, dimensions }));
 app.get('/api/knowledge', (_, res) => res.json({ dimensions, cards, sources, benchmarks }));
 app.get('/api/benchmarks', (_, res) => res.json(benchmarks));
 app.post('/api/check-code', (req, res) => res.json({ ok: !ACCESS_CODE || req.body?.code === ACCESS_CODE }));
@@ -133,4 +133,6 @@ app.get('/api/admin/export', wrap(async (req, res) => { if (!process.env.ADMIN_T
 
 app.get('*', (_, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
 
-initStore().then(() => app.listen(PORT, () => console.log(`coverage-map listening on ${PORT} (model ${MODEL}, knowledge ${KNOWLEDGE_VERSION})`)));
+// Listen first so Render sees an open port; the store connects in the background (with file fallback).
+app.listen(PORT, () => console.log(`coverage-map listening on ${PORT} (model ${MODEL}, knowledge ${KNOWLEDGE_VERSION})`));
+initStore().catch((e) => console.error('[store] init failed', e.message));

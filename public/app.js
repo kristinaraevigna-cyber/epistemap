@@ -270,4 +270,4 @@ function renderExport(p) {
 }
 
 // ---------- boot ----------
-(async () => { CFG = await api('/api/config'); route(); })();
+(async () => { CFG = await api('/api/config'); if (CFG.store !== 'postgres') console.warn('Coverage Map: no database connected; fields are stored as files on the server.'); route(); })();
