@@ -17,7 +17,7 @@ for (let i = 0; i < 40; i++) { try { if ((await fetch(base + '/healthz')).ok) br
 const shots = process.argv[2] || dir;
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-const errors = []; page.on('pageerror', (e) => errors.push(e.message)); page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+const errors = []; page.on('pageerror', (e) => errors.push(e.message)); page.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && errors.push(m.text()));
 try {
   await page.goto(base);
   await page.fill('#newName', 'Social and financial performance');

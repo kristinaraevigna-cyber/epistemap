@@ -4,49 +4,79 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Coverage Map</title>
+<meta name="description" content="Map which assumptions of a field's core claims the evidence has tested.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23245C73'/%3E%3Crect x='7' y='7' width='8' height='8' rx='2' fill='%23fff'/%3E%3Crect x='17' y='7' width='8' height='8' rx='2' fill='%23F4C542'/%3E%3Crect x='7' y='17' width='8' height='8' rx='2' fill='%23E88C7D'/%3E%3Crect x='17' y='17' width='8' height='8' rx='2' fill='%23fff'/%3E%3C/svg%3E">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><strong>Coverage Map</strong><span class="muted">Which assumptions of a claim has the evidence tested?</span></div>
+  <a class="brand" href="#home" aria-label="Coverage Map home">
+    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#245C73"/><rect x="7" y="7" width="8" height="8" rx="2" fill="#fff"/><rect x="17" y="7" width="8" height="8" rx="2" fill="#F4C542"/><rect x="7" y="17" width="8" height="8" rx="2" fill="#E88C7D"/><rect x="17" y="17" width="8" height="8" rx="2" fill="#fff"/></svg>
+    <strong>Coverage Map</strong>
+  </a>
+  <div class="crumbs"><span id="fieldName" class="pill" hidden></span></div>
   <div class="top-right">
-    <span id="fieldName" class="pill" hidden></span>
+    <span id="dbState" class="dot-label" title="Where fields are stored" hidden></span>
     <button id="settingsBtn" class="ghost">Settings</button>
   </div>
 </header>
 
 <main id="home" class="home">
   <section class="hero">
-    <h1>Map what a field's evidence has and has not tested</h1>
-    <p>For each core claim in a field, Coverage Map breaks the claim into its assumptions (theory, constructs, design and sample, analysis, context), records which studies varied each one, and shows where the next test would be most informative. The AI reads papers and proposes; you confirm every item.</p>
+    <div class="hero-text">
+      <p class="eyebrow">An instrument for meta-research</p>
+      <h1>Which assumptions of a claim has the evidence tested?</h1>
+      <p class="lede">Replications are counted. What they test is rarely examined. Coverage Map breaks each core claim of a field into its assumptions, reads the studies to record which assumptions each one varied, and shows where the next test would be most informative. The AI proposes with a quote and page; you confirm every item.</p>
+      <form id="newField" class="row hero-form">
+        <input id="newName" placeholder="Name a field, e.g. Social and financial performance" required aria-label="Field name">
+        <button type="submit">Create field</button>
+      </form>
+    </div>
+    <figure class="hero-fig" aria-label="Example coverage map: one claim, five dimensions">
+      <div class="mini-claim">Corporate social performance → financial performance</div>
+      <div class="mini-grid">
+        <div class="mini-cell none"><b>0/2</b><span>Theory</span></div>
+        <div class="mini-cell partly"><b>1/3</b><span>Constructs</span></div>
+        <div class="mini-cell covered"><b>2/2</b><span>Design</span></div>
+        <div class="mini-cell covered"><b>4/4</b><span>Analysis</span></div>
+        <div class="mini-cell partly"><b>1/2</b><span>Context</span></div>
+      </div>
+      <figcaption>Red cells with high consequentiality are the field's most informative next tests.</figcaption>
+    </figure>
   </section>
-  <section class="card">
-    <h2>Your fields</h2>
+
+  <section class="card" id="fieldsCard">
+    <div class="card-head"><h2>Your fields</h2><span class="muted small" id="fieldCount"></span></div>
     <ul id="fieldList" class="list"></ul>
-    <form id="newField" class="row">
-      <input id="newName" placeholder="Field name, e.g. Social and financial performance" required>
-      <button type="submit">Create field</button>
-    </form>
   </section>
-  <section class="card muted small">
-    <p><strong>How it works.</strong> 1 Corpus: find the field's core studies (OpenAlex, or a Web of Science / Scopus export). 2 Studies: upload PDFs; the AI extracts claims, assumptions and analysis choices with page-referenced quotes. 3 Claims: confirm or edit the decomposition. 4 Coverage: tag which studies varied each assumption; see the map. 5 Choice space: compare AI-found analysis choices with a reference map (benchmark). 6 Export.</p>
-    <p>Papers are read once by the model and not stored. Fields are saved on the server so a team can work on them together.</p>
+
+  <section class="steps-grid" aria-label="How it works">
+    <article class="step-card"><span class="num">1</span><h3>Corpus</h3><p>Find the field's core studies with OpenAlex or a Web of Science / Scopus export. You decide which are core.</p></article>
+    <article class="step-card"><span class="num">2</span><h3>Studies</h3><p>Upload a PDF. The model extracts claims, their assumptions in five dimensions, and every analytical choice, each with a quote and page.</p></article>
+    <article class="step-card"><span class="num">3</span><h3>Claims</h3><p>Confirm, edit or reject each claim and assumption. Set how consequential each assumption is.</p></article>
+    <article class="step-card"><span class="num">4</span><h3>Coverage map</h3><p>Tag further studies against a claim. See which assumptions are covered, partly covered or untested.</p></article>
+    <article class="step-card"><span class="num">5</span><h3>Choice space</h3><p>Compare the analytical choices the AI found with a published reference map (Berchicci &amp; King, 2022 is built in).</p></article>
+    <article class="step-card"><span class="num">6</span><h3>Export</h3><p>Diagnostic coverage per claim, the most informative next tests, JSON and CSV for analysis.</p></article>
   </section>
+
+  <p class="foot muted small">Papers are read once by the model and are not stored. Fields are saved on the server so a team can work on them together. Grounded in 322 verified evidence cards from the replication-methods literature.</p>
 </main>
 
 <div id="work" class="work" hidden>
-  <nav class="side">
+  <nav class="side" aria-label="Steps">
     <a href="#home" class="back">← All fields</a>
     <ol id="steps" class="steps">
-      <li data-step="corpus"><span>1</span>Corpus</li>
-      <li data-step="studies"><span>2</span>Studies</li>
-      <li data-step="claims"><span>3</span>Claims &amp; assumptions</li>
-      <li data-step="coverage"><span>4</span>Coverage map</li>
-      <li data-step="choices"><span>5</span>Choice space</li>
-      <li data-step="export"><span>6</span>Export</li>
+      <li data-step="corpus"><span class="n">1</span><span class="lbl">Corpus<small id="c-corpus"></small></span></li>
+      <li data-step="studies"><span class="n">2</span><span class="lbl">Studies<small id="c-studies"></small></span></li>
+      <li data-step="claims"><span class="n">3</span><span class="lbl">Claims &amp; assumptions<small id="c-claims"></small></span></li>
+      <li data-step="coverage"><span class="n">4</span><span class="lbl">Coverage map<small id="c-coverage"></small></span></li>
+      <li data-step="choices"><span class="n">5</span><span class="lbl">Choice space<small id="c-choices"></small></span></li>
+      <li data-step="export"><span class="n">6</span><span class="lbl">Export<small id="c-export"></small></span></li>
     </ol>
     <div class="side-foot">
-      <div id="saveState" class="muted small">Saved</div>
+      <div id="saveState" class="save-state">Saved</div>
       <a href="#" id="exportJson" class="small">Download field (JSON)</a>
     </div>
   </nav>
@@ -64,7 +94,7 @@
 </dialog>
 
 <dialog id="modal"><div id="modalBody" class="dlg"></div></dialog>
-<div id="toast" class="toast" hidden></div>
+<div id="toast" class="toast" role="status" hidden></div>
 <script src="app.js"></script>
 </body>
 </html>
