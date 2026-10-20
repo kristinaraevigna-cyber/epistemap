@@ -69,6 +69,8 @@ Each line is: [card-id] (stage; kind; page) Title. Guidance. ACTION: checklist a
 ${EVIDENCE_LINES}`;
 
 const STEP_HELP = {
+  inquiry: 'Step 0, Inquiry: the researcher states what they want to understand, their search terms, seed studies and what they believe the field assumes. The tool only proposes after this. Relevant: target selection (isager2021).',
+  assumptions: 'Step 5, Assumptions and decision: the tool unearths the assumptions the designs rest on; the researcher judges which are reasonable, questionable or violated, and decides between a multiverse on existing data and a new replication with a different design. Relevant: validity and generalisation (flake2023, irvine2021, forrt2025), replication value (isager2021).',
   corpus: 'Step 1, Corpus: bounding the field and choosing the core empirical studies (seminal, recent, rising; reviews flagged). Relevant: target selection and replication value (isager2021).',
   studies: 'Step 2, Studies: reading PDFs; the model extracts the paper type, its predictions, the design used to test each one, the result, and analytical choices. Relevant: documenting the original precisely (brandt2014, forrt2025).',
   predictions: 'Step 3, Predictions: confirming each prediction (X → Y, construct level), merging the same prediction across studies, marking core ones. Relevant: construct validity (flake2023), theory and replication type (irvine2021, anderson2016).',
@@ -85,6 +87,7 @@ export function fieldContext(field, step) {
   const sById = new Map(studies.map((s) => [s.id, s]));
   const short = (s) => s ? `${(s.authors || '').split(',')[0] || 'Unknown'}${s.year ? ` (${s.year})` : ''}` : '?';
   const lines = [];
+  if (field.inquiry?.statement || field.inquiry?.priors) lines.push(`Researcher's inquiry: ${clip(field.inquiry.statement, 500)}${field.inquiry.priors ? ` | What they believe the field assumes: ${clip(field.inquiry.priors, 400)}` : ''}`);
   lines.push(`Field: ${clip(field.name, 120)}. Studies: ${studies.length} (${studies.filter((s) => s.core).length} core, ${studies.filter((s) => s.extraction).length} read). Claims: ${claims.length} (${claims.filter((c) => c.status === 'confirmed').length} confirmed). Assumptions: ${as.length} (${as.filter((a) => a.status === 'confirmed').length} confirmed). Coverage tags: ${cov.length}. Analytical choices: ${ch.length}.`);
   const preds = field.predictions || [], tests = field.tests || [];
   if (preds.length) {

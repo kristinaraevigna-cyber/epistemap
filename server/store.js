@@ -51,7 +51,7 @@ export async function initStore() {
 }
 
 export function newField(name, description = '') {
-  return { id: randomUUID(), name, description, created: new Date().toISOString(), schema: 2, studies: [], predictions: [], tests: [], claims: [], assumptions: [], coverage: [], choices: [], reference: [], matches: [], notes: '' };
+  return { id: randomUUID(), name, description, created: new Date().toISOString(), schema: 3, inquiry: { statement: '', terms: '', seeds: '', priors: '' }, assumptions_by_prediction: {}, decisions: {}, loops: [], studies: [], predictions: [], tests: [], claims: [], assumptions: [], coverage: [], choices: [], reference: [], matches: [], notes: '' };
 }
 
 export async function listFields() {
@@ -68,7 +68,7 @@ export async function listFields() {
   return out.sort((a, b) => String(b.updated).localeCompare(String(a.updated)));
 }
 
-const migrate = (d) => d ? { predictions: [], tests: [], ...d, schema: 2 } : d;
+const migrate = (d) => d ? { predictions: [], tests: [], inquiry: { statement: '', terms: '', seeds: '', priors: '' }, assumptions_by_prediction: {}, decisions: {}, loops: [], ...d, schema: 3 } : d;
 export async function getField(id) {
   if (pool) {
     const { rows } = await pool.query('SELECT doc, version FROM cm_fields WHERE id = $1', [id]);

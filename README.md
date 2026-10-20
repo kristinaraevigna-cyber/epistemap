@@ -24,14 +24,20 @@ The unit is the **prediction** (X → Y, direction, at the construct level): wha
 
 Lined up across studies, this shows which predictions **recur** (core), which design decisions **differ** between studies, and where the **results disagree**. Those are the inputs to a multiverse or specification map (Berchicci & King, 2022; Götz et al., 2026), and the design decisions a next test should vary. The earlier assumption-based decomposition (theory, constructs, design, analysis, context) remains in the evidence base as a secondary, conceptual lens.
 
-## The six steps
+## Human in the loop (v0.3)
 
+The human goes first and disposes last. Step 0 records the researcher's inquiry (what they want to understand, search terms, seed studies, what they think the field takes for granted); every later step is "the tool proposes, the human disposes"; and three loops let the person send the tool back (revise the search, add studies it should weigh, add a prediction or assumption from their own reading). Step 5 is a judgment step rather than a confirmation: the tool unearths the assumptions the designs rest on and rates their sensitivity; the person judges each as reasonable, questionable or violated and decides, per prediction, between a multiverse on existing data, a new study with a different design, both, or stopping. Decisions, judgments, loops and coach use are logged (with consent) so the study of the instrument can ask when human judgment changed the outcome.
+
+## The eight steps
+
+0. **Your inquiry.** The researcher states the question, search terms (dictation supported where the browser allows it), seed studies and priors.
 1. **Corpus.** Search OpenAlex (phrases in quotes; OR / AND / NOT) or upload a Web of Science / Scopus / BibTeX export. Sort by citations, citations per year (age-adjusted) or year; reviews are flagged; local citation counts show bibliographic coupling. A person marks the core empirical studies.
-2. **Studies.** Upload each core study's PDF. The model classifies the paper (empirical, conceptual, review), extracts its predictions, the design used to test each one, the result, and the analytical choices, each with a verbatim quote and page. PDFs are read once and not stored.
+2. **Studies.** Attach a PDF to any study (from step 1 or 2). The model classifies the paper (empirical, conceptual, review), lists its studies (Study 1, Study 2…), and extracts its predictions in all their forms (hypotheses, propositions, research questions, stated predictions, including ones that open a later results section), the design of each test per study, the result, and the analytical choices, each with a verbatim quote and page. Reviews yield the predictions they report as tested, flagged `from_review`. PDFs are read once and not stored.
 3. **Predictions.** On import, the model proposes which of the paper's predictions are the same as ones already in the map (same constructs and direction; different measures are design choices, not different predictions). A person confirms, edits, merges or rejects, and marks the **core** predictions: those that recur and that later work builds on.
 4. **Design map.** For each core prediction, a table of the nine dimensions × the options used across studies, with each study's result. Dimensions with several options and mixed results are the design decisions that matter.
-5. **Choice space.** The analytical choices found across papers, and the benchmark against a reference list (the Berchicci & King 2022 window of model uncertainty is built in): found, missed, added.
-6. **Export.** Core predictions, the design decisions ranked (mixed results first), a JSON of the field, and a CSV of prediction × study × design for R or Python.
+5. **Assumptions and decision.** For each core prediction the tool unearths the hidden assumptions behind the designs (with sensitivity, what would relax each, evidence-card grounding, design options no study has used, possible overlaps); the person judges and decides.
+6. **Choice space.** The analytical choices found across papers, and the benchmark against a reference list (the Berchicci & King 2022 window of model uncertainty is built in): found, missed, added.
+7. **Reproduce, replicate, export.** Decisions with their reasons; hand-off to Replication Navigator (whose reproduction stage generates analysis code from the original paper and whose later stages plan a preregistered replication); JSON and CSV for a multiverse.
 
 An **AI coach** sits beside every step, as in Replication Navigator: it streams short, answer-first replies, sees the field's predictions, tests and designs (not the PDFs), may only use the 322 evidence cards, cites card ids that the server validates, and lets users open the cited card or flag a citation. Every AI proposal is created with status `ai` and must be confirmed by a person.
 

@@ -27,8 +27,8 @@
   <section class="hero">
     <div class="hero-text">
       <p class="eyebrow">An instrument for meta-research · empirical focus</p>
-      <h1>Which predictions does a field rest on, and how have they been tested?</h1>
-      <p class="lede">Coverage Map reads a field's core empirical studies, extracts the predictions they set out to test (X → Y) and the research design each one used, and lines them up: which predictions recur, which design decisions differ across studies, and where the results disagree. That is the raw material for a multiverse, and for choosing the next test. The AI proposes with a quote and page; you confirm every item.</p>
+      <h1>Map what a field has tested, judge what it assumes, decide what to test next</h1>
+      <p class="lede">You state your inquiry. The tool reads the field's core empirical studies, extracts the predictions they set out to test and the research design of every test, lines them up, and unearths the assumptions the designs rest on. You judge what is reasonable and decide what to test next: a multiverse on existing data, or a new study with a different design, planned in Replication Navigator. The tool proposes with a quote and page; you dispose.</p>
       <form id="newField" class="row hero-form">
         <input id="newName" placeholder="Name a field, e.g. Social and financial performance" required aria-label="Field name">
         <button type="submit">Create field</button>
@@ -53,12 +53,14 @@
   </section>
 
   <section class="steps-grid" aria-label="How it works">
-    <article class="step-card"><span class="num">1</span><h3>Corpus</h3><p>Bound the field with OpenAlex or a Web of Science / Scopus export: seminal, recent and rising studies; reviews flagged. You decide which are core.</p></article>
-    <article class="step-card"><span class="num">2</span><h3>Studies</h3><p>Upload a PDF. The model extracts the predictions the paper set out to test, the design used for each, the result, and the analytical choices, with quotes and pages.</p></article>
-    <article class="step-card"><span class="num">3</span><h3>Predictions</h3><p>Confirm each prediction (X → Y at the construct level), merge the same prediction across studies, and mark the core ones.</p></article>
-    <article class="step-card"><span class="num">4</span><h3>Design map</h3><p>For each core prediction, the range of designs used across studies (data, sample, period, measures, estimator, controls, form, identification) and the result under each.</p></article>
-    <article class="step-card"><span class="num">5</span><h3>Choice space</h3><p>Compare the analytical choices the AI found with a published reference map (Berchicci &amp; King, 2022 is built in).</p></article>
-    <article class="step-card"><span class="num">6</span><h3>Export</h3><p>Core predictions, the design decisions that matter most, a hand-off into Replication Navigator, and JSON and CSV for a multiverse.</p></article>
+    <article class="step-card"><span class="num">0</span><h3>Your inquiry</h3><p>You go first: what you want to understand, your search terms, the studies you already know, and what you think the field takes for granted.</p></article>
+    <article class="step-card"><span class="num">1</span><h3>Corpus</h3><p>Bound the field with OpenAlex or a Web of Science / Scopus export; seminal, recent and rising studies; reviews flagged. You decide which are core.</p></article>
+    <article class="step-card"><span class="num">2</span><h3>Studies</h3><p>Upload PDFs. The tool extracts each paper's hypotheses, research questions or propositions, the design of every test (per study), the result, and the analytical choices, with quotes and pages.</p></article>
+    <article class="step-card"><span class="num">3</span><h3>Predictions</h3><p>The tool proposes; you dispose: confirm, edit, merge or reject each prediction, add your own, and mark the core ones. Not satisfied? Send the tool back to the search.</p></article>
+    <article class="step-card"><span class="num">4</span><h3>Design map</h3><p>For each core prediction, the range of designs used across studies and the result under each: the design decisions that matter.</p></article>
+    <article class="step-card"><span class="num">5</span><h3>Assumptions &amp; decision</h3><p>The tool unearths the hidden assumptions the designs rest on; you judge which are reasonable, then decide: a multiverse on existing data, or a new study with a different design.</p></article>
+    <article class="step-card"><span class="num">6</span><h3>Choice space</h3><p>The analytical choices found across papers, benchmarked against a published reference map (Berchicci &amp; King, 2022 built in).</p></article>
+    <article class="step-card"><span class="num">7</span><h3>Reproduce, replicate, export</h3><p>Hand the chosen test to Replication Navigator (reproduction code, then a preregistered replication), and export the map for a multiverse.</p></article>
   </section>
 
   <p class="foot muted small">Papers are read once by the model and are not stored. Fields are saved on the server so a team can work on them together. Grounded in 322 verified evidence cards from the replication-methods literature. Built to feed Replication Navigator, which plans the test.</p>
@@ -68,12 +70,14 @@
   <nav class="side" aria-label="Steps">
     <a href="#home" class="back">← All fields</a>
     <ol id="steps" class="steps">
+      <li data-step="inquiry"><span class="n">0</span><span class="lbl">Your inquiry<small id="c-inquiry"></small></span></li>
       <li data-step="corpus"><span class="n">1</span><span class="lbl">Corpus<small id="c-corpus"></small></span></li>
       <li data-step="studies"><span class="n">2</span><span class="lbl">Studies<small id="c-studies"></small></span></li>
       <li data-step="predictions"><span class="n">3</span><span class="lbl">Predictions<small id="c-predictions"></small></span></li>
       <li data-step="designs"><span class="n">4</span><span class="lbl">Design map<small id="c-designs"></small></span></li>
-      <li data-step="choices"><span class="n">5</span><span class="lbl">Choice space<small id="c-choices"></small></span></li>
-      <li data-step="export"><span class="n">6</span><span class="lbl">Export<small id="c-export"></small></span></li>
+      <li data-step="assumptions"><span class="n">5</span><span class="lbl">Assumptions &amp; decision<small id="c-assumptions"></small></span></li>
+      <li data-step="choices"><span class="n">6</span><span class="lbl">Choice space<small id="c-choices"></small></span></li>
+      <li data-step="export"><span class="n">7</span><span class="lbl">Reproduce, replicate, export<small id="c-export"></small></span></li>
     </ol>
     <div class="side-foot">
       <div id="saveState" class="save-state">Saved</div>

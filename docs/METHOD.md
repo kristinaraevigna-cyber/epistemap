@@ -1,10 +1,14 @@
-# Method notes (v0.2)
+# Method notes (v0.3)
 
 These notes record the design decisions behind Coverage Map so they can go into the technical appendix of the Organization Science proposal.
 
 ## 0. Change of focus in v0.2 (16 October 2026)
 
 After the team reviewed v0.1, the instrument was refocused on empirical work. v0.1 decomposed each claim into assumptions across five dimensions; that produced many one-off, conceptual items and was dominated by reviews and theory papers. v0.2 extracts **predictions** (what a study set out to test, X → Y at the construct level) and the **research design** used in each test, and lines them up across studies. This is the raw material of a multiverse / specification map (Berchicci & King, 2022; Götz et al., 2026): the core predictions, and the range of designs used to test them. The five-dimension lens stays in the evidence base as a secondary, conceptual view.
+
+## 0b. Human first, loops, judgment (v0.3, after the 20 October review)
+
+Three changes from the review. (1) The person goes first: step 0 records the inquiry, search terms, seed studies and priors, and the tool is told to weigh them. (2) Loops: from steps 3–5 the person can send the tool back to revise the search, add studies to weigh, or add their own prediction; each loop is logged with its reason. (3) A judgment step: the tool unearths the assumptions the designs rest on (gap-spotting is the tool's strength; problematisation is the person's), the person judges them, and decides between a multiverse on existing data and a new study with a different design. Predictions now include hypotheses, propositions, research questions and stated predictions, per study within a paper, and reviews are handled as sources of reported predictions.
 
 ## 1. Unit of analysis
 
@@ -16,12 +20,14 @@ A prediction is **core** when it recurs across studies and later work builds on 
 
 | Step | AI proposes | Person decides |
 |---|---|---|
-| 1 Corpus | candidate studies, citation counts | field boundary, core set |
+| 0 Inquiry | — | states the question, search terms, seed studies, priors |
+| 1 Corpus | candidate studies, citation counts | field boundary, core set; may loop back here from 3–5 |
 | 2 Studies | paper type; predictions; the design and result of each test; choices, with quotes; which predictions are the same as existing ones | — (review in step 3) |
 | 3 Predictions | merge proposals | confirm / edit / merge / reject; mark core |
 | 4 Design map | — | confirm / edit / reject each test |
-| 5 Choice space | alignment of AI-found choices with a reference | override matches; final benchmark coding |
-| 6 Export | ranking of design decisions that vary, mixed results first | what to test next; hand-off to Replication Navigator |
+| 5 Assumptions & decision | hidden assumptions behind the designs, sensitivity, what would relax each, gaps, overlaps | judges each assumption (reasonable / questionable / violated), adds own, decides multiverse vs new study vs both vs stop, with reason |
+| 6 Choice space | alignment of AI-found choices with a reference | override matches; final benchmark coding |
+| 7 Reproduce, replicate, export | ranking of design decisions that vary | hand-off to Replication Navigator with the decision; exports |
 
 Every proposal carries `status: "ai"` until a person confirms it. Confirmed and rejected items are kept, so the agreement between AI proposals and human decisions can be computed from the exported JSON (acceptance rate per dimension, per study).
 

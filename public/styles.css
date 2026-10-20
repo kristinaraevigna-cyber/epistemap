@@ -184,3 +184,9 @@ code{background:var(--line-2);padding:.05rem .3rem;border-radius:4px;font-size:.
 .card-view .quote{display:block;border-left:3px solid var(--accent-3);padding:.3rem .6rem;margin:.5rem 0;font-size:.9rem}
 @media (max-width:1180px){.work{grid-template-columns:250px minmax(0,1fr)}.coach{position:fixed;right:0;top:54px;width:min(420px,100vw);box-shadow:-8px 0 30px rgba(0,0,0,.12);transform:translateX(100%);visibility:hidden;transition:transform .2s,visibility .2s;z-index:7}.coach.open{transform:none;visibility:visible}#coachClose{display:inline-block}.coach-fab{display:block}}
 @media (max-width:760px){.coach{top:0;height:100vh}}
+/* v0.3: loops, judgment, decision */
+.loopbar{margin-top:1rem;padding:.7rem 1rem;border:1px dashed var(--accent-3);border-radius:var(--r);background:var(--card);font-size:.88rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.decision{margin-top:.8rem;padding:.7rem .9rem;background:var(--accent-2);border-radius:var(--r-s)}
+.decision .row{flex-direction:column;align-items:stretch;gap:.2rem}
+label.radio{display:flex;gap:.5rem;align-items:flex-start;font-weight:400;margin:0;font-size:.88rem}
+label.radio input{width:auto;flex:none;min-width:0;margin-top:.25rem}

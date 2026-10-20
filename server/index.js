@@ -2,8 +2,8 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initStore, storeMode, newField, listFields, getField, saveField, deleteField, logEvent, exportAll } from './store.js';
-import { dimensions, designDimensions, cards, sources, benchmarks, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
-import { EXTRACT_PROMPT, CONSOLIDATE_PROMPT, COMPARE_PROMPT, parseJsonLoose } from './prompts.js';
+import { dimensions, designDimensions, cards, sources, benchmarks, cardById, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
+import { EXTRACT_PROMPT, CONSOLIDATE_PROMPT, COMPARE_PROMPT, ASSUMPTIONS_PROMPT, parseJsonLoose } from './prompts.js';
 import { searchOpenAlex, localCitations, parseExport, mergeStudies } from './corpus.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -107,6 +107,21 @@ app.post('/api/consolidate', wrap(async (req, res) => {
   res.json({ map: json.map || [] });
 }));
 
+app.post('/api/assumptions', wrap(async (req, res) => {
+  const { key } = resolveKey(req);
+  const { fieldId, prediction, tests, others } = req.body || {};
+  if (!prediction?.text) return res.status(400).json({ error: 'prediction required' });
+  const T = (tests || []).map((t, i) => `TEST ${i + 1} (${t.study || 'study'}${t.study_label ? ', ' + t.study_label : ''}): ${Object.entries(t.design || {}).map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(', ') : v ?? 'n/a'}`).join('; ')} → result: ${t.result?.direction || '?'}/${t.result?.support || '?'}`).join('\n') || '(no empirical tests recorded yet)';
+  const O = (others || []).map((o) => `- ${o.id}: ${o.text}`).join('\n') || '(none)';
+  const content = `${ASSUMPTIONS_PROMPT}\n\nPREDICTION: ${prediction.text}${prediction.statement ? ' — ' + prediction.statement : ''}\n\n<tests>\n${T}\n</tests>\n\n<other_predictions>\n${O}\n</other_predictions>`;
+  const out = await callModel({ key, system: systemBlocks(), content: [{ type: 'text', text: content }], maxTokens: 4000 });
+  const json = parseJsonLoose(out.text);
+  const seen = extractCitations(JSON.stringify(json.assumptions || []));
+  await logEvent(fieldId, 'assumptions', { prediction: prediction.id, n: json.assumptions?.length, invalid: seen.filter((c) => !c.valid).map((c) => c.id), usage: out.usage });
+  for (const a of json.assumptions || []) a.grounding = (a.grounding || []).map((id) => ({ id: String(id).replace(/[\[\]]/g, ''), valid: cardById.has(String(id).replace(/[\[\]]/g, '')) }));
+  res.json({ assumptions: json.assumptions || [], gaps: json.gaps || [], overlaps: json.overlaps || [] });
+}));
+
 app.post('/api/compare', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, reference, choices } = req.body || {};
@@ -155,6 +170,7 @@ app.post('/api/coach', wrap(async (req, res) => {
   await logEvent(fieldId, 'coach', { step, invalid: citations.filter((c) => !c.valid).map((c) => c.id), n: citations.length, stop, chars: text.length });
   send({ type: 'done', citations, stop, model }); res.end();
 }));
+app.post('/api/event', wrap(async (req, res) => { const { fieldId, type, payload } = req.body || {}; const ok = ['coach_open', 'coach_close', 'nudge_shown', 'nudge_dismissed', 'loop_back', 'decision', 'judgment']; if (!ok.includes(type)) return res.status(400).json({ error: 'unknown event' }); await logEvent(fieldId, type, payload || {}); res.json({ ok: true }); }));
 app.post('/api/flag', wrap(async (req, res) => { const { fieldId, cardId, step, note } = req.body || {}; await logEvent(fieldId, 'citation_flag', { cardId: String(cardId || '').slice(0, 40), step, note: String(note || '').slice(0, 500) }); res.json({ ok: true }); }));
 
 // ---- exports ----

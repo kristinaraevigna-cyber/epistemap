@@ -49,7 +49,7 @@ test('corpus parsing and merge', async () => {
 
 test('extract → consolidate → compare → exports', async () => {
   const f = (await j('/api/fields', { name: 'Flow' })).body;
-  const x = await j('/api/extract', { pdfBase64: PDF, fieldId: f.id }); assert.equal(x.status, 200); assert.equal(x.body.extraction.paper_type, 'empirical'); assert.equal(x.body.extraction.predictions.length, 2); assert.ok(x.body.extraction.predictions[0].test.dv_measure);
+  const x = await j('/api/extract', { pdfBase64: PDF, fieldId: f.id }); assert.equal(x.status, 200); assert.equal(x.body.extraction.paper_type, 'empirical'); assert.equal(x.body.extraction.predictions.length, 2); assert.ok(x.body.extraction.predictions[0].tests[0].dv_measure); assert.equal(x.body.extraction.studies.length, 2); assert.equal(x.body.extraction.predictions[1].form, 'research_question');
   const bad = await j('/api/extract', { pdfBase64: Buffer.from('not a pdf').toString('base64') }); assert.equal(bad.status, 400);
   const c0 = await j('/api/consolidate', { fieldId: f.id, canonical: [], incoming: [{ key: 'p1', text: 'A → B' }] }); assert.equal(c0.body.map[0].c, null);
   const c1 = await j('/api/consolidate', { fieldId: f.id, canonical: [{ id: 'p_x', text: 'A → B' }], incoming: [{ key: 'p1', text: 'A → B (+)' }, { key: 'p2', text: 'C → D' }] }); assert.equal(c1.body.map[0].c, 'p_x'); assert.equal(c1.body.map[1].c, null);
@@ -60,7 +60,7 @@ test('extract → consolidate → compare → exports', async () => {
   f.tests.push({ id: 't1', prediction: 'p1', study: 's1', design: { data_source: 'KLD', sample: 'US firms', period: '1995–2010', iv_measure: 'KLD index', dv_measure: 'ROA', estimator: 'OLS', controls: ['size', 'leverage'], functional_form: 'linear', identification: 'none' }, result: { direction: 'positive', support: 'supported', statistic: 'b=0.1', quote: 'q', page: 3 }, status: 'confirmed' });
   await j(`/api/fields/${f.id}`, { doc: f, version: 1 }, 'PUT');
   const csv = await (await fetch(`${base}/api/fields/${f.id}/designs.csv`)).text(); assert.ok(csv.includes('"ROA"')); assert.ok(csv.includes('"size; leverage"')); assert.equal(csv.split('\n').length, 2);
-  const ex = await (await fetch(`${base}/api/fields/${f.id}/export.json`)).json(); assert.equal(ex.name, 'Flow'); assert.equal(ex.schema, 2);
+  const ex = await (await fetch(`${base}/api/fields/${f.id}/export.json`)).json(); assert.equal(ex.name, 'Flow'); assert.equal(ex.schema, 3);
   const adm = await j('/api/admin/export', null, 'GET', { 'x-admin-token': 'adm' }); assert.ok(adm.body.fields.length >= 2); assert.ok(adm.body.events.some((e) => e.type === 'extract'));
   const noadm = await j('/api/admin/export'); assert.equal(noadm.status, 401);
 });
@@ -85,4 +85,14 @@ test('coach streams NDJSON with validated citations', async () => {
   assert.deepEqual(done.citations.map((c) => [c.id, c.valid]), [['flake2023-01', true], ['isager2021-02', true], ['fake2020-01', false]]);
   const empty = await j('/api/coach', { fieldId: f.id, step: 'claims', messages: [] }); assert.equal(empty.status, 400);
   const fl = await j('/api/flag', { fieldId: f.id, cardId: 'fake2020-01', step: 'claims' }); assert.equal(fl.body.ok, true);
+});
+
+test('assumptions endpoint validates grounding ids and logs', async () => {
+  const f = (await j('/api/fields', { name: 'Assume' })).body;
+  const r = await j('/api/assumptions', { fieldId: f.id, prediction: { id: 'p1', text: 'CSP → CFP (+)' }, tests: [{ study: 'Doe (2015)', design: { identification: 'none', iv_measure: 'KLD' }, result: { direction: 'positive', support: 'supported' } }], others: [] });
+  assert.equal(r.status, 200); assert.equal(r.body.assumptions.length, 2);
+  assert.deepEqual(r.body.assumptions[1].grounding.map((g) => g.valid), [true, false]);
+  assert.ok(r.body.gaps.length);
+  const ev = await j('/api/event', { fieldId: f.id, type: 'decision', payload: { prediction: 'p1', choice: 'replication' } }); assert.equal(ev.body.ok, true);
+  const bad = await j('/api/event', { fieldId: f.id, type: 'hack' }); assert.equal(bad.status, 400);
 });
