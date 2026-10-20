@@ -94,8 +94,26 @@ function bindHome() {
   $('#ctaTop')?.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#newName')?.focus(), 400); });
   const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.15 }) : null;
   document.querySelectorAll('.reveal').forEach((el) => io ? io.observe(el) : el.classList.add('in'));
-  const rail = $('#rail'), det = $('#railDetail'); const texts = JSON.parse(det.dataset.details || '[]');
-  rail.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; rail.querySelectorAll('button').forEach((x) => x.classList.toggle('active', x === b)); det.textContent = texts[Number(b.dataset.i)] || ''; });
+  // stepper banner: auto-advances every 6 s; clicking a step or an arrow stops it; hovering pauses it
+  const st = $('#stepper'), rail = $('#rail'), det = $('#railDetail');
+  const texts = JSON.parse(det.dataset.details || '[]'), titles = JSON.parse(st.dataset.titles || '[]'), subs = JSON.parse(st.dataset.subs || '[]');
+  const DUR = 6000; let cur = 0, timer = null, playing = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const bar = $('#stepBar');
+  const show = (i) => {
+    cur = (i + texts.length) % texts.length;
+    rail.querySelectorAll('button').forEach((b) => { const k = Number(b.dataset.i); b.classList.toggle('active', k === cur); b.classList.toggle('done', k < cur); });
+    $('#stepK').textContent = `Step ${cur} of ${texts.length - 1} · ${subs[cur] || ''}`; $('#stepTitle').textContent = titles[cur] || ''; $('#stepText').textContent = texts[cur] || '';
+    const body = $('.step-body'); body.classList.remove('fade'); void body.offsetWidth; body.classList.add('fade');
+    bar.style.transition = 'none'; bar.style.width = '0'; void bar.offsetWidth;
+    if (playing) { bar.style.transition = `width ${DUR}ms linear`; bar.style.width = '100%'; }
+  };
+  const tick = () => { timer = setInterval(() => show(cur + 1), DUR); };
+  const stop = () => { playing = false; clearInterval(timer); timer = null; bar.style.transition = 'none'; bar.style.width = '0'; };
+  rail.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; stop(); show(Number(b.dataset.i)); });
+  $('#stepPrev').addEventListener('click', () => { stop(); show(cur - 1); }); $('#stepNext').addEventListener('click', () => { stop(); show(cur + 1); });
+  st.addEventListener('mouseenter', () => { if (playing) { clearInterval(timer); timer = null; bar.style.transition = 'none'; } });
+  st.addEventListener('mouseleave', () => { if (playing && !timer) { show(cur); tick(); } });
+  show(0); if (playing) tick();
 }
 async function renderHome() {
   bindHome();
