@@ -91,7 +91,6 @@ function drawConstellation() {
 }
 function bindHome() {
   if (homeBound) return; homeBound = true;
-  drawConstellation();
   $('#ctaTop')?.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#newName')?.focus(), 400); });
   const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.15 }) : null;
   document.querySelectorAll('.reveal').forEach((el) => io ? io.observe(el) : el.classList.add('in'));
@@ -424,7 +423,7 @@ function renderExport(p) {
 }
 
 // ---------- boot ----------
-(async () => { CFG = await api('/api/config'); const d = $('#dbState'); d.hidden = false; d.textContent = CFG.store === 'postgres' ? 'Database connected' : 'File storage'; d.classList.toggle('files', CFG.store !== 'postgres'); route(); })();
+(async () => { CFG = await api('/api/config'); if (CFG.navigatorUrl) { for (const id of ['#topNav', '#footNav']) { const el = $(id); if (el) { el.href = CFG.navigatorUrl; el.hidden = false; } } } const d = $('#dbState'); d.hidden = false; d.textContent = CFG.store === 'postgres' ? 'Database connected' : 'File storage'; d.classList.toggle('files', CFG.store !== 'postgres'); route(); })();
 
 // ================= AI coach =================
 const STARTERS = {
