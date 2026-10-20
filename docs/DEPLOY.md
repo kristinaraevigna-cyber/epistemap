@@ -1,11 +1,11 @@
-# Deploying Coverage Map (GitHub + Render + Supabase)
+# Deploying Evidence Atlas (GitHub + Render + Supabase)
 
 The same setup as Replication Navigator, so the steps will be familiar. Allow about 20 minutes.
 
 ## 1. GitHub
 
-1. In GitHub Desktop: **File → Add Local Repository**, choose the `coverage-map` folder. If it says the folder is not a Git repository, click **create a repository** and keep the defaults.
-2. **Publish repository**. Name: `coverage-map`. Keep it private for now (it can be anonymised or made public later).
+1. In GitHub Desktop: **File → Add Local Repository**, choose the project folder (it may still be called `coverage-map` on disk; the folder and repository names do not matter to the app). If it says the folder is not a Git repository, click **create a repository** and keep the defaults.
+2. **Publish repository**. Keep it private for now (it can be anonymised or made public later). If the repository is already published as `coverage-map`, you can rename it on GitHub under Settings → General; GitHub redirects the old name and GitHub Desktop follows.
 
 ## 2. Supabase (shared storage for fields)
 
@@ -16,7 +16,7 @@ You can use the same Supabase project as the Navigator; the table names do not c
 
 ## 3. Render
 
-1. **New → Blueprint**, select the `coverage-map` repository. Render reads `render.yaml` and creates one free web service.
+1. **New → Blueprint**, select the `evidence-atlas` repository. Render reads `render.yaml` and creates one free web service.
 2. When asked for environment variables, set:
    - `ANTHROPIC_API_KEY`: your key (the same one as the Navigator is fine; both count against the same budget)
    - `DATABASE_URL`: the Supabase session-pooler string

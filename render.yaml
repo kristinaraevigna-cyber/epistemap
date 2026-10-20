@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: coverage-map
+    name: coverage-map  # Render service name; kept so the existing service is updated rather than recreated
     runtime: node
     plan: free
     buildCommand: npm ci

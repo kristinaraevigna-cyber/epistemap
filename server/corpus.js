@@ -34,7 +34,7 @@ export async function searchOpenAlex({ query, fromYear, toYear, perPage = 50, pa
   const params = new URLSearchParams({ search: normaliseQuery(query), filter: filters.join(','), sort, per_page: String(Math.min(perPage, 200)), page: String(page),
     select: 'id,doi,title,authorships,publication_year,primary_location,cited_by_count,cited_by_percentile_year,type,referenced_works,abstract_inverted_index' });
   if (process.env.CONTACT_EMAIL) params.set('mailto', process.env.CONTACT_EMAIL);
-  const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `coverage-map (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
+  const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `evidence-atlas (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
   if (!r.ok) throw new Error(`OpenAlex ${r.status}`);
   const j = await r.json();
   return {

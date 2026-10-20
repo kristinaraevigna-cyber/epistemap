@@ -1,5 +1,5 @@
 {
-  "name": "coverage-map",
+  "name": "evidence-atlas",
   "version": "0.1.0",
   "description": "An AI-enabled instrument for mapping the diagnostic coverage of replication across a field.",
   "main": "server/index.js",

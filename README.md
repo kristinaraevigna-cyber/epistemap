@@ -1,8 +1,10 @@
-# Coverage Map
+# Evidence Atlas
 
-**An AI-enabled instrument for mapping the diagnostic coverage of replication across a field.**
+**Map what a field has tested, judge what it assumes, decide what to test next.** An AI-enabled meta-science instrument that leads into Replication Navigator.
 
-Replications are usually counted per paper. Coverage Map records something more useful: for each core claim in a field, *which of its assumptions* the existing studies and replications have actually varied, and which remain untested. The result is a coverage map (claims × assumptions) whose empty cells show where the next test would be most informative.
+*Formerly Coverage Map (v0.1–v0.3).*
+
+Replications are usually counted per paper. Evidence Atlas records something more useful: for each core claim in a field, *which of its assumptions* the existing studies and replications have actually varied, and which remain untested. The result is a coverage map (claims × assumptions) whose empty cells show where the next test would be most informative.
 
 This is a separate project from [Replication Navigator](https://github.com/kristinaraevigna-cyber/replication-navigator) (single-study planning). It reuses the Navigator's verified evidence base but shares no code, so the two can evolve independently.
 
