@@ -26,13 +26,14 @@
 <main id="home" class="home">
   <section class="hero">
     <div class="hero-text">
-      <p class="eyebrow">Map what a field has tested · judge what it assumes · decide what to test next</p>
-      <h1>Map what a field has tested, judge what it assumes, decide what to test next</h1>
-      <p class="lede">You state your inquiry. Evidence Atlas reads the field's core empirical studies, extracts the predictions they set out to test and the research design of every test, lines them up, and unearths the assumptions the designs rest on. You judge what is reasonable and decide what to test next: a multiverse on existing data, or a new study with a different design, planned in Replication Navigator. The tool proposes with a quote and page; you dispose.</p>
+      <p class="eyebrow">Evidence Atlas</p>
+      <h1>Map what a field has tested.<br>Judge what it assumes.<br>Decide what to test next.</h1>
+      <p class="lede">An AI-enabled instrument for meta-science. The tool proposes, with a quote and page for everything; you dispose.</p>
       <form id="newField" class="row hero-form">
         <input id="newName" placeholder="Name a field, e.g. Social and financial performance" required aria-label="Field name">
-        <button type="submit">Create field</button>
+        <button type="submit">Start a field</button>
       </form>
+      <p class="small muted hero-hint">Or <a href="#how">see how it works</a> in three moves.</p>
     </div>
     <figure class="hero-fig" aria-label="Example design map: one prediction, design dimensions across six studies">
       <div class="mini-claim">Social performance → financial performance (+) · 6 studies</div>
@@ -43,7 +44,7 @@
         <div class="mini-cell none"><b>2 ≠</b><span>Estimator</span></div>
         <div class="mini-cell partly"><b>3</b><span>Form</span></div>
       </div>
-      <figcaption>Cells show how many options studies used; red where the results disagree. Those are the design decisions that matter.</figcaption>
+      <figcaption>One prediction, six studies, five design dimensions. Red: the studies chose differently and disagree.</figcaption>
     </figure>
   </section>
 
@@ -52,18 +53,41 @@
     <ul id="fieldList" class="list"></ul>
   </section>
 
-  <section class="steps-grid" aria-label="How it works">
-    <article class="step-card"><span class="num">0</span><h3>Your inquiry</h3><p>You go first: what you want to understand, your search terms, the studies you already know, and what you think the field takes for granted.</p></article>
-    <article class="step-card"><span class="num">1</span><h3>Corpus</h3><p>Bound the field with OpenAlex or a Web of Science / Scopus export; seminal, recent and rising studies; reviews flagged. You decide which are core.</p></article>
-    <article class="step-card"><span class="num">2</span><h3>Studies</h3><p>Upload PDFs. The tool extracts each paper's hypotheses, research questions or propositions, the design of every test (per study), the result, and the analytical choices, with quotes and pages.</p></article>
-    <article class="step-card"><span class="num">3</span><h3>Predictions</h3><p>The tool proposes; you dispose: confirm, edit, merge or reject each prediction, add your own, and mark the core ones. Not satisfied? Send the tool back to the search.</p></article>
-    <article class="step-card"><span class="num">4</span><h3>Design map</h3><p>For each core prediction, the range of designs used across studies and the result under each: the design decisions that matter.</p></article>
-    <article class="step-card"><span class="num">5</span><h3>Assumptions &amp; decision</h3><p>The tool unearths the hidden assumptions the designs rest on; you judge which are reasonable, then decide: a multiverse on existing data, or a new study with a different design.</p></article>
-    <article class="step-card"><span class="num">6</span><h3>Choice space</h3><p>The analytical choices found across papers, benchmarked against a published reference map (Berchicci &amp; King, 2022 built in).</p></article>
-    <article class="step-card"><span class="num">7</span><h3>Reproduce, replicate, export</h3><p>Hand the chosen test to Replication Navigator (reproduction code, then a preregistered replication), and export the map for a multiverse.</p></article>
+  <section id="how" class="moves" aria-label="How it works">
+    <article class="move reveal">
+      <div class="move-art" aria-hidden="true"><svg viewBox="0 0 120 80"><rect x="6" y="10" width="34" height="60" rx="4"/><rect x="43" y="22" width="34" height="48" rx="4"/><rect x="80" y="34" width="34" height="36" rx="4"/><circle cx="23" cy="26" r="5" class="dot"/><circle cx="60" cy="38" r="5" class="dot"/><circle cx="97" cy="50" r="5" class="dot"/><path d="M23 26 L60 38 L97 50" class="line"/></svg></div>
+      <div class="move-text"><span class="move-n">1</span><h2>Map</h2><p>You state your inquiry and the studies you know. The tool bounds the field, reads the core papers, and lines up every prediction with the design of every test: data, sample, period, measures, estimator, controls, form, identification.</p><p class="small muted">Steps 0–4 · you confirm, edit, merge or send the tool back</p></div>
+    </article>
+    <article class="move reveal">
+      <div class="move-art" aria-hidden="true"><svg viewBox="0 0 120 80"><circle cx="60" cy="40" r="30"/><circle cx="60" cy="40" r="18" class="faint"/><circle cx="60" cy="40" r="6" class="dot"/><path d="M60 10 V70 M30 40 H90" class="line faint"/><path d="M84 16 L96 4" class="line"/><circle cx="98" cy="2" r="3" class="dot"/></svg></div>
+      <div class="move-text"><span class="move-n">2</span><h2>Judge</h2><p>Claims are visible; assumptions are hidden. The tool unearths what the designs rest on and how sensitive each result is to it. You judge what is reasonable, questionable or violated, from your knowledge of the field.</p><p class="small muted">Step 5 · the expert's step, not a confirmation</p></div>
+    </article>
+    <article class="move reveal">
+      <div class="move-art" aria-hidden="true"><svg viewBox="0 0 120 80"><path d="M10 60 Q40 10 60 40 T110 20" class="line"/><circle cx="10" cy="60" r="5" class="dot"/><circle cx="60" cy="40" r="5" class="dot"/><circle cx="110" cy="20" r="6" class="dot accent"/><rect x="70" y="52" width="40" height="20" rx="4" class="faint"/></svg></div>
+      <div class="move-text"><span class="move-n">3</span><h2>Test</h2><p>Decide per prediction: a multiverse on existing data, or a new study with a different design. The decision opens Replication Navigator, which drafts reproduction code from the original paper and guides a preregistered replication. The result comes back into the map.</p><p class="small muted">Steps 6–7 and Replication Navigator</p></div>
+    </article>
   </section>
 
-  <p class="foot muted small">Papers are read once by the model and are not stored. Fields are saved on the server so a team can work on them together. Grounded in 322 verified evidence cards from the replication-methods literature. Replication Navigator, the reproduction and replication stage, is part of the same flow.</p>
+  <section class="rail-wrap reveal" aria-label="The steps">
+    <h2 class="rail-title">The steps, in order</h2>
+    <ol class="rail" id="rail">
+      <li><button type="button" data-i="0"><span>0</span>Your inquiry</button></li>
+      <li><button type="button" data-i="1"><span>1</span>Corpus</button></li>
+      <li><button type="button" data-i="2"><span>2</span>Studies</button></li>
+      <li><button type="button" data-i="3"><span>3</span>Predictions</button></li>
+      <li><button type="button" data-i="4"><span>4</span>Design map</button></li>
+      <li><button type="button" data-i="5"><span>5</span>Assumptions &amp; decision</button></li>
+      <li><button type="button" data-i="6"><span>6</span>Choice space</button></li>
+      <li><button type="button" data-i="7"><span>7</span>Reproduce &amp; replicate</button></li>
+    </ol>
+    <div class="rail-detail" id="railDetail" data-details='["What you want to understand, your search terms, the studies you already know, and what you think the field takes for granted. You go first; the tool only proposes after this.","Bound the field with OpenAlex or a Web of Science / Scopus export. Seminal, recent and rising studies; reviews flagged. You decide which are core.","Attach PDFs. The tool extracts each paper’s hypotheses, research questions or propositions, the design of every test per study, the result and the analytical choices, with quotes and pages.","Confirm, edit, merge or reject each prediction; add your own; mark the core ones. Not satisfied? Send the tool back to the search.","For each core prediction: the range of designs used across studies and the result under each. Where studies chose differently and disagree, a design decision matters.","The tool unearths the assumptions behind the designs; you judge them and decide: multiverse on existing data, new study with a different design, both, or stop.","The analytical choices found across papers, benchmarked against a published reference map (Berchicci & King, 2022 built in).","Hand the chosen test to Replication Navigator: reproduction code from the original paper, then a preregistered replication. Export the map for a multiverse."]'>Click a step to read what happens there.</div>
+  </section>
+
+  <section class="trust reveal">
+    <div><strong>Grounded.</strong> Every quote has a page; the coach may only cite 322 verified evidence cards.</div>
+    <div><strong>Private.</strong> Papers are read once and not stored. Fields are shared with your team only.</div>
+    <div><strong>Yours.</strong> Nothing enters the map until a person confirms it; every judgment and decision is yours.</div>
+  </section>
 </main>
 
 <div id="work" class="work" hidden>

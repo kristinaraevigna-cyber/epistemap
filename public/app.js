@@ -77,8 +77,18 @@ function updateCounts() {
 }
 
 // ---------- home ----------
+let homeBound = false;
+function bindHome() {
+  if (homeBound) return; homeBound = true;
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.15 }) : null;
+  document.querySelectorAll('.reveal').forEach((el) => io ? io.observe(el) : el.classList.add('in'));
+  const rail = $('#rail'), det = $('#railDetail'); const texts = JSON.parse(det.dataset.details || '[]');
+  rail.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; rail.querySelectorAll('button').forEach((x) => x.classList.toggle('active', x === b)); det.textContent = texts[Number(b.dataset.i)] || ''; });
+}
 async function renderHome() {
+  bindHome();
   const list = await api('/api/fields');
+  $('#fieldsCard').hidden = !list.length;
   $('#fieldCount').textContent = list.length ? `${list.length} field${list.length > 1 ? 's' : ''}` : ''; $('#fieldList').innerHTML = list.length ? list.map((f) => `<li><a href="#field/${f.id}">${esc(f.name)}</a><span class="muted small">${f.studies} studies · ${f.predictions ?? 0} predictions · ${new Date(f.updated).toLocaleDateString()}</span><span class="actions"><a class="small" href="#field/${f.id}">Open →</a><button class="small ghost" data-rename="${f.id}" data-name="${esc(f.name)}" title="Rename">Rename</button><button class="small danger" data-delete="${f.id}" data-name="${esc(f.name)}" title="Delete this field">Delete</button></span></li>`).join('') : '<li class="empty">No fields yet. Name one above to start.</li>';
 }
 $('#fieldList').addEventListener('click', async (e) => {
