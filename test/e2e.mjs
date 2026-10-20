@@ -84,6 +84,10 @@ try {
   await page.setViewportSize({ width: 390, height: 800 }); await page.click('li[data-step=designs]'); await wait(300);
   const sw = await page.evaluate(() => document.documentElement.scrollWidth); if (sw > 400) { const who = await page.evaluate(() => [...document.querySelectorAll('body *')].filter((el) => el.getBoundingClientRect().right > 400 && el.getBoundingClientRect().width > 0).slice(0, 8).map((el) => el.tagName + '#' + el.id + '.' + el.className + ' ' + Math.round(el.getBoundingClientRect().right)).join(' | ')); throw new Error('horizontal overflow on mobile: ' + sw + ' :: ' + who); }
   await page.screenshot({ path: path.join(shots, 'e2e-7-mobile.png') });
+  // delete from the home list, with the typed confirmation
+  await page.setViewportSize({ width: 1280, height: 900 }); await page.goto(base + '/#home'); await page.waitForSelector('[data-delete]');
+  page.once('dialog', (d) => d.accept('DELETE')); await page.click('[data-delete]'); await wait(500);
+  const left = await (await fetch(`${base}/api/fields`)).json(); if (left.length !== 0) throw new Error('field not deleted: ' + left.length);
   if (errors.length) throw new Error('console errors: ' + errors.join(' | '));
   console.log('E2E OK, screenshots in', shots);
 } catch (e) { console.error('E2E FAILED:', e.message); process.exitCode = 1; await page.screenshot({ path: path.join(shots, 'e2e-fail.png'), fullPage: true }); }

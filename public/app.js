@@ -58,6 +58,7 @@ async function route() {
 window.addEventListener('hashchange', route);
 $('#steps').addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) location.hash = `field/${F.id}/${li.dataset.step}`; });
 $('#exportJson').addEventListener('click', (e) => { e.preventDefault(); if (F) location.href = `/api/fields/${F.id}/export.json`; });
+$('#deleteField').addEventListener('click', async (e) => { e.preventDefault(); if (!F) return; const typed = prompt(`Delete the field “${F.name}” and everything in it? This cannot be undone.\n\nType DELETE to confirm:`); if (typed !== 'DELETE') return; try { await api(`/api/fields/${F.id}`, null, 'DELETE'); const name = F.name; F = null; location.hash = 'home'; toast(`Deleted “${name}”.`); } catch (err) { toast(err.message, true); } });
 
 function updateCounts() {
   if (!F) return;
@@ -78,8 +79,21 @@ function updateCounts() {
 // ---------- home ----------
 async function renderHome() {
   const list = await api('/api/fields');
-  $('#fieldCount').textContent = list.length ? `${list.length} field${list.length > 1 ? 's' : ''}` : ''; $('#fieldList').innerHTML = list.length ? list.map((f) => `<li><a href="#field/${f.id}">${esc(f.name)}</a><span class="muted small">${f.studies} studies · ${f.predictions ?? 0} predictions · ${new Date(f.updated).toLocaleDateString()}</span><a class="small" href="#field/${f.id}">Open →</a></li>`).join('') : '<li class="empty">No fields yet. Name one above to start.</li>';
+  $('#fieldCount').textContent = list.length ? `${list.length} field${list.length > 1 ? 's' : ''}` : ''; $('#fieldList').innerHTML = list.length ? list.map((f) => `<li><a href="#field/${f.id}">${esc(f.name)}</a><span class="muted small">${f.studies} studies · ${f.predictions ?? 0} predictions · ${new Date(f.updated).toLocaleDateString()}</span><span class="actions"><a class="small" href="#field/${f.id}">Open →</a><button class="small ghost" data-rename="${f.id}" data-name="${esc(f.name)}" title="Rename">Rename</button><button class="small danger" data-delete="${f.id}" data-name="${esc(f.name)}" title="Delete this field">Delete</button></span></li>`).join('') : '<li class="empty">No fields yet. Name one above to start.</li>';
 }
+$('#fieldList').addEventListener('click', async (e) => {
+  const del = e.target.closest('[data-delete]'); const ren = e.target.closest('[data-rename]');
+  if (del) {
+    const name = del.dataset.name;
+    const typed = prompt(`Delete the field “${name}” and everything in it (corpus, extractions, predictions, decisions)? This cannot be undone.\n\nType DELETE to confirm:`);
+    if (typed !== 'DELETE') return;
+    try { await api(`/api/fields/${del.dataset.id || del.dataset.delete}`, null, 'DELETE'); toast(`Deleted “${name}”.`); renderHome(); } catch (err) { toast(err.message, true); }
+  }
+  if (ren) {
+    const name = prompt('New name for this field:', ren.dataset.name); if (!name || name.trim() === ren.dataset.name) return;
+    try { const f = await api(`/api/fields/${ren.dataset.rename}`); f.name = name.trim().slice(0, 200); await api(`/api/fields/${f.id}`, { doc: f, version: f.version }, 'PUT'); toast('Renamed.'); renderHome(); } catch (err) { toast(err.message, true); }
+  }
+});
 $('#newField').addEventListener('submit', async (e) => {
   e.preventDefault();
   try { const f = await api('/api/fields', { name: $('#newName').value.trim() }); location.hash = `field/${f.id}`; } catch (err) { toast(err.message, true); }
