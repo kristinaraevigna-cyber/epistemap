@@ -300,3 +300,5 @@ body.on-home .glass .mini-cell{color:#E6EBF2}body.on-home .glass .mini-cell span
 body.on-home .glass .mini-cell.covered{background:rgba(94,234,212,.18);color:#5EEAD4}body.on-home .glass .mini-cell.partly{background:rgba(253,230,138,.16);color:#FDE68A}body.on-home .glass .mini-cell.none{background:rgba(249,168,160,.18);color:#F9A8A0}
 body.on-home .move{box-shadow:0 20px 50px rgba(0,0,0,.35)}
 body.on-home .hero-fig.glass{box-shadow:0 30px 60px rgba(0,0,0,.45)}
+.brand-logo{width:42px;height:42px;object-fit:contain;display:block;background:#fff;border-radius:50%;padding:1px;box-shadow:0 0 0 1px rgba(0,0,0,.06)}
+body.on-home .brand-logo{box-shadow:0 0 0 2px rgba(94,234,212,.35),0 0 18px rgba(94,234,212,.25)}
