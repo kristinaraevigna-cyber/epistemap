@@ -48,7 +48,8 @@ window.addEventListener('pagehide', () => { if (F && JSON.stringify(F) !== lastS
 async function route() {
   const h = location.hash.replace(/^#/, '');
   const m = /^field\/([^/]+)(?:\/(\w+))?/.exec(h);
-  if (!m) { F = null; $('#work').hidden = true; $('#home').hidden = false; $('#fieldName').hidden = true; return renderHome(); }
+  if (!m) { F = null; $('#work').hidden = true; $('#home').hidden = false; $('#fieldName').hidden = true; document.body.classList.add('on-home'); return renderHome(); }
+  document.body.classList.remove('on-home');
   if (!F || F.id !== m[1]) { F = await api(`/api/fields/${m[1]}`); VERSION = F.version || 1; lastSaved = JSON.stringify(F); }
   STEP = m[2] || ((F.inquiry?.statement || F.studies.length) ? 'corpus' : 'inquiry');
   $('#home').hidden = true; $('#work').hidden = false; $('#fieldName').textContent = F.name; $('#fieldName').hidden = false;
@@ -82,7 +83,7 @@ function drawConstellation() {
   const svg = $('#constellation'); if (!svg || svg.dataset.done) return; svg.dataset.done = '1';
   const W = 1200, H = 520, N = 42, pts = []; let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   for (let i = 0; i < N; i++) pts.push({ x: rnd() * W, y: rnd() * H, r: 2 + rnd() * 4, d: 6 + rnd() * 10, p: rnd() * 6 });
-  const cols = ['#FFD166', '#7FE0D6', '#F9A8A0', '#FFFFFF'];
+  const cols = ['#5EEAD4', '#818CF8', '#FDE68A', '#FFFFFF'];
   let html = '';
   for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) { const a = pts[i], b = pts[j]; const dd = Math.hypot(a.x - b.x, a.y - b.y); if (dd < 170) html += `<line x1="${a.x.toFixed(0)}" y1="${a.y.toFixed(0)}" x2="${b.x.toFixed(0)}" y2="${b.y.toFixed(0)}" stroke="#fff" stroke-opacity="${(0.35 * (1 - dd / 170)).toFixed(2)}" stroke-width="1"/>`; }
   for (const p of pts) html += `<circle cx="${p.x.toFixed(0)}" cy="${p.y.toFixed(0)}" r="${p.r.toFixed(1)}" fill="${cols[Math.floor(p.p) % cols.length]}" opacity=".9"><animate attributeName="opacity" values=".4;1;.4" dur="${p.d.toFixed(1)}s" repeatCount="indefinite"/></circle>`;
