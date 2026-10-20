@@ -246,7 +246,7 @@ function renderCorpus(p) {
   <div class="grid2">
     <div class="card"><h3>Search OpenAlex</h3>
       <form id="oa"><label>Query <span class="muted">(quotes for phrases; OR, AND, NOT)</span><input name="q" placeholder='e.g. greenwashing OR "green washing" OR brownwashing' value="${esc(sessionStorage.getItem('cm.prefillQuery') || F.inquiry?.terms || '')}" required></label>
-      <div class="row"><label style="flex:1">From year<input name="from" type="number" placeholder="1990"></label><label style="flex:1">To year<input name="to" type="number" placeholder="2026"></label><label style="flex:1">Sort<select name="sort"><option value="cites">Most cited</option><option value="recent">Most recent</option><option value="relevance">Relevance</option></select></label><label style="flex:1">Results<input name="n" type="number" value="100" min="10" max="200"></label></div>
+      <div class="row"><label style="flex:1">From year<input name="from" type="number" placeholder="1990"></label><label style="flex:1">To year<input name="to" type="number" placeholder="2026"></label><label style="flex:1">Sort<select name="sort"><option value="cites">Most cited</option><option value="recent">Most recent</option><option value="relevance">Relevance</option></select></label><label style="flex:1">Results<select name="n"><option value="50">50</option><option value="100" selected>100</option><option value="200">200</option><option value="all">All (up to 3,000)</option></select></label></div>
       <button>Search</button></form>
       <div id="oaOut" class="small"></div></div>
     <div class="card"><h3>Upload an export</h3>
@@ -263,7 +263,14 @@ function renderCorpus(p) {
   let lastSearch = null;
   $('#oa').addEventListener('submit', async (e) => {
     e.preventDefault(); const fd = new FormData(e.target); const btn = e.target.querySelector('button'); busy(btn, true, 'Searching…');
-    try { lastSearch = { query: fd.get('q'), fromYear: fd.get('from') || null, toYear: fd.get('to') || null, perPage: Number(fd.get('n')) || 100, sort: fd.get('sort'), page: 1 }; const r = await api('/api/openalex/search', lastSearch); showCandidates($('#oaOut'), r.results, `${r.total.toLocaleString()} matches in OpenAlex; showing ${r.results.length}.`, async () => { lastSearch.page += 1; const r2 = await api('/api/openalex/search', lastSearch); return r2.results; }); }
+    try {
+      const all = fd.get('n') === 'all'; const CAP = 3000;
+      lastSearch = { query: fd.get('q'), fromYear: fd.get('from') || null, toYear: fd.get('to') || null, perPage: all ? 200 : Number(fd.get('n')) || 100, sort: fd.get('sort'), page: 1 };
+      const r = await api('/api/openalex/search', lastSearch); let results = r.results;
+      if (all) { const pages = Math.min(Math.ceil(r.total / 200), CAP / 200); for (let p = 2; p <= pages; p++) { busy(btn, true, `Fetching ${Math.min(p * 200, r.total).toLocaleString()} of ${Math.min(r.total, CAP).toLocaleString()}…`); lastSearch.page = p; const r2 = await api('/api/openalex/search', lastSearch); results = results.concat(r2.results); if (!r2.results.length) break; } }
+      const note = all ? `${r.total.toLocaleString()} matches in OpenAlex; fetched ${results.length.toLocaleString()}${r.total > CAP ? ` (capped at ${CAP.toLocaleString()}; narrow the query or years to see the rest)` : ''}.` : `${r.total.toLocaleString()} matches in OpenAlex; showing ${results.length}.`;
+      showCandidates($('#oaOut'), results, note, results.length < r.total && !all ? async () => { lastSearch.page += 1; const r2 = await api('/api/openalex/search', lastSearch); return r2.results; } : null);
+    }
     catch (err) { toast(err.message, true); } finally { busy(btn, false); }
   });
   $('#expFile').addEventListener('change', async (e) => {
