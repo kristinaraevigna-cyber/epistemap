@@ -11,7 +11,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23245C73'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23fff' stroke-width='1.8'/%3E%3Cellipse cx='16' cy='16' rx='4' ry='9' fill='none' stroke='%23fff' stroke-width='1.4'/%3E%3Cline x1='7' y1='16' x2='25' y2='16' stroke='%23fff' stroke-width='1.4'/%3E%3Cline x1='8.5' y1='11' x2='23.5' y2='11' stroke='%23fff' stroke-width='1' opacity='.8'/%3E%3Cline x1='8.5' y1='21' x2='23.5' y2='21' stroke='%23fff' stroke-width='1' opacity='.8'/%3E%3Ccircle cx='20' cy='12.5' r='2' fill='%23F4C542'/%3E%3C/svg%3E">
 </head>
 <body>
-<header class="top">
+<header class="top" id="top">
   <a class="brand" href="#home" aria-label="Evidence Atlas home">
     <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#245C73"/><circle cx="16" cy="16" r="9" fill="none" stroke="#fff" stroke-width="1.8"/><ellipse cx="16" cy="16" rx="4" ry="9" fill="none" stroke="#fff" stroke-width="1.4"/><line x1="7" y1="16" x2="25" y2="16" stroke="#fff" stroke-width="1.4"/><line x1="8.5" y1="11" x2="23.5" y2="11" stroke="#fff" stroke-width="1" opacity=".8"/><line x1="8.5" y1="21" x2="23.5" y2="21" stroke="#fff" stroke-width="1" opacity=".8"/><circle cx="20" cy="12.5" r="2" fill="#F4C542"/></svg>
     <strong>Evidence Atlas</strong>
@@ -24,28 +24,34 @@
 </header>
 
 <main id="home" class="home">
-  <section class="hero">
-    <div class="hero-text">
-      <p class="eyebrow">Evidence Atlas</p>
-      <h1>Map what a field has tested.<br>Judge what it assumes.<br>Decide what to test next.</h1>
-      <p class="lede">An AI-enabled instrument for meta-science. The tool proposes, with a quote and page for everything; you dispose.</p>
-      <form id="newField" class="row hero-form">
-        <input id="newName" placeholder="Name a field, e.g. Social and financial performance" required aria-label="Field name">
-        <button type="submit">Start a field</button>
-      </form>
-      <p class="small muted hero-hint">Or <a href="#how">see how it works</a> in three moves.</p>
+  <section class="hero hero-vivid">
+    <div class="hero-bg" aria-hidden="true">
+      <svg id="constellation" viewBox="0 0 1200 520" preserveAspectRatio="xMidYMid slice"></svg>
     </div>
-    <figure class="hero-fig" aria-label="Example design map: one prediction, design dimensions across six studies">
-      <div class="mini-claim">Social performance → financial performance (+) · 6 studies</div>
-      <div class="mini-grid">
-        <div class="mini-cell covered"><b>1</b><span>Data source</span></div>
-        <div class="mini-cell partly"><b>5</b><span>Measure of X</span></div>
-        <div class="mini-cell partly"><b>2</b><span>Measure of Y</span></div>
-        <div class="mini-cell none"><b>2 ≠</b><span>Estimator</span></div>
-        <div class="mini-cell partly"><b>3</b><span>Form</span></div>
+    <div class="hero-inner">
+      <div class="hero-text">
+        <p class="eyebrow light">Evidence Atlas · an instrument for meta-science</p>
+        <h1>See what a field has really tested.</h1>
+        <p class="lede">Map every prediction and the design behind every test. Judge what the evidence assumes. Decide what to test next, with the tool proposing and you deciding.</p>
+        <form id="newField" class="row hero-form">
+          <input id="newName" placeholder="Name a field, e.g. CEO narcissism and risk-taking" required aria-label="Field name">
+          <button type="submit" class="cta">Start mapping</button>
+        </form>
+        <p class="small hero-hint">Free · no account · your papers are read once and never stored</p>
       </div>
-      <figcaption>One prediction, six studies, five design dimensions. Red: the studies chose differently and disagree.</figcaption>
-    </figure>
+      <figure class="hero-fig glass" aria-label="Example design map: one prediction, design dimensions across six studies">
+        <div class="mini-claim">Social performance → financial performance (+)</div>
+        <div class="mini-sub">6 studies · 5 design dimensions</div>
+        <div class="mini-grid">
+          <div class="mini-cell covered"><b>1</b><span>Data source</span></div>
+          <div class="mini-cell partly"><b>5</b><span>Measure of X</span></div>
+          <div class="mini-cell partly"><b>2</b><span>Measure of Y</span></div>
+          <div class="mini-cell none"><b>2 ≠</b><span>Estimator</span></div>
+          <div class="mini-cell partly"><b>3</b><span>Form</span></div>
+        </div>
+        <figcaption>Where studies chose differently and disagree, a design decision matters.</figcaption>
+      </figure>
+    </div>
   </section>
 
   <section class="card" id="fieldsCard">
@@ -54,17 +60,23 @@
   </section>
 
   <section id="how" class="moves" aria-label="How it works">
-    <article class="move reveal">
-      <div class="move-art" aria-hidden="true"><svg viewBox="0 0 120 80"><rect x="6" y="10" width="34" height="60" rx="4"/><rect x="43" y="22" width="34" height="48" rx="4"/><rect x="80" y="34" width="34" height="36" rx="4"/><circle cx="23" cy="26" r="5" class="dot"/><circle cx="60" cy="38" r="5" class="dot"/><circle cx="97" cy="50" r="5" class="dot"/><path d="M23 26 L60 38 L97 50" class="line"/></svg></div>
-      <div class="move-text"><span class="move-n">1</span><h2>Map</h2><p>You state your inquiry and the studies you know. The tool bounds the field, reads the core papers, and lines up every prediction with the design of every test: data, sample, period, measures, estimator, controls, form, identification.</p><p class="small muted">Steps 0–4 · you confirm, edit, merge or send the tool back</p></div>
+    <article class="move reveal m1">
+      <div class="move-art" aria-hidden="true">
+        <svg viewBox="0 0 320 220"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1D8FA8"/><stop offset="1" stop-color="#6D5BD0"/></linearGradient></defs><rect width="320" height="220" rx="18" fill="url(#g1)"/><g opacity=".9"><rect x="34" y="46" width="70" height="140" rx="8" fill="#fff" opacity=".18"/><rect x="124" y="76" width="70" height="110" rx="8" fill="#fff" opacity=".18"/><rect x="214" y="106" width="70" height="80" rx="8" fill="#fff" opacity=".18"/><path d="M69 90 L159 110 L249 140" stroke="#FFD166" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="69" cy="90" r="9" fill="#FFD166"/><circle cx="159" cy="110" r="9" fill="#FFD166"/><circle cx="249" cy="140" r="9" fill="#FFD166"/><circle cx="69" cy="150" r="5" fill="#fff" opacity=".7"/><circle cx="159" cy="160" r="5" fill="#fff" opacity=".7"/><circle cx="249" cy="170" r="5" fill="#fff" opacity=".7"/></g></svg>
+      </div>
+      <div class="move-text"><span class="move-n">1</span><h2>Map</h2><p>State your inquiry and the studies you know. The tool bounds the field, reads the core papers, and lines up every prediction with the design of every test.</p><p class="small muted">Steps 0–4 · you confirm, edit, merge, or send the tool back</p></div>
     </article>
-    <article class="move reveal">
-      <div class="move-art" aria-hidden="true"><svg viewBox="0 0 120 80"><circle cx="60" cy="40" r="30"/><circle cx="60" cy="40" r="18" class="faint"/><circle cx="60" cy="40" r="6" class="dot"/><path d="M60 10 V70 M30 40 H90" class="line faint"/><path d="M84 16 L96 4" class="line"/><circle cx="98" cy="2" r="3" class="dot"/></svg></div>
-      <div class="move-text"><span class="move-n">2</span><h2>Judge</h2><p>Claims are visible; assumptions are hidden. The tool unearths what the designs rest on and how sensitive each result is to it. You judge what is reasonable, questionable or violated, from your knowledge of the field.</p><p class="small muted">Step 5 · the expert's step, not a confirmation</p></div>
+    <article class="move reveal m2">
+      <div class="move-art" aria-hidden="true">
+        <svg viewBox="0 0 320 220"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F26B5B"/><stop offset="1" stop-color="#F7A531"/></linearGradient></defs><rect width="320" height="220" rx="18" fill="url(#g2)"/><g fill="none" stroke="#fff" stroke-width="4" opacity=".9"><circle cx="160" cy="110" r="70" opacity=".35"/><circle cx="160" cy="110" r="44" opacity=".55"/><circle cx="160" cy="110" r="18"/><path d="M212 58 L262 18" stroke-linecap="round"/></g><circle cx="266" cy="14" r="8" fill="#fff"/><circle cx="160" cy="110" r="7" fill="#fff"/><path d="M90 110 H230 M160 40 V180" stroke="#fff" stroke-width="2" opacity=".5"/></svg>
+      </div>
+      <div class="move-text"><span class="move-n">2</span><h2>Judge</h2><p>Claims are visible; assumptions are hidden. The tool unearths what the designs rest on and how sensitive each result is. You judge what is reasonable, questionable, or violated.</p><p class="small muted">Step 5 · the expert's step, not a confirmation</p></div>
     </article>
-    <article class="move reveal">
-      <div class="move-art" aria-hidden="true"><svg viewBox="0 0 120 80"><path d="M10 60 Q40 10 60 40 T110 20" class="line"/><circle cx="10" cy="60" r="5" class="dot"/><circle cx="60" cy="40" r="5" class="dot"/><circle cx="110" cy="20" r="6" class="dot accent"/><rect x="70" y="52" width="40" height="20" rx="4" class="faint"/></svg></div>
-      <div class="move-text"><span class="move-n">3</span><h2>Test</h2><p>Decide per prediction: a multiverse on existing data, or a new study with a different design. The decision opens Replication Navigator, which drafts reproduction code from the original paper and guides a preregistered replication. The result comes back into the map.</p><p class="small muted">Steps 6–7 and Replication Navigator</p></div>
+    <article class="move reveal m3">
+      <div class="move-art" aria-hidden="true">
+        <svg viewBox="0 0 320 220"><defs><linearGradient id="g3" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#1E9E6A"/><stop offset="1" stop-color="#3BC9A4"/></linearGradient></defs><rect width="320" height="220" rx="18" fill="url(#g3)"/><path d="M36 170 C 90 40, 150 190, 200 90 S 280 30, 290 48" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".95"/><circle cx="36" cy="170" r="9" fill="#fff"/><circle cx="200" cy="90" r="9" fill="#fff"/><circle cx="290" cy="48" r="12" fill="#FFD166"/><rect x="190" y="140" width="96" height="46" rx="10" fill="#fff" opacity=".22"/><path d="M206 163 h64" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="move-text"><span class="move-n">3</span><h2>Test</h2><p>Decide per prediction: a multiverse on existing data, or a new study with a different design. The decision opens Replication Navigator: reproduction code from the original paper, then a preregistered replication. The result comes back into the map.</p><p class="small muted">Steps 6–7 and Replication Navigator</p></div>
     </article>
   </section>
 
@@ -83,11 +95,19 @@
     <div class="rail-detail" id="railDetail" data-details='["What you want to understand, your search terms, the studies you already know, and what you think the field takes for granted. You go first; the tool only proposes after this.","Bound the field with OpenAlex or a Web of Science / Scopus export. Seminal, recent and rising studies; reviews flagged. You decide which are core.","Attach PDFs. The tool extracts each paper’s hypotheses, research questions or propositions, the design of every test per study, the result and the analytical choices, with quotes and pages.","Confirm, edit, merge or reject each prediction; add your own; mark the core ones. Not satisfied? Send the tool back to the search.","For each core prediction: the range of designs used across studies and the result under each. Where studies chose differently and disagree, a design decision matters.","The tool unearths the assumptions behind the designs; you judge them and decide: multiverse on existing data, new study with a different design, both, or stop.","The analytical choices found across papers, benchmarked against a published reference map (Berchicci & King, 2022 built in).","Hand the chosen test to Replication Navigator: reproduction code from the original paper, then a preregistered replication. Export the map for a multiverse."]'>Click a step to read what happens there.</div>
   </section>
 
-  <section class="trust reveal">
-    <div><strong>Grounded.</strong> Every quote has a page; the coach may only cite 322 verified evidence cards.</div>
-    <div><strong>Private.</strong> Papers are read once and not stored. Fields are shared with your team only.</div>
-    <div><strong>Yours.</strong> Nothing enters the map until a person confirms it; every judgment and decision is yours.</div>
+  <section class="stats reveal" aria-label="At a glance">
+    <div><b>322</b><span>verified evidence cards behind the coach</span></div>
+    <div><b>9</b><span>design dimensions per test</span></div>
+    <div><b>3</b><span>loops to send the tool back</span></div>
+    <div><b>1</b><span>judgment that is yours alone</span></div>
   </section>
+
+  <section class="trust reveal">
+    <div><strong>Grounded.</strong> Every quote has a page; the coach may only cite the evidence cards.</div>
+    <div><strong>Private.</strong> Papers are read once and not stored. Fields are shared with your team only.</div>
+    <div><strong>Yours.</strong> Nothing enters the map until a person confirms it.</div>
+  </section>
+  <section class="cta-band reveal"><h2>Ready to see your field?</h2><a href="#top" class="cta-link" id="ctaTop">Start mapping ↑</a></section>
 </main>
 
 <div id="work" class="work" hidden>
