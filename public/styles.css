@@ -339,3 +339,7 @@ body.on-home .home-nav{display:flex;gap:1.6rem;justify-content:center}
 @keyframes floatb{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(-6deg) translateY(6px)}}
 @media (prefers-reduced-motion:reduce){.hcard{animation:none}}
 @media (max-width:1000px){.hero-cards{display:none}}
+/* closing band in the hero's blues */
+.band-b{background:radial-gradient(900px 420px at 80% 20%,#2F80ED 0%,#1D4F9E 45%,#12305F 100%)}
+.band-lines{position:absolute;inset:0;width:100%;height:100%}
+.band-b .cta-link{background:#fff;color:#1D4F9E;box-shadow:0 8px 20px rgba(0,0,0,.25)}.band-b .cta-link:hover{background:#EAF2FC}
