@@ -25,7 +25,7 @@ try {
   await page.waitForSelector('#iqStatement');
   await page.fill('#iqStatement', 'Does social performance pay, and does it depend on how it is measured?'); await page.fill('#iqTerms', '"social performance" AND "financial performance"'); await page.fill('#iqSeeds', 'Waddock & Graves (1997) SMJ 10.1002/(SICI)1097-0266(199704)18:4<303::AID-SMJ869>3.0.CO;2-G');
   await page.click('#iqAddSeeds'); await wait(300); await page.click('#iqToSearch'); await page.waitForSelector('#oa');
-  if (!(await page.inputValue('#oa [name=q]')).includes('social performance')) throw new Error('search not prefilled from inquiry');
+  const g1 = await page.inputValue('#oa [name=g1]'), g2 = await page.inputValue('#oa [name=g2]'); if (!g1.includes('social performance') || !g2.includes('financial performance')) throw new Error('search not prefilled from inquiry: ' + g1 + ' / ' + g2);
   await page.screenshot({ path: path.join(shots, 'e2e-0-inquiry.png') });
   await page.screenshot({ path: path.join(shots, 'e2e-1-corpus.png') });
   await page.fill('#manual [name=title]', 'The corporate social performance–financial performance link'); await page.fill('#manual [name=authors]', 'Waddock & Graves'); await page.fill('#manual [name=year]', '1997');

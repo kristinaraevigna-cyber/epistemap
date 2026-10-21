@@ -31,23 +31,61 @@ export async function searchOpenAlex({ query, fromYear, toYear, perPage = 50, pa
   const filters = ['type:article|review'];
   if (fromYear) filters.push(`from_publication_date:${fromYear}-01-01`);
   if (toYear) filters.push(`to_publication_date:${toYear}-12-31`);
-  const params = new URLSearchParams({ search: normaliseQuery(query), filter: filters.join(','), sort, per_page: String(Math.min(perPage, 200)), page: String(page),
-    select: 'id,doi,title,authorships,publication_year,primary_location,cited_by_count,cited_by_percentile_year,type,referenced_works,abstract_inverted_index' });
+  const params = new URLSearchParams({ search: normaliseQuery(query), filter: filters.join(','), sort, per_page: String(Math.min(perPage, 200)), page: String(page), select: SELECT });
   if (process.env.CONTACT_EMAIL) params.set('mailto', process.env.CONTACT_EMAIL);
   const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `evidence-atlas (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
-  if (!r.ok) throw new Error(`OpenAlex ${r.status}`);
+  if (!r.ok) { let msg = ''; try { msg = (await r.json()).message || ''; } catch {} throw new Error(`OpenAlex ${r.status}${msg ? `: ${msg}` : ''}${r.status === 400 ? ' — check the query: OpenAlex accepts quoted phrases and AND / OR / NOT, but not parentheses or wildcards. Use the two term boxes to combine groups.' : ''}`); }
   const j = await r.json();
   return {
     total: j.meta?.count ?? 0,
-    results: j.results.map((w) => studyRecord({
+    results: j.results.map(workToStudy)
+  };
+}
+function workToStudy(w) {
+  return studyRecord({
       id: w.id.replace('https://openalex.org/', ''), doi: normDoi(w.doi), title: w.title,
       authors: (w.authorships || []).slice(0, 6).map((a) => a.author?.display_name).filter(Boolean).join(', ') + ((w.authorships || []).length > 6 ? ' et al.' : ''),
       year: w.publication_year, venue: w.primary_location?.source?.display_name || '', cited_by: w.cited_by_count,
       cites_per_year: w.publication_year ? Math.round(10 * (w.cited_by_count || 0) / Math.max(1, new Date().getFullYear() - w.publication_year + 1)) / 10 : null,
       percentile_year: w.cited_by_percentile_year?.min ?? null, type: w.type || 'article', is_review: w.type === 'review' || REVIEW_RE.test(w.title || ''),
       references: (w.referenced_works || []).map((x) => x.replace('https://openalex.org/', '')), abstract: abstractFromIndex(w.abstract_inverted_index), source: 'openalex'
-    }))
-  };
+  });
+}
+const SELECT = 'id,doi,title,authorships,publication_year,primary_location,cited_by_count,cited_by_percentile_year,type,referenced_works,abstract_inverted_index';
+
+// Several groups of terms, e.g. [["CEO narcissism","narcissistic CEO"],["firm performance","innovation"]]:
+// every combination is run as one query ("a" AND "b"), because OpenAlex does not support parentheses,
+// and the results are merged by OpenAlex id. maxPerCombo pages through each combination.
+export async function searchGroups({ groups, fromYear, toYear, sort, maxPerCombo = 200 }) {
+  const gs = (groups || []).map((g) => (g || []).map((t) => String(t).trim().replace(/^"|"$/g, '')).filter(Boolean)).filter((g) => g.length);
+  if (!gs.length) throw new Error('No search terms');
+  let combos = gs[0].map((t) => [t]);
+  for (const g of gs.slice(1)) combos = combos.flatMap((c) => g.map((t) => [...c, t]));
+  if (combos.length > 24) throw new Error(`${combos.length} term combinations; reduce the terms to 24 combinations or fewer`);
+  const seen = new Map(); let total = 0; const queries = [];
+  for (const combo of combos) {
+    const query = combo.map((t) => (/\s/.test(t) ? `"${t}"` : t)).join(' AND ');
+    queries.push(query);
+    for (let page = 1; (page - 1) * 200 < maxPerCombo; page++) {
+      const r = await searchOpenAlex({ query, fromYear, toYear, perPage: Math.min(200, maxPerCombo), page, sort });
+      if (page === 1) total += r.total;
+      for (const s of r.results) if (!seen.has(s.id)) seen.set(s.id, s);
+      if (r.results.length < 200 || seen.size >= 3000) break;
+    }
+  }
+  return { total, unique: seen.size, queries, results: [...seen.values()] };
+}
+
+// Resolve DOIs to full records (title, authors, year, venue, citations, references).
+export async function resolveDois(dois) {
+  const list = [...new Set((dois || []).map(normDoi).filter(Boolean))].slice(0, 50);
+  if (!list.length) return [];
+  const params = new URLSearchParams({ filter: `doi:${list.join('|')}`, per_page: '50', select: SELECT });
+  if (process.env.CONTACT_EMAIL) params.set('mailto', process.env.CONTACT_EMAIL);
+  const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `evidence-atlas (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
+  if (!r.ok) throw new Error(`OpenAlex ${r.status}`);
+  const j = await r.json();
+  return j.results.map(workToStudy);
 }
 
 // Local citations: how many papers in the corpus cite each paper. Needs OpenAlex ids or DOIs.

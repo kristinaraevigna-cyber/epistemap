@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { initStore, storeMode, newField, listFields, getField, saveField, deleteField, logEvent, exportAll } from './store.js';
 import { dimensions, designDimensions, cards, sources, benchmarks, cardById, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
 import { EXTRACT_PROMPT, CONSOLIDATE_PROMPT, COMPARE_PROMPT, ASSUMPTIONS_PROMPT, parseJsonLoose } from './prompts.js';
-import { searchOpenAlex, localCitations, parseExport, mergeStudies } from './corpus.js';
+import { searchOpenAlex, searchGroups, resolveDois, localCitations, parseExport, mergeStudies } from './corpus.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -77,7 +77,10 @@ app.put('/api/fields/:id', wrap(async (req, res) => { guard(req); const doc = re
 app.delete('/api/fields/:id', wrap(async (req, res) => { guard(req); const f = await getField(req.params.id); if (!f) return res.status(404).json({ error: 'Not found' }); await logEvent(req.params.id, 'field_delete', { name: f.name, studies: f.studies?.length, predictions: f.predictions?.length }); await deleteField(req.params.id); res.json({ ok: true }); }));
 
 // ---- corpus ----
-app.post('/api/openalex/search', wrap(async (req, res) => { guard(req); const { query, fromYear, toYear, perPage, page, sort } = req.body || {}; if (!query) return res.status(400).json({ error: 'query required' }); const allowed = { cites: 'cited_by_count:desc', recent: 'publication_date:desc', relevance: 'relevance_score:desc' }; res.json(await searchOpenAlex({ query, fromYear, toYear, perPage, page, sort: allowed[sort] || allowed.cites })); }));
+app.post('/api/openalex/search', wrap(async (req, res) => { guard(req); const { query, groups, fromYear, toYear, perPage, page, sort, maxPerCombo } = req.body || {}; const allowed = { cites: 'cited_by_count:desc', recent: 'publication_date:desc', relevance: 'relevance_score:desc' }; const srt = allowed[sort] || allowed.cites;
+  if (groups) { const r = await searchGroups({ groups, fromYear, toYear, sort: srt, maxPerCombo: Math.min(Number(maxPerCombo) || 200, 1000) }); if (req.body.fieldId) logEvent(req.body.fieldId, 'search', { queries: r.queries, total: r.total, unique: r.unique }).catch(() => {}); return res.json(r); }
+  if (!query) return res.status(400).json({ error: 'query required' }); res.json(await searchOpenAlex({ query, fromYear, toYear, perPage, page, sort: srt })); }));
+app.post('/api/openalex/resolve', wrap(async (req, res) => { guard(req); res.json({ studies: await resolveDois(req.body?.dois || []) }); }));
 app.post('/api/corpus/parse', wrap(async (req, res) => { guard(req); const text = typeof req.body === 'string' ? req.body : req.body?.text; const studies = parseExport(text, req.get('x-filename') || ''); res.json({ studies }); }));
 app.post('/api/corpus/local-cites', wrap(async (req, res) => res.json({ studies: localCitations(req.body.studies || []) })));
 // helper used by the client to merge without duplicates (kept server-side so the rule is in one place)
