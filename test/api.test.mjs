@@ -60,7 +60,7 @@ test('extract → consolidate → compare → exports', async () => {
   f.tests.push({ id: 't1', prediction: 'p1', study: 's1', design: { data_source: 'KLD', sample: 'US firms', period: '1995–2010', iv_measure: 'KLD index', dv_measure: 'ROA', estimator: 'OLS', controls: ['size', 'leverage'], functional_form: 'linear', identification: 'none' }, result: { direction: 'positive', support: 'supported', statistic: 'b=0.1', quote: 'q', page: 3 }, status: 'confirmed' });
   await j(`/api/fields/${f.id}`, { doc: f, version: 1 }, 'PUT');
   const csv = await (await fetch(`${base}/api/fields/${f.id}/designs.csv`)).text(); assert.ok(csv.includes('"ROA"')); assert.ok(csv.includes('"size; leverage"')); assert.equal(csv.split('\n').length, 2);
-  const ex = await (await fetch(`${base}/api/fields/${f.id}/export.json`)).json(); assert.equal(ex.name, 'Flow'); assert.equal(ex.schema, 3);
+  const ex = await (await fetch(`${base}/api/fields/${f.id}/export.json`)).json(); assert.equal(ex.name, 'Flow'); assert.equal(ex.schema, 4); assert.deepEqual(ex.runs, []);
   const adm = await j('/api/admin/export', null, 'GET', { 'x-admin-token': 'adm' }); assert.ok(adm.body.fields.length >= 2); assert.ok(adm.body.events.some((e) => e.type === 'extract'));
   const noadm = await j('/api/admin/export'); assert.equal(noadm.status, 401);
 });
@@ -95,4 +95,17 @@ test('assumptions endpoint validates grounding ids and logs', async () => {
   assert.ok(r.body.gaps.length);
   const ev = await j('/api/event', { fieldId: f.id, type: 'decision', payload: { prediction: 'p1', choice: 'replication' } }); assert.equal(ev.body.ok, true);
   const bad = await j('/api/event', { fieldId: f.id, type: 'hack' }); assert.equal(bad.status, 400);
+});
+
+test('specifications and runs exports', async () => {
+  const f = (await j('/api/fields', { name: 'Map' })).body;
+  f.predictions.push({ id: 'p1', study: 's1', text: 'X → Y (+)', kind: 'main', core: true, status: 'confirmed' });
+  f.space = { p1: { dims: { estimator: { include: true, options: ['OLS', 'Firm FE'] }, dv_measure: { include: true, options: ['ROA', "Tobin's q"] } }, stat: 'b, SE, N' } };
+  f.teams = [{ id: 'tm_a', name: 'Team A' }, { id: 'tm_b', name: 'Team B' }];
+  f.allocation = { prediction: 'p1', mode: 'split', seed: 1, assignments: { tm_a: ['p1:0.0', 'p1:1.1'], tm_b: ['p1:0.1', 'p1:1.0'] } };
+  f.runs = [{ id: 'run_1', prediction: 'p1', spec_id: 'p1:0.0', spec: { estimator: 'OLS', dv_measure: 'ROA' }, team: 'tm_a', by: 'Maria', estimate: '0.12', se: '0.05', n: '1200', direction: 'positive', support: 'supported', notes: '', at: 'now' }];
+  await j(`/api/fields/${f.id}`, { doc: f, version: 1 }, 'PUT');
+  const specs = await (await fetch(`${base}/api/fields/${f.id}/specs.csv`)).text(); assert.equal(specs.trim().split('\n').length, 5); assert.ok(specs.includes('"Team A"')); assert.ok(specs.includes('"(fixed)"'));
+  const runs = await (await fetch(`${base}/api/fields/${f.id}/runs.csv`)).text(); assert.equal(runs.trim().split('\n').length, 2); assert.ok(runs.includes('"Maria"'));
+  const ev = await j('/api/event', { fieldId: f.id, type: 'run', payload: { team: 'tm_a' } }); assert.equal(ev.body.ok, true);
 });

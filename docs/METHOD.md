@@ -1,4 +1,4 @@
-# Method notes (v0.3)
+# Method notes (v0.4)
 
 These notes record the design decisions behind Evidence Atlas so they can go into the technical appendix of the Organization Science proposal.
 
@@ -9,6 +9,10 @@ After the team reviewed v0.1, the instrument was refocused on empirical work. v0
 ## 0b. Human first, loops, judgment (v0.3, after the 20 October review)
 
 Three changes from the review. (1) The person goes first: step 0 records the inquiry, search terms, seed studies and priors, and the tool is told to weigh them. (2) Loops: from steps 3–5 the person can send the tool back to revise the search, add studies to weigh, or add their own prediction; each loop is logged with its reason. (3) A judgment step: the tool unearths the assumptions the designs rest on (gap-spotting is the tool's strength; problematisation is the person's), the person judges them, and decides between a multiverse on existing data and a new study with a different design. Predictions now include hypotheses, propositions, research questions and stated predictions, per study within a paper, and reviews are handled as sources of reported predictions.
+
+## 0c. Epistemic maps and teams (v0.4, after the 23 October review)
+
+The team re-anchored the instrument on *epistemic maps* (King, Goldfarb & Simcoe, 2021): a correspondence between sets of assumptions about an empirical model and summaries of the evidence under each. Steps 0–5 build the map as the literature has drawn it (which assumption sets were used, with what result); step 7 completes it. The person fixes the assumption space A for a core prediction (which of the nine dimensions vary, with which options, including alternatives no study has used), reads the legend (where each prior study sits; the step-5 judgments as credibility weights, kept separate from the map as King et al. recommend), and the instrument enumerates the specifications. These can be run as a multiverse, or allocated to analyst teams (every team runs everything, a seeded random split, one forking dimension per team, or free choice); each team works through its own link and submits t(a) per specification; results return to the field as a specification curve and as a database (`runs.csv`). This is the "many analysts" layer discussed in the proposal, in prototype: the map provides the structure, the people provide the estimates, and the allocation and submissions are logged so the study of the instrument can compare teams. Eleven cards from King et al. (2021) and Goldfarb & Yan (2021) were added to the evidence base (quotes verified on page).
 
 ## 1. Unit of analysis
 
@@ -27,7 +31,8 @@ A prediction is **core** when it recurs across studies and later work builds on 
 | 4 Design map | — | confirm / edit / reject each test |
 | 5 Assumptions & decision | hidden assumptions behind the designs, sensitivity, what would relax each, gaps, overlaps | judges each assumption (reasonable / questionable / violated), adds own, decides multiverse vs new study vs both vs stop, with reason |
 | 6 Choice space | alignment of AI-found choices with a reference | override matches; final benchmark coding |
-| 7 Reproduce, replicate, export | ranking of design decisions that vary | hand-off to Replication Navigator with the decision; exports |
+| 7 Epistemic map & teams | enumerates specifications; seeded allocation to teams; specification curve | assumption space (dimensions, options, alternatives); allocation mode; which results to keep |
+| 8 Reproduce, replicate, export | ranking of design decisions that vary | hand-off to Replication Navigator with the decision; exports |
 
 Every proposal carries `status: "ai"` until a person confirms it. Confirmed and rejected items are kept, so the agreement between AI proposals and human decisions can be computed from the exported JSON (acceptance rate per dimension, per study).
 

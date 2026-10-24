@@ -12,6 +12,7 @@ const pdfPath = path.join(dir, 'paper.pdf');
 writeFileSync(pdfPath, '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF');
 const mock = spawn(process.execPath, ['test/mock-model.mjs', String(MOCK)], { stdio: 'ignore' });
 const server = spawn(process.execPath, ['server/index.js'], { stdio: 'ignore', env: { ...process.env, PORT: String(PORT), ANTHROPIC_BASE_URL: `http://localhost:${MOCK}`, ANTHROPIC_API_KEY: 't', DATA_DIR: dir, DATABASE_URL: '' } });
+const location_field = (page) => new URL(page.url()).hash.split('/')[1];
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 for (let i = 0; i < 40; i++) { try { if ((await fetch(base + '/healthz')).ok) break; } catch {} await wait(250); }
 const shots = process.argv[2] || dir;
@@ -74,6 +75,20 @@ try {
   await page.click('#loadBench'); await wait(200); await page.click('#saveRef'); await wait(200);
   await page.click('#runCompare'); await page.waitForSelector('text=reference choices found', { timeout: 15000 });
   await page.screenshot({ path: path.join(shots, 'e2e-5-choices.png'), fullPage: true });
+  // epistemic map & teams
+  await page.click('li[data-step=multiverse]'); await page.waitForSelector('#mvPred');
+  await page.fill('[data-opt-in=identification]', 'instrumental variable'); await page.click('[data-add-opt=identification]'); await wait(200);
+  if (!(await page.locator('.opt.alt').count())) throw new Error('alternative option not added');
+  await page.fill('#teamName', 'Team A'); await page.click('#addTeam'); await wait(200); await page.fill('#teamName', 'Team B'); await page.click('#addTeam'); await wait(200);
+  await page.selectOption('#allocMode', 'split'); await page.click('#allocate'); await wait(400);
+  const link = await page.getAttribute('[data-copy]', 'data-copy'); if (!link || !/\/team\//.test(link)) throw new Error('team link missing');
+  await page.screenshot({ path: path.join(shots, 'e2e-7-map.png'), fullPage: true });
+  // team view: submit one result through the team link
+  const fieldId = location_field(page); await page.goto(link.replace(/^https?:\/\/[^/]+/, base)); await page.waitForSelector('#analyst');
+  await page.fill('#analyst', 'Maria'); const forms = await page.locator('form.runform').count(); if (!forms) throw new Error('no specifications assigned to team');
+  await page.fill('form.runform >> nth=0 >> [name=estimate]', '0.12'); await page.fill('form.runform >> nth=0 >> [name=se]', '0.05'); await page.click('form.runform >> nth=0 >> button'); await page.waitForSelector('.status.confirmed'); await wait(400);
+  await page.screenshot({ path: path.join(shots, 'e2e-7b-team.png'), fullPage: true });
+  await page.goto(`${base}/#field/${fieldId}/multiverse`); await page.waitForSelector('svg.speccurve'); await wait(300);
   // export
   await page.click('li[data-step=export]'); await page.waitForSelector('#notes');
   await page.screenshot({ path: path.join(shots, 'e2e-6-export.png'), fullPage: true });

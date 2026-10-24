@@ -13,7 +13,7 @@ export const designDimensions = load('design-dimensions.json');
 import { readdirSync } from 'node:fs';
 export const benchmarks = readdirSync(path.join(root, 'benchmarks')).filter((f) => f.endsWith('.json')).map((f) => load(path.join('benchmarks', f)));
 export const cardById = new Map(cards.map((c) => [c.id, c]));
-export const KNOWLEDGE_VERSION = '0.1.0';
+export const KNOWLEDGE_VERSION = '0.1.0+epistemic';
 
 // Cards that ground each dimension: by stage and by source, capped so the prompt stays small.
 export function cardsForDimension(dim, limit = 18) {
@@ -74,9 +74,10 @@ const STEP_HELP = {
   corpus: 'Step 1, Corpus: bounding the field and choosing the core empirical studies (seminal, recent, rising; reviews flagged). Relevant: target selection and replication value (isager2021).',
   studies: 'Step 2, Studies: reading PDFs; the model extracts the paper type, its predictions, the design used to test each one, the result, and analytical choices. Relevant: documenting the original precisely (brandt2014, forrt2025).',
   predictions: 'Step 3, Predictions: confirming each prediction (X → Y, construct level), merging the same prediction across studies, marking core ones. Relevant: construct validity (flake2023), theory and replication type (irvine2021, anderson2016).',
-  designs: 'Step 4, Design map: for each core prediction, the range of designs used (data, sample, period, measures, estimator, controls, form, identification) and the results under each. Relevant: differences between studies (brandt2014), design and analysis (bonett2021, forrt2025).',
-  choices: 'Step 5, Choice space: the analytical choices found across papers and the benchmark against a reference list. Relevant: analysis and robustness (forrt2025, bonett2021, anderson2016).',
-  export: 'Step 6, Export: core predictions, the design decisions that matter most, and the hand-off to Replication Navigator. Relevant: replication value (isager2021), choosing the replication type that teaches most (anderson2016, irvine2021).'
+  multiverse: 'Step 7, Epistemic map and teams: the assumption space for a core prediction (which design dimensions vary, which options, including alternatives no study has used), the legend (which prior study used which assumption set; the researcher\'s credibility judgments from step 5), the list of specifications, and the allocation of specifications to analyst teams (many-analysts / multiverse). Relevant: epistemic maps (king2021-01, king2021-03, king2021-04, king2021-05, king2021-06, king2021-07), the replication that needed a map (goldfarb2021-01, goldfarb2021-02, goldfarb2021-03), multiverse (forrt2025).',
+  designs: 'Step 4, Epistemic map: for each core prediction, the range of designs used (data, sample, period, measures, estimator, controls, form, identification) and the results under each. Relevant: differences between studies (brandt2014), design and analysis (bonett2021, forrt2025).',
+  choices: 'Step 6, Choice space: the analytical choices found across papers and the benchmark against a reference list. Relevant: analysis and robustness (forrt2025, bonett2021, anderson2016).',
+  export: 'Step 8, Export: core predictions, the design decisions that matter most, and the hand-off to Replication Navigator. Relevant: replication value (isager2021), choosing the replication type that teaches most (anderson2016, irvine2021).'
 };
 
 // Compact, bounded summary of the field for the coach.

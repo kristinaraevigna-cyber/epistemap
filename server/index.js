@@ -173,11 +173,38 @@ app.post('/api/coach', wrap(async (req, res) => {
   await logEvent(fieldId, 'coach', { step, invalid: citations.filter((c) => !c.valid).map((c) => c.id), n: citations.length, stop, chars: text.length });
   send({ type: 'done', citations, stop, model }); res.end();
 }));
-app.post('/api/event', wrap(async (req, res) => { const { fieldId, type, payload } = req.body || {}; const ok = ['coach_open', 'coach_close', 'nudge_shown', 'nudge_dismissed', 'loop_back', 'decision', 'judgment']; if (!ok.includes(type)) return res.status(400).json({ error: 'unknown event' }); await logEvent(fieldId, type, payload || {}); res.json({ ok: true }); }));
+app.post('/api/event', wrap(async (req, res) => { const { fieldId, type, payload } = req.body || {}; const ok = ['coach_open', 'coach_close', 'nudge_shown', 'nudge_dismissed', 'loop_back', 'decision', 'judgment', 'allocation', 'run', 'search']; if (!ok.includes(type)) return res.status(400).json({ error: 'unknown event' }); await logEvent(fieldId, type, payload || {}); res.json({ ok: true }); }));
 app.post('/api/flag', wrap(async (req, res) => { const { fieldId, cardId, step, note } = req.body || {}; await logEvent(fieldId, 'citation_flag', { cardId: String(cardId || '').slice(0, 40), step, note: String(note || '').slice(0, 500) }); res.json({ ok: true }); }));
 
 // ---- exports ----
 app.get('/api/fields/:id/export.json', wrap(async (req, res) => { const f = await getField(req.params.id); if (!f) return res.status(404).end(); res.setHeader('content-disposition', `attachment; filename="${(f.name || 'field').replace(/[^\w-]+/g, '_')}.json"`); res.json(f); }));
+app.get('/api/fields/:id/runs.csv', wrap(async (req, res) => {
+  const f = await getField(req.params.id); if (!f) return res.status(404).end();
+  const esc = (v) => `"${String(Array.isArray(v) ? v.join('; ') : v ?? '').replace(/"/g, '""')}"`;
+  const dd = designDimensions.map((d) => d.id);
+  const rows = [['run_id', 'prediction_id', 'prediction', 'spec_id', ...dd, 'team', 'analyst', 'estimate', 'se', 'n', 'direction', 'support', 'notes', 'submitted']];
+  const teams = new Map((f.teams || []).map((t) => [t.id, t.name]));
+  for (const r of f.runs || []) { const p = (f.predictions || []).find((q) => q.id === r.prediction) || {}; rows.push([r.id, r.prediction, p.text, r.spec_id, ...dd.map((k) => (r.spec || {})[k]), teams.get(r.team) || r.team, r.by, r.estimate, r.se, r.n, r.direction, r.support, r.notes, r.at]); }
+  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', 'attachment; filename="runs.csv"');
+  res.send(rows.map((r) => r.map(esc).join(',')).join('\n'));
+}));
+app.get('/api/fields/:id/specs.csv', wrap(async (req, res) => {
+  const f = await getField(req.params.id); if (!f) return res.status(404).end();
+  const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const dd = designDimensions.map((d) => d.id);
+  const rows = [['prediction_id', 'prediction', 'spec_id', ...dd, 'prior_studies', 'assigned_to']];
+  const teams = new Map((f.teams || []).map((t) => [t.id, t.name]));
+  const assigned = {}; for (const [tid, ids] of Object.entries(f.allocation?.assignments || {})) for (const sid of ids) (assigned[sid] ||= []).push(teams.get(tid) || tid);
+  for (const [pid, sp] of Object.entries(f.space || {})) {
+    const p = (f.predictions || []).find((q) => q.id === pid) || {};
+    const dims = dd.filter((k) => sp.dims?.[k]?.include && (sp.dims[k].options || []).length);
+    let combos = [[]]; for (const k of dims) combos = combos.flatMap((c) => sp.dims[k].options.map((o, i) => [...c, [k, o, i]]));
+    if (combos.length > 5000) continue;
+    for (const c of combos) { const id = `${pid}:${c.map((z) => z[2]).join('.')}`; const spec = Object.fromEntries(c.map((z) => [z[0], z[1]])); const prior = (f.tests || []).filter((t) => t.prediction === pid && dims.every((k) => String(Array.isArray(t.design?.[k]) ? t.design[k].join(', ') : t.design?.[k] || '').trim() === spec[k])).map((t) => t.study); rows.push([pid, p.text, id, ...dd.map((k) => spec[k] ?? '(fixed)'), prior.join('; '), (assigned[id] || []).join('; ')]); }
+  }
+  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', 'attachment; filename="specifications.csv"');
+  res.send(rows.map((r) => r.map(esc).join(',')).join('\n'));
+}));
 app.get('/api/fields/:id/designs.csv', wrap(async (req, res) => {
   const f = await getField(req.params.id); if (!f) return res.status(404).end();
   const esc = (v) => `"${String(Array.isArray(v) ? v.join('; ') : v ?? '').replace(/"/g, '""')}"`;

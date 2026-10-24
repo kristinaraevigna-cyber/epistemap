@@ -2,7 +2,7 @@
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const uid = (p) => p + Math.random().toString(36).slice(2, 8);
-let CFG = { dimensions: [] }, F = null, VERSION = 0, STEP = 'corpus', saveTimer = null, KNOW = null;
+let CFG = { dimensions: [] }, TEAM_ID = null, F = null, VERSION = 0, STEP = 'corpus', saveTimer = null, KNOW = null;
 const PDF = {}; // studyId -> base64, kept only in memory for this tab
 const DIM = () => CFG.dimensions;
 const dimName = (id) => (DIM().find((d) => d.id === id) || {}).name || id;
@@ -47,11 +47,11 @@ window.addEventListener('pagehide', () => { if (F && JSON.stringify(F) !== lastS
 // ---------- routing ----------
 async function route() {
   const h = location.hash.replace(/^#/, '');
-  const m = /^field\/([^/]+)(?:\/(\w+))?/.exec(h);
+  const m = /^field\/([^/]+)(?:\/(\w+))?(?:\/([\w-]+))?/.exec(h);
   if (!m) { F = null; $('#work').hidden = true; $('#home').hidden = false; $('#fieldName').hidden = true; document.body.classList.add('on-home'); return renderHome(); }
   document.body.classList.remove('on-home');
   if (!F || F.id !== m[1]) { F = await api(`/api/fields/${m[1]}`); VERSION = F.version || 1; lastSaved = JSON.stringify(F); }
-  STEP = m[2] || ((F.inquiry?.statement || F.studies.length) ? 'corpus' : 'inquiry');
+  STEP = m[2] || ((F.inquiry?.statement || F.studies.length) ? 'corpus' : 'inquiry'); TEAM_ID = m[2] === 'team' ? m[3] : null; document.body.classList.toggle('team-view', !!TEAM_ID);
   $('#home').hidden = true; $('#work').hidden = false; $('#fieldName').textContent = F.name; $('#fieldName').hidden = false;
   document.querySelectorAll('#steps li').forEach((li) => li.classList.toggle('active', li.dataset.step === STEP));
   updateCounts(); renderStep(); $('#panel').scrollTop = 0; window.scrollTo(0, 0); renderStarters(); renderChat();
@@ -67,6 +67,7 @@ function updateCounts() {
   const core = F.studies.filter((s) => s.core).length, read = F.studies.filter((s) => s.extraction).length;
   const set = (id, txt, done) => { const el = $('#' + id); if (el) { el.textContent = txt; el.closest('li').classList.toggle('done', !!done); } };
   set('c-inquiry', F.inquiry?.statement ? 'stated' : 'not yet', !!F.inquiry?.statement);
+  set('c-multiverse', (F.teams || []).length ? `${(F.teams || []).length} team${(F.teams || []).length === 1 ? '' : 's'} · ${(F.runs || []).length} result${(F.runs || []).length === 1 ? '' : 's'}` : (Object.keys(F.space || {}).length ? 'space set' : 'not started'), (F.runs || []).length);
   set('c-assumptions', Object.keys(F.assumptions_by_prediction || {}).length ? `${Object.values(F.assumptions_by_prediction).flat().filter((a) => a.judgment).length} judged · ${Object.keys(F.decisions || {}).length} decided` : 'not started', Object.keys(F.decisions || {}).length);
   set('c-corpus', F.studies.length ? `${F.studies.length} studies · ${core} core` : 'not started', core);
   set('c-studies', read ? `${read} read` : 'no PDFs yet', read);
@@ -178,7 +179,7 @@ function planLink(p, focus) {
 function renderStep() {
   // Replace the panel node so listeners added by the previous render are dropped (they would otherwise stack).
   const old = $('#panel'); const p = old.cloneNode(false); old.replaceWith(p);
-  ({ inquiry: renderInquiry, corpus: renderCorpus, studies: renderStudies, predictions: renderPredictions, designs: renderDesigns, assumptions: renderAssumptions, choices: renderChoices, export: renderExport }[STEP] || renderCorpus)(p);
+  ({ inquiry: renderInquiry, corpus: renderCorpus, studies: renderStudies, predictions: renderPredictions, designs: renderDesigns, assumptions: renderAssumptions, choices: renderChoices, multiverse: renderMultiverse, export: renderExport, team: renderTeam }[STEP] || renderCorpus)(p);
 }
 
 
@@ -425,8 +426,8 @@ const OPEN_TESTS = new Set();
 function renderDesigns(p) {
   const core = F.predictions.filter((x) => x.status === 'confirmed' && x.core);
   const others = F.predictions.filter((x) => x.status === 'confirmed' && !x.core);
-  p.innerHTML = `<h2>4. Design map: how each core prediction has been tested</h2>
-  <div class="intro">For each core prediction, the rows are the nine <strong>research-design dimensions</strong> and the cells list the options used across studies, with the result each study found. A dimension with several options and mixed results is a design decision that matters: an input to a multiverse, and a candidate for the next test. Confirm or reject the tests the model extracted; edit them if the paper says otherwise.</div>
+  p.innerHTML = `<h2>4. Epistemic map: how each core prediction has been tested</h2>
+  <div class="intro">This is the field's <strong>epistemic map</strong> as the literature has drawn it so far: for each core prediction, the rows are the nine <strong>research-design dimensions</strong> (the assumption sets, in King, Goldfarb &amp; Simcoe's 2021 terms) and the cells list the options used across studies, with the result each study found under each. A dimension with several options and mixed results is a design decision that matters: an input to a multiverse, and a candidate for the next test. Confirm or reject the tests the model extracted; edit them if the paper says otherwise.</div>
   ${core.length ? core.map((pr) => { const ts = testsOf(pr.id); const varying = DD().filter((d) => designRange(pr.id, d.id).length > 1); return `<div class="card"><div class="row" style="justify-content:space-between"><div><strong>★ ${esc(pr.text)}</strong><br><span class="small muted">${ts.length} test${ts.length === 1 ? '' : 's'} in ${new Set(ts.map((t) => t.study)).size} stud${new Set(ts.map((t) => t.study)).size === 1 ? 'y' : 'ies'} · ${ts.filter((t) => t.result?.support === 'supported').length} supported, ${ts.filter((t) => t.result?.support === 'not supported').length} not, ${ts.filter((t) => t.result?.support === 'partly').length} partly · design decisions that vary: ${varying.length ? varying.map((d) => esc(d.name)).join(', ') : 'none yet'}</span></div>${planLink(pr)}</div>
     <table style="margin-top:.6rem"><tr><th>Dimension</th><th>Options used across studies (study: result)</th></tr>${DD().map((d) => { const r = designRange(pr.id, d.id); return `<tr><td><b>${esc(d.name)}</b><br><span class="small muted">${esc(d.question)}</span></td><td class="cell ${r.length > 1 ? 'partly' : r.length ? 'covered' : 'none'}" style="text-align:left">${r.length ? r.map((o) => `<div><strong>${esc(o.value)}</strong> <span class="small muted">${o.tests.map((t) => `${esc(short(study(t.study)))}${t.study_label ? ' ' + esc(t.study_label) : ''}: ${esc(t.result?.direction || '?')}/${esc(t.result?.support || '?')}`).join('; ')}</span></div>`).join('') : '<span class="muted small">not reported</span>'}${r.length > 1 ? ` <div>${planLink(pr, { id: d.id, options: r.map((o) => o.value) })}</div>` : ''}</td></tr>`; }).join('')}</table>
     <details style="margin-top:.5rem" data-open="${pr.id}" ${OPEN_TESTS.has(pr.id) ? 'open' : ''}><summary>Tests of this prediction (${ts.length}) — confirm or edit</summary><table>${F.tests.filter((t) => t.prediction === pr.id).map((t) => `<tr><td><b>${esc(short(study(t.study)))}</b>${t.label ? ` ${esc(t.label)}` : ''}<br><span class="small muted">${esc(t.design?.dv_measure || '')} on ${esc(t.design?.iv_measure || '')}; ${esc(t.design?.estimator || '')}</span></td><td class="small">${esc(t.result?.direction || '')}, ${esc(t.result?.support || '')}; ${esc(t.result?.statistic || '')}<br><span class="quote">“${esc(t.result?.quote || '')}” (p. ${t.result?.page ?? '?'})</span></td><td>${statusBtns('test', t.id, t.status)}</td></tr>`).join('')}</table></details></div>`; }).join('') : `<div class="empty-state"><h3>No core predictions confirmed</h3><p>In step 3, confirm predictions and tick the core ones; the design map is built from those.</p><button class="ghost small" onclick="location.hash='field/${F.id}/predictions'">Go to step 3</button></div>`}
@@ -461,15 +462,142 @@ function renderChoices(p) {
   p.addEventListener('click', (e) => { const { act, kind, id } = e.target.dataset; if (kind !== 'choice') return; const h = F.choices.find((x) => x.id === id); if (act === 'edit') { modal(`<h3>Edit choice</h3><form id="ef"><label>Category<input name="category" value="${esc(h.category)}"></label><label>Description<textarea name="description">${esc(h.description)}</textarea></label><label>Options (one per line)<textarea name="options">${esc((h.options || []).join('\n'))}</textarea></label><menu><button type="button" data-close class="ghost">Cancel</button><button>Save</button></menu></form>`, (b) => $('#ef', b).addEventListener('submit', (ev) => { ev.preventDefault(); const fd = new FormData(ev.target); h.category = fd.get('category'); h.description = fd.get('description'); h.options = fd.get('options').split('\n').map((x) => x.trim()).filter(Boolean); if (h.status === 'ai') h.status = 'confirmed'; markDirty(); $('#modal').close(); renderStep(); })); return; } h.status = act === 'confirm' ? 'confirmed' : 'rejected'; markDirty(); renderStep(); });
 }
 
-/* 6 EXPORT */
+
+/* 7 EPISTEMIC MAP & TEAMS: assumption space, legend, specifications, allocation, collected results */
+const SPEC_CAP = 2000;
+function spaceFor(pid) {
+  const SP = F.space || (F.space = {}); const sp = SP[pid] || (SP[pid] = { dims: {}, stat: 'Coefficient on X (or marginal effect), its SE, and N', note: '' });
+  for (const d of DD()) {
+    const r = designRange(pid, d.id); const used = r.map((o) => o.value);
+    const cur = sp.dims[d.id] || (sp.dims[d.id] = { include: r.length > 1, options: [], own: [] });
+    cur.options = [...new Set([...used, ...(cur.own || [])])];
+  }
+  return sp;
+}
+function specsFor(pid) {
+  const sp = spaceFor(pid); const dims = DD().filter((d) => sp.dims[d.id].include && sp.dims[d.id].options.length);
+  let n = 1; for (const d of dims) n *= sp.dims[d.id].options.length;
+  if (n > SPEC_CAP) return { dims, n, specs: null };
+  let combos = [[]]; for (const d of dims) combos = combos.flatMap((c) => sp.dims[d.id].options.map((o, i) => [...c, { d: d.id, o, i }]));
+  const specs = combos.map((c) => { const spec = Object.fromEntries(c.map((z) => [z.d, z.o])); const id = `${pid}:${c.map((z) => z.i).join('.')}`; const prior = testsOf(pid).filter((t) => dims.every((d) => { let v = t.design?.[d.id]; if (Array.isArray(v)) v = v.join(', '); return String(v || '').trim() === spec[d.id]; })); return { id, spec, prior }; });
+  return { dims, n, specs };
+}
+function seededShuffle(arr, seed) { let s = Number(seed) || 1; const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor((s / 233280) * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function allocate(pid, mode, seed) {
+  const teams = F.teams || []; if (!teams.length) throw new Error('Add at least one team first');
+  const { dims, specs } = specsFor(pid); if (!specs) throw new Error(`Too many specifications (> ${SPEC_CAP}); drop a dimension or some options first`);
+  const A = {}; for (const t of teams) A[t.id] = [];
+  if (mode === 'all') for (const t of teams) A[t.id] = specs.map((s) => s.id);
+  else if (mode === 'split') { const order = seededShuffle(specs.map((s) => s.id), seed); order.forEach((id, i) => A[teams[i % teams.length].id].push(id)); }
+  else if (mode === 'fork') { const vary = seededShuffle(dims, seed); teams.forEach((t, i) => { const d = vary[i % vary.length]; if (!d) return; const base = specs[0]; A[t.id] = specs.filter((s) => dims.every((e) => e.id === d.id || s.spec[e.id] === base.spec[e.id])).map((s) => s.id); t.fork = d.id; }); }
+  else if (mode === 'free') for (const t of teams) A[t.id] = [];
+  F.allocation = { prediction: pid, mode, seed: Number(seed) || 1, at: new Date().toISOString(), assignments: A };
+  markDirty(); api('/api/event', { fieldId: F.id, type: 'allocation', payload: { prediction: pid, mode, teams: teams.length, specs: specs.length } }).catch(() => {});
+}
+function teamLink(t) { return `${location.origin}${location.pathname}#field/${F.id}/team/${t.id}`; }
+function specCurveSvg(runs) {
+  const rs = runs.filter((r) => Number.isFinite(Number(r.estimate))).map((r) => ({ ...r, e: Number(r.estimate), s: Number(r.se) || 0 })).sort((a, b) => a.e - b.e);
+  if (!rs.length) return '<p class="muted small">No numeric estimates yet. The curve appears as teams submit results.</p>';
+  const W = 720, H = 220, L = 50, R = 20, T = 14, B = 30; const lo = Math.min(0, ...rs.map((r) => r.e - 1.96 * r.s)), hi = Math.max(0, ...rs.map((r) => r.e + 1.96 * r.s)); const y = (v) => T + (H - T - B) * (1 - (v - lo) / ((hi - lo) || 1)); const x = (i) => L + (W - L - R) * ((i + 0.5) / rs.length);
+  const teams = [...new Set(rs.map((r) => r.team))]; const col = (t) => ['#2F80ED', '#9B51E0', '#27AE60', '#F2994A', '#EB5757', '#2D9CDB', '#6FCF97', '#BB6BD9'][teams.indexOf(t) % 8];
+  return `<svg class="speccurve" viewBox="0 0 ${W} ${H}" role="img" aria-label="Specification curve: estimates sorted by size with 95% intervals"><line x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}" stroke="#999" stroke-dasharray="4 3"/><text x="${L - 6}" y="${y(0) + 4}" font-size="10" text-anchor="end">0</text><text x="${L - 6}" y="${y(hi) + 4}" font-size="10" text-anchor="end">${hi.toPrecision(2)}</text><text x="${L - 6}" y="${y(lo) + 4}" font-size="10" text-anchor="end">${lo.toPrecision(2)}</text>${rs.map((r, i) => `<g><line x1="${x(i)}" x2="${x(i)}" y1="${y(r.e - 1.96 * r.s)}" y2="${y(r.e + 1.96 * r.s)}" stroke="${col(r.team)}" stroke-opacity=".5"/><circle cx="${x(i)}" cy="${y(r.e)}" r="3.5" fill="${col(r.team)}"><title>${esc(r.spec_id)} · ${esc(r.estimate)} (SE ${esc(r.se || '?')}) · ${esc((F.teams.find((t) => t.id === r.team) || {}).name || r.team)}</title></circle></g>`).join('')}<text x="${(L + W - R) / 2}" y="${H - 8}" font-size="10" text-anchor="middle">${rs.length} specification${rs.length === 1 ? '' : 's'}, sorted by estimate · ${rs.filter((r) => r.e > 0).length} positive, ${rs.filter((r) => r.e < 0).length} negative · ${rs.filter((r) => Math.abs(r.e) > 1.96 * r.s && r.s).length} with |z| > 1.96</text>${teams.map((t, i) => `<rect x="${L + i * 120}" y="2" width="10" height="10" fill="${col(t)}"/><text x="${L + 14 + i * 120}" y="11" font-size="10">${esc((F.teams.find((q) => q.id === t) || {}).name || t)}</text>`).join('')}</svg>`;
+}
+function renderMultiverse(p) {
+  const core = F.predictions.filter((x) => x.status === 'confirmed' && x.core);
+  const AB = F.assumptions_by_prediction || {}; const teams = F.teams || (F.teams = []); const AL = F.allocation || {};
+  const curPid = AL.prediction && core.some((c) => c.id === AL.prediction) ? AL.prediction : core[0]?.id;
+  p.innerHTML = `<h2>7. Epistemic map and teams</h2>
+  <div class="intro">An <strong>epistemic map</strong> is a correspondence between sets of assumptions and the evidence obtained under each (King, Goldfarb &amp; Simcoe, 2021). Steps 2–4 harvested the assumption sets the literature has already used; step 5 recorded your judgment of them. Here you fix the <strong>assumption space</strong> for a core prediction (which design dimensions vary, with which options, including alternatives no study has used), read the <strong>legend</strong> (where each prior study sits; which assumptions you judged questionable), and turn the space into a list of <strong>specifications</strong>. Then either run the multiverse yourself, or allocate specifications to <strong>analyst teams</strong>, each with its own link; their results come back into the map as a specification curve. The researcher is the cartographer; the map stays neutral and the judgments stay in the legend.</div>
+  ${core.length ? `<div class="card"><label>Core prediction to map<select id="mvPred">${core.map((c) => `<option value="${c.id}" ${c.id === curPid ? 'selected' : ''}>${esc(c.text)}</option>`).join('')}</select></label></div>` + mvBody(curPid) : `<div class="empty-state"><h3>No core predictions yet</h3><p>Confirm predictions in step 3 and mark the core ones; the design map (step 4) and the judgments (step 5) feed this step.</p></div>`}
+  ${loopBar()}`;
+  $('#mvPred')?.addEventListener('change', (e) => { F.allocation = { ...(F.allocation || {}), prediction: e.target.value }; markDirty(); renderStep(); });
+  p.addEventListener('click', async (e) => {
+    const t = e.target; const pid = $('#mvPred')?.value; if (!pid) return;
+    const sp = spaceFor(pid);
+    if (t.dataset.addOpt) { const d = t.dataset.addOpt; const v = ($(`[data-opt-in="${d}"]`)?.value || '').trim(); if (!v) return; sp.dims[d].own = [...new Set([...(sp.dims[d].own || []), v])]; sp.dims[d].include = true; markDirty(); renderStep(); }
+    if (t.dataset.dropOpt) { const [d, v] = [t.dataset.dropOpt, t.dataset.v]; sp.dims[d].own = (sp.dims[d].own || []).filter((x) => x !== v); markDirty(); renderStep(); }
+    if (t.id === 'addTeam') { const name = ($('#teamName').value || '').trim(); if (!name) return; teams.push({ id: uid('tm_'), name, members: ($('#teamMembers').value || '').trim(), created: new Date().toISOString() }); markDirty(); renderStep(); }
+    if (t.dataset.delTeam) { const id = t.dataset.delTeam; if (!confirm('Remove this team? Its submitted results are kept.')) return; F.teams = teams.filter((x) => x.id !== id); if (F.allocation?.assignments) delete F.allocation.assignments[id]; markDirty(); renderStep(); }
+    if (t.dataset.copy) { try { await navigator.clipboard.writeText(t.dataset.copy); toast('Link copied'); } catch { prompt('Copy this link', t.dataset.copy); } }
+    if (t.id === 'allocate') { try { allocate(pid, $('#allocMode').value, $('#allocSeed').value); toast('Specifications allocated'); renderStep(); } catch (err) { toast(err.message, true); } }
+    if (t.dataset.delRun) { if (!confirm('Delete this submitted result?')) return; F.runs = (F.runs || []).filter((r) => r.id !== t.dataset.delRun); markDirty(); renderStep(); }
+  });
+  p.addEventListener('change', (e) => {
+    const t = e.target; const pid = $('#mvPred')?.value; if (!pid) return; const sp = spaceFor(pid);
+    if (t.dataset.inc) { sp.dims[t.dataset.inc].include = t.checked; markDirty(); renderStep(); }
+    if (t.id === 'mvStat') { sp.stat = t.value; markDirty(); }
+  });
+}
+function mvBody(pid) {
+  const sp = spaceFor(pid); const { dims, n, specs } = specsFor(pid); const AB = (F.assumptions_by_prediction || {})[pid]; const AL = F.allocation || {}; const teams = F.teams || [];
+  const judged = (AB?.assumptions || []).filter((a) => a.judgment);
+  const runs = (F.runs || []).filter((r) => r.prediction === pid);
+  const assigned = AL.prediction === pid ? AL.assignments || {} : {};
+  return `<div class="card"><h3>1 · Assumption space <span class="small muted">— which decisions vary, and with which options</span></h3>
+    <table><tr><th></th><th>Design dimension</th><th>Options (from the studies, plus your alternatives)</th></tr>${DD().map((d) => { const c = sp.dims[d.id]; const used = new Set(designRange(pid, d.id).map((o) => o.value)); return `<tr><td><input type="checkbox" data-inc="${d.id}" ${c.include ? 'checked' : ''} aria-label="Vary ${esc(d.name)}"></td><td><b>${esc(d.name)}</b><br><span class="small muted">${esc(d.question)}</span></td><td>${c.options.map((o) => `<span class="opt ${used.has(o) ? 'used' : 'alt'}" title="${used.has(o) ? 'used by a prior study' : 'alternative no study has used'}">${esc(o)}${used.has(o) ? '' : ` <button class="x" data-drop-opt="${d.id}" data-v="${esc(o)}" aria-label="remove">×</button>`}</span>`).join(' ') || '<span class="muted small">no options yet</span>'}<div class="row" style="margin-top:.3rem"><input data-opt-in="${d.id}" placeholder="Add an alternative no study has used" style="flex:1"><button class="small ghost" data-add-opt="${d.id}">Add</button></div></td></tr>`; }).join('')}</table>
+    <p class="small"><strong>${n.toLocaleString()}</strong> specification${n === 1 ? '' : 's'} = ${dims.length ? dims.map((d) => `${sp.dims[d.id].options.length} ${esc(d.name.toLowerCase())}`).join(' × ') : 'nothing varies yet'}${n > SPEC_CAP ? ` <span style="color:var(--warn)">(more than ${SPEC_CAP.toLocaleString()}: drop a dimension or some options before allocating)</span>` : ''}. Dimensions that are not ticked are held at the original study's choice.</p>
+    <label>Summary statistic every specification reports (T)<input id="mvStat" value="${esc(sp.stat || '')}"></label></div>
+  <div class="card"><h3>2 · Legend <span class="small muted">— where prior studies sit, and what you judged</span></h3>
+    ${specs ? `<p class="small">${specs.filter((s) => s.prior.length).length} of ${specs.length} specifications have been run by a prior study; <strong>${specs.filter((s) => !s.prior.length).length}</strong> have not.</p>` : ''}
+    <table><tr><th>Prior study</th><th>Its assumption set</th><th>Result</th></tr>${testsOf(pid).map((t) => `<tr><td>${esc(short(study(t.study)))}${t.study_label ? ' ' + esc(t.study_label) : ''}</td><td class="small">${dims.map((d) => { let v = t.design?.[d.id]; if (Array.isArray(v)) v = v.join(', '); return `${esc(d.name)}: ${esc(v || '—')}`; }).join(' · ') || '<span class="muted">no dimension varies</span>'}</td><td class="small">${esc(t.result?.direction || '?')} / ${esc(t.result?.support || '?')}${t.result?.statistic ? ` · ${esc(t.result.statistic)}` : ''}</td></tr>`).join('')}</table>
+    ${judged.length ? `<p class="small" style="margin-top:.5rem"><strong>Credibility weights (your step-5 judgments):</strong></p><ul class="small">${judged.map((a) => `<li><span class="status ${{ reasonable: 'confirmed', questionable: 'ai', violated: 'rejected' }[a.judgment]}">${esc(a.judgment)}</span> ${esc(a.text)}${(a.source || []).length ? ` <span class="muted">(${(a.source || []).map(ddName).join(', ')})</span>` : ''}</li>`).join('')}</ul>` : '<p class="small muted">No judgments recorded in step 5 yet; the legend will list them here as credibility weights.</p>'}
+    ${(F.decisions || {})[pid]?.choice ? `<p class="small"><strong>Your decision (step 5):</strong> ${esc(F.decisions[pid].choice)}${F.decisions[pid].reason ? ` — ${esc(F.decisions[pid].reason)}` : ''}</p>` : ''}</div>
+  <div class="card"><h3>3 · Teams <span class="small muted">— many analysts, one map</span></h3>
+    <div class="row"><input id="teamName" placeholder="Team name, e.g. Team A" style="flex:1"><input id="teamMembers" placeholder="Members (optional, pseudonyms are fine)" style="flex:2"><button class="small" id="addTeam">Add team</button></div>
+    ${teams.length ? `<table style="margin-top:.5rem"><tr><th>Team</th><th>Members</th><th>Assigned</th><th>Submitted</th><th>Link</th><th></th></tr>${teams.map((t) => `<tr><td><b>${esc(t.name)}</b>${t.fork && AL.mode === 'fork' ? `<br><span class="small muted">varies ${esc(ddName(t.fork))}</span>` : ''}</td><td class="small">${esc(t.members || '')}</td><td>${(assigned[t.id] || []).length}${AL.mode === 'free' ? ' (free choice)' : ''}</td><td>${runs.filter((r) => r.team === t.id).length}</td><td><button class="small ghost" data-copy="${esc(teamLink(t))}">Copy link</button> <a class="small" href="${esc(teamLink(t))}" target="_blank" rel="noopener">open</a></td><td><button class="small ghost danger" data-del-team="${t.id}">Remove</button></td></tr>`).join('')}</table>` : '<p class="small muted">No teams yet. Add the teams (or individual analysts) who will run specifications; each gets a link that shows only their assignment and a form to submit results.</p>'}
+    <div class="row" style="margin-top:.6rem;align-items:flex-end"><label style="flex:2">Allocation<select id="allocMode"><option value="all" ${AL.mode === 'all' ? 'selected' : ''}>Every team runs every specification (many-analysts: compare analysts)</option><option value="split" ${AL.mode === 'split' ? 'selected' : ''}>Split the specifications randomly across teams (cover the map faster)</option><option value="fork" ${AL.mode === 'fork' ? 'selected' : ''}>One forking dimension per team (each team varies one decision, others held at baseline)</option><option value="free" ${AL.mode === 'free' ? 'selected' : ''}>Free choice: teams pick their own assumption set and report it</option></select></label><label style="flex:1">Random seed<input id="allocSeed" type="number" value="${AL.seed || 1}"></label><button id="allocate" ${teams.length && specs ? '' : 'disabled'}>Allocate</button></div>
+    ${AL.prediction === pid && AL.mode ? `<p class="small muted">Allocated ${new Date(AL.at).toLocaleString()} · mode: ${esc(AL.mode)} · seed ${AL.seed}. Re-allocating replaces the assignment; submitted results are kept.</p>` : ''}</div>
+  <div class="card"><h3>4 · The map so far <span class="small muted">— ${runs.length} result${runs.length === 1 ? '' : 's'} submitted</span></h3>
+    ${specCurveSvg(runs)}
+    ${runs.length ? `<table style="margin-top:.5rem"><tr><th>Specification</th><th>Team</th><th>Estimate</th><th>SE</th><th>N</th><th>Direction / support</th><th>Notes</th><th></th></tr>${runs.slice().sort((a, b) => Number(a.estimate) - Number(b.estimate)).map((r) => `<tr><td class="small" title="${esc(dims.map((d) => `${d.name}: ${r.spec?.[d.id] ?? '—'}`).join('\n'))}">${dims.map((d) => `<span class="opt">${esc(r.spec?.[d.id] ?? '—')}</span>`).join('') || esc(r.spec_id)}</td><td>${esc((teams.find((t) => t.id === r.team) || {}).name || r.team)}${r.by ? `<br><span class="small muted">${esc(r.by)}</span>` : ''}</td><td>${esc(r.estimate)}</td><td>${esc(r.se || '')}</td><td>${esc(r.n || '')}</td><td class="small">${esc(r.direction || '')} / ${esc(r.support || '')}</td><td class="small">${esc(r.notes || '')}</td><td><button class="small ghost danger" data-del-run="${r.id}">×</button></td></tr>`).join('')}</table>` : ''}
+    <p class="actions" style="margin-top:.6rem"><a href="/api/fields/${F.id}/specs.csv"><button class="ghost">Specifications (CSV)</button></a><a href="/api/fields/${F.id}/runs.csv"><button class="ghost">Results (CSV)</button></a></p><p class="small muted">The specification list is the input to a multiverse in R or Python; the results file is the map as a database, one row per assumption set and estimate (King et al., 2021, recommend publishing exactly this).</p></div>`;
+}
+
+/* TEAM VIEW: what an analyst team sees through its link */
+function renderTeam(p) {
+  const tid = TEAM_ID; const team = (F.teams || []).find((t) => t.id === tid);
+  document.body.classList.add('team-view');
+  if (!team) { p.innerHTML = `<div class="empty-state"><h3>Unknown team link</h3><p>Ask the field's owner for a current link (step 7).</p></div>`; return; }
+  const AL = F.allocation || {}; const pid = AL.prediction; const pr = pid ? pred(pid) : null;
+  if (!pr) { p.innerHTML = `<h2>${esc(team.name)}</h2><div class="empty-state"><h3>Nothing allocated yet</h3><p>The field's owner has not allocated specifications to teams.</p></div>`; return; }
+  const { dims, specs } = specsFor(pid); const sp = spaceFor(pid); const ids = AL.assignments?.[tid] || []; const mine = (specs || []).filter((s) => ids.includes(s.id));
+  const runs = (F.runs || []).filter((r) => r.team === tid); const done = new Set(runs.map((r) => r.spec_id));
+  const who = sessionStorage.getItem('cm.analyst') || '';
+  const row = (s) => `<tr class="${done.has(s.id) ? 'done' : ''}"><td class="small">${dims.map((d) => `<b>${esc(d.name)}</b>: ${esc(s.spec[d.id])}`).join('<br>')}${s.prior.length ? `<br><span class="status candidate">run before by ${s.prior.map((t) => esc(short(study(t.study)))).join(', ')}</span>` : ''}</td><td>${done.has(s.id) ? `<span class="status confirmed">submitted</span> ${runs.filter((r) => r.spec_id === s.id).map((r) => esc(r.estimate)).join(', ')}` : `<form data-spec="${s.id}" class="runform"><div class="row"><input name="estimate" placeholder="Estimate" required style="flex:1"><input name="se" placeholder="SE" style="flex:1"><input name="n" placeholder="N" style="flex:1"></div><div class="row"><select name="direction"><option value="">direction…</option><option>positive</option><option>negative</option><option>null</option></select><select name="support"><option value="">support…</option><option>supported</option><option>not supported</option><option>partly</option></select></div><input name="notes" placeholder="Notes: software, deviations, anything the map should know"><button class="small">Submit</button></form>`}</td></tr>`;
+  p.innerHTML = `<h2>${esc(team.name)} <span class="small muted">· analyst view</span></h2>
+  <div class="intro"><strong>Prediction:</strong> ${esc(pr.text)}${pr.statement ? ` — ${esc(pr.statement)}` : ''}<br><strong>Report for each specification:</strong> ${esc(sp.stat || 'the coefficient on X, its SE and N')}. Dimensions not listed are held at the original study's choice. Your submissions are added to the field's map; the field owner sees them as a specification curve.</div>
+  <div class="card"><label>Your name or pseudonym (saved for this browser tab)<input id="analyst" value="${esc(who)}" placeholder="e.g. Team A / Maria"></label></div>
+  ${AL.mode === 'free' ? `<div class="card"><h3>Choose your own assumption set</h3><p class="small muted">Free-choice mode: pick one option per dimension, run it, and report.</p><form id="freeRun" class="runform">${dims.map((d) => `<label>${esc(d.name)}<select name="d:${d.id}">${sp.dims[d.id].options.map((o) => `<option>${esc(o)}</option>`).join('')}</select></label>`).join('')}<div class="row"><input name="estimate" placeholder="Estimate" required style="flex:1"><input name="se" placeholder="SE" style="flex:1"><input name="n" placeholder="N" style="flex:1"></div><div class="row"><select name="direction"><option value="">direction…</option><option>positive</option><option>negative</option><option>null</option></select><select name="support"><option value="">support…</option><option>supported</option><option>not supported</option><option>partly</option></select></div><input name="notes" placeholder="Notes"><button class="small">Submit</button></form></div>` : `<div class="card"><h3>Your ${mine.length} specification${mine.length === 1 ? '' : 's'} <span class="small muted">· ${mine.filter((s) => done.has(s.id)).length} submitted</span></h3>${mine.length ? `<table><tr><th>Assumption set</th><th>Your result</th></tr>${mine.map(row).join('')}</table>` : '<p class="muted">Nothing assigned to this team yet.</p>'}</div>`}
+  ${runs.length ? `<div class="card"><h3>Submitted by this team</h3>${specCurveSvg(runs)}</div>` : ''}`;
+  $('#analyst').addEventListener('input', (e) => sessionStorage.setItem('cm.analyst', e.target.value));
+  p.addEventListener('submit', async (e) => {
+    e.preventDefault(); const form = e.target; const fd = new FormData(form); let spec, spec_id;
+    if (form.id === 'freeRun') { spec = Object.fromEntries(dims.map((d) => [d.id, fd.get('d:' + d.id)])); spec_id = `${pid}:free:${dims.map((d) => sp.dims[d.id].options.indexOf(spec[d.id])).join('.')}`; }
+    else { const s = (specs || []).find((x) => x.id === form.dataset.spec); spec = s.spec; spec_id = s.id; }
+    const run = { id: uid('run_'), prediction: pid, spec_id, spec, team: tid, by: $('#analyst').value.trim(), estimate: fd.get('estimate'), se: fd.get('se'), n: fd.get('n'), direction: fd.get('direction'), support: fd.get('support'), notes: fd.get('notes'), at: new Date().toISOString() };
+    const btn = form.querySelector('button'); busy(btn, true, 'Saving…');
+    try { await submitRun(run); api('/api/event', { fieldId: F.id, type: 'run', payload: { team: tid, spec_id } }).catch(() => {}); toast('Result added to the map'); renderStep(); }
+    catch (err) { toast(err.message, true); busy(btn, false); }
+  });
+}
+// Several teams write to the same field, so a submission reloads the field and retries on a version conflict.
+async function submitRun(run) {
+  for (let i = 0; i < 4; i++) {
+    const fresh = await api(`/api/fields/${F.id}`); fresh.runs = fresh.runs || []; fresh.runs.push(run);
+    try { const { version } = await api(`/api/fields/${F.id}`, { doc: fresh, version: fresh.version || 1 }, 'PUT'); F = { ...fresh, version }; VERSION = version; lastSaved = JSON.stringify(F); return; }
+    catch (e) { if (!/changed by someone else|409/i.test(e.message) || i === 3) throw e; }
+  }
+}
+
+/* 8 EXPORT */
 function renderExport(p) {
   const conf = (arr) => arr.filter((x) => x.status === 'confirmed').length;
   const core = F.predictions.filter((x) => x.status === 'confirmed' && x.core);
   const decisions = []; for (const pr of core) for (const d of DD()) { const r = designRange(pr.id, d.id); if (r.length > 1) { const results = new Set(r.flatMap((o) => o.tests.map((t) => t.result?.support)).filter(Boolean)); decisions.push({ pr, d, options: r.length, mixed: results.size > 1 }); } }
   decisions.sort((a, b) => (b.mixed - a.mixed) || (b.options - a.options));
   const DEC = F.decisions || {};
-  p.innerHTML = `<h2>7. Reproduce, replicate, export</h2>
-  <div class="intro">What leaves this map. For each core prediction you decided on in step 5, the hand-off opens <strong>Replication Navigator</strong> with the prediction, the evidence, the design range and your decision pre-filled; its reproduction stage can generate analysis code from the original paper, and its later stages plan a preregistered replication. The exports feed a multiverse.</div>
+  p.innerHTML = `<h2>8. Reproduce, replicate, export</h2>
+  <div class="intro">What leaves this map. The specification list and the collected results (step 7) are the epistemic map as a database. For each core prediction you decided on in step 5, the hand-off opens <strong>Replication Navigator</strong> with the prediction, the evidence, the design range and your decision pre-filled; its reproduction stage can generate analysis code from the original paper, and its later stages plan a preregistered replication. The exports feed a multiverse.</div>
   <div class="card"><h3>Decisions</h3>${Object.keys(DEC).length ? `<table><tr><th>Prediction</th><th>Decision</th><th>Reason</th><th></th></tr>${Object.entries(DEC).map(([pid, d]) => { const pr = pred(pid); return pr ? `<tr><td>${esc(pr.text)}</td><td>${esc(d.choice || '')}</td><td class="small">${esc(d.reason || '')}</td><td>${planLink(pr, d)}</td></tr>` : ''; }).join('')}</table>` : '<p class="muted">No decisions yet (step 5).</p>'}</div>
   <div class="card"><h3>Status of “${esc(F.name)}”</h3><table><tr><th></th><th>Total</th><th>Confirmed</th></tr><tr><td>Studies in corpus / core / read</td><td>${F.studies.length}</td><td>${F.studies.filter((s) => s.core).length} / ${F.studies.filter((s) => s.extraction).length}</td></tr><tr><td>Predictions (core)</td><td>${F.predictions.length}</td><td>${conf(F.predictions)} (${core.length})</td></tr><tr><td>Tests (prediction × study)</td><td>${F.tests.length}</td><td>${conf(F.tests)}</td></tr><tr><td>Analytical choices</td><td>${F.choices.length}</td><td>${conf(F.choices)}</td></tr></table></div>
   <div class="card"><h3>Core predictions</h3>${core.length ? `<ol>${core.map((pr) => { const ts = testsOf(pr.id); return `<li><strong>${esc(pr.text)}</strong> <span class="small muted">— ${ts.length} test${ts.length === 1 ? '' : 's'}, ${ts.filter((t) => t.result?.support === 'supported').length} supported; first in ${esc(short(study(pr.study)))}</span> ${planLink(pr)}</li>`; }).join('')}</ol>` : '<p class="muted">None marked yet (step 3).</p>'}</div>
@@ -491,6 +619,7 @@ const STARTERS = {
   predictions: ['Are these two predictions the same?', 'Which predictions here are core?', 'Is this a prediction or a finding?'],
   designs: ['Which design decision matters most for this prediction?', 'Do the mixed results come from the design or the sample?', 'What is missing from the design range?'],
   choices: ['Which choices form a reasonable multiverse?', 'How do I judge a missed vs an added choice?'],
+  multiverse: ['What is an epistemic map, and what goes in its legend?', 'Which dimensions should vary in this map?', 'How should I split the specifications across teams?', 'How do I report the map once results are in?'],
   export: ['What is the most informative next test?', 'Draft a one-paragraph justification for the next test', 'How should I report the design map?']
 };
 const CHAT = {}; // step -> messages[]
@@ -514,7 +643,7 @@ function renderChat() {
   box.querySelectorAll('.cite').forEach((el) => { if (CARDS && !CARDS.byId.has(el.dataset.card)) el.classList.add('bad'); });
   box.scrollTop = box.scrollHeight;
 }
-function renderStarters() { $('#starters').innerHTML = (STARTERS[STEP] || []).map((q) => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join(''); $('#coachStep').textContent = `Step ${{ inquiry: 0, corpus: 1, studies: 2, predictions: 3, designs: 4, assumptions: 5, choices: 6, export: 7 }[STEP] ?? 1} · grounded in 322 evidence cards`; }
+function renderStarters() { $('#starters').innerHTML = (STARTERS[STEP] || []).map((q) => `<button type="button" data-q="${esc(q)}">${esc(q)}</button>`).join(''); $('#coachStep').textContent = `Step ${{ inquiry: 0, corpus: 1, studies: 2, predictions: 3, designs: 4, assumptions: 5, choices: 6, multiverse: 7, export: 8 }[STEP] ?? 1} · grounded in 333 evidence cards`; }
 async function ask(text, cont = false) {
   if (streaming || !F) return;
   const msgs = (CHAT[STEP] ||= []);
