@@ -109,3 +109,11 @@ test('specifications and runs exports', async () => {
   const runs = await (await fetch(`${base}/api/fields/${f.id}/runs.csv`)).text(); assert.equal(runs.trim().split('\n').length, 2); assert.ok(runs.includes('"Maria"'));
   const ev = await j('/api/event', { fieldId: f.id, type: 'run', payload: { team: 'tm_a' } }); assert.equal(ev.body.ok, true);
 });
+
+test('suggest-core and alternatives', async () => {
+  const f = (await j('/api/fields', { name: 'Focus' })).body;
+  const r = await j('/api/suggest-core', { fieldId: f.id, inquiry: { statement: 'Does board gender diversity affect firm performance?' }, predictions: [{ id: 'p_a', text: 'gender diversity → performance (+)', n: 3 }, { id: 'p_b', text: 'gender diversity → attendance (+)', n: 1 }] });
+  assert.equal(r.status, 200); assert.deepEqual(r.body.items.map((i) => [i.id, i.verdict]), [['p_a', 'core'], ['p_b', 'outside']]);
+  const al = await j('/api/alternatives', { fieldId: f.id, prediction: { id: 'p_a', text: 'gender diversity → performance (+)' }, dims: [{ id: 'identification', name: 'Identification', options: ['none'] }], judgments: [], gaps: [] });
+  assert.equal(al.status, 200); assert.equal(al.body.alternatives[0].dim, 'identification');
+});

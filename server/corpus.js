@@ -27,11 +27,14 @@ export function normaliseQuery(q) {
   return String(q || '').trim().replace(/\s+(or|and|not)\s+/gi, (m, op) => ` ${op.toUpperCase()} `);
 }
 const REVIEW_RE = /\b(review|meta-?analy|systematic|bibliometric|research agenda|state of the art|literature)\b/i;
-export async function searchOpenAlex({ query, fromYear, toYear, perPage = 50, page = 1, sort = 'cited_by_count:desc' }) {
+// scope: 'title_abstract' (default; avoids full-text noise such as methods papers that merely mention a term) or 'fulltext'.
+export async function searchOpenAlex({ query, fromYear, toYear, perPage = 50, page = 1, sort = 'cited_by_count:desc', scope = 'title_abstract' }) {
   const filters = ['type:article|review'];
+  if (scope !== 'fulltext') filters.push(`title_and_abstract.search:${normaliseQuery(query).replace(/,/g, ' ')}`);
   if (fromYear) filters.push(`from_publication_date:${fromYear}-01-01`);
   if (toYear) filters.push(`to_publication_date:${toYear}-12-31`);
-  const params = new URLSearchParams({ search: normaliseQuery(query), filter: filters.join(','), sort, per_page: String(Math.min(perPage, 200)), page: String(page), select: SELECT });
+  const params = new URLSearchParams({ filter: filters.join(','), sort, per_page: String(Math.min(perPage, 200)), page: String(page), select: SELECT });
+  if (scope === 'fulltext') params.set('search', normaliseQuery(query));
   if (process.env.CONTACT_EMAIL) params.set('mailto', process.env.CONTACT_EMAIL);
   const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `evidence-atlas (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
   if (!r.ok) { let msg = ''; try { msg = (await r.json()).message || ''; } catch {} throw new Error(`OpenAlex ${r.status}${msg ? `: ${msg}` : ''}${r.status === 400 ? ' — check the query: OpenAlex accepts quoted phrases and AND / OR / NOT, but not parentheses or wildcards. Use the two term boxes to combine groups.' : ''}`); }
@@ -56,7 +59,7 @@ const SELECT = 'id,doi,title,authorships,publication_year,primary_location,cited
 // Several groups of terms, e.g. [["CEO narcissism","narcissistic CEO"],["firm performance","innovation"]]:
 // every combination is run as one query ("a" AND "b"), because OpenAlex does not support parentheses,
 // and the results are merged by OpenAlex id. maxPerCombo pages through each combination.
-export async function searchGroups({ groups, fromYear, toYear, sort, maxPerCombo = 200 }) {
+export async function searchGroups({ groups, fromYear, toYear, sort, maxPerCombo = 200, scope = 'title_abstract' }) {
   const gs = (groups || []).map((g) => (g || []).map((t) => String(t).trim().replace(/^"|"$/g, '')).filter(Boolean)).filter((g) => g.length);
   if (!gs.length) throw new Error('No search terms');
   let combos = gs[0].map((t) => [t]);
@@ -67,7 +70,7 @@ export async function searchGroups({ groups, fromYear, toYear, sort, maxPerCombo
     const query = combo.map((t) => (/\s/.test(t) ? `"${t}"` : t)).join(' AND ');
     queries.push(query);
     for (let page = 1; (page - 1) * 200 < maxPerCombo; page++) {
-      const r = await searchOpenAlex({ query, fromYear, toYear, perPage: Math.min(200, maxPerCombo), page, sort });
+      const r = await searchOpenAlex({ query, fromYear, toYear, perPage: Math.min(200, maxPerCombo), page, sort, scope });
       if (page === 1) total += r.total;
       for (const s of r.results) if (!seen.has(s.id)) seen.set(s.id, s);
       if (r.results.length < 200 || seen.size >= 3000) break;

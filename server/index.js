@@ -77,9 +77,9 @@ app.put('/api/fields/:id', wrap(async (req, res) => { guard(req); const doc = re
 app.delete('/api/fields/:id', wrap(async (req, res) => { guard(req); const f = await getField(req.params.id); if (!f) return res.status(404).json({ error: 'Not found' }); await logEvent(req.params.id, 'field_delete', { name: f.name, studies: f.studies?.length, predictions: f.predictions?.length }); await deleteField(req.params.id); res.json({ ok: true }); }));
 
 // ---- corpus ----
-app.post('/api/openalex/search', wrap(async (req, res) => { guard(req); const { query, groups, fromYear, toYear, perPage, page, sort, maxPerCombo } = req.body || {}; const allowed = { cites: 'cited_by_count:desc', recent: 'publication_date:desc', relevance: 'relevance_score:desc' }; const srt = allowed[sort] || allowed.cites;
-  if (groups) { const r = await searchGroups({ groups, fromYear, toYear, sort: srt, maxPerCombo: Math.min(Number(maxPerCombo) || 200, 1000) }); if (req.body.fieldId) logEvent(req.body.fieldId, 'search', { queries: r.queries, total: r.total, unique: r.unique }).catch(() => {}); return res.json(r); }
-  if (!query) return res.status(400).json({ error: 'query required' }); res.json(await searchOpenAlex({ query, fromYear, toYear, perPage, page, sort: srt })); }));
+app.post('/api/openalex/search', wrap(async (req, res) => { guard(req); const { query, groups, fromYear, toYear, perPage, page, sort, maxPerCombo, scope } = req.body || {}; const allowed = { cites: 'cited_by_count:desc', recent: 'publication_date:desc', relevance: 'relevance_score:desc' }; const srt = allowed[sort] || allowed.cites;
+  if (groups) { const r = await searchGroups({ groups, fromYear, toYear, sort: srt, maxPerCombo: Math.min(Number(maxPerCombo) || 200, 1000), scope }); if (req.body.fieldId) logEvent(req.body.fieldId, 'search', { queries: r.queries, total: r.total, unique: r.unique }).catch(() => {}); return res.json(r); }
+  if (!query) return res.status(400).json({ error: 'query required' }); res.json(await searchOpenAlex({ query, fromYear, toYear, perPage, page, sort: srt, scope })); }));
 app.post('/api/openalex/resolve', wrap(async (req, res) => { guard(req); res.json({ studies: await resolveDois(req.body?.dois || []) }); }));
 app.post('/api/corpus/parse', wrap(async (req, res) => { guard(req); const text = typeof req.body === 'string' ? req.body : req.body?.text; const studies = parseExport(text, req.get('x-filename') || ''); res.json({ studies }); }));
 app.post('/api/corpus/local-cites', wrap(async (req, res) => res.json({ studies: localCitations(req.body.studies || []) })));
@@ -125,6 +125,31 @@ app.post('/api/assumptions', wrap(async (req, res) => {
   res.json({ assumptions: json.assumptions || [], gaps: json.gaps || [], overlaps: json.overlaps || [] });
 }));
 
+// Which predictions match the researcher's inquiry? (step 3: reduce clutter; the person still decides)
+app.post('/api/suggest-core', wrap(async (req, res) => {
+  const { key } = resolveKey(req);
+  const { fieldId, inquiry, predictions } = req.body || {};
+  if (!inquiry?.statement || !predictions?.length) return res.status(400).json({ error: 'inquiry and predictions required' });
+  const P = predictions.map((p) => `P ${p.id}: ${p.text}${p.statement ? ' — ' + p.statement : ''}${p.n ? ` [tested in ${p.n} stud${p.n === 1 ? 'y' : 'ies'}]` : ''}`).join('\n');
+  const content = `A researcher stated this inquiry:\n<inquiry>${inquiry.statement}${inquiry.priors ? '\nWhat they think the field assumes: ' + inquiry.priors : ''}</inquiry>\n\nThese predictions were extracted from the papers:\n${P}\n\nFor EACH prediction, say whether it is central to the inquiry ("core"), related but secondary ("related"), or outside the inquiry ("outside"), with a reason of at most 15 words. Core predictions are the ones the inquiry is about; recurring across studies counts in favour. Return only JSON: {"items":[{"id":"...","verdict":"core|related|outside","reason":"..."}]}`;
+  const out = await callModel({ key, system: [{ type: 'text', text: 'You help a researcher focus a field map on their inquiry. Be conservative: mark as core only predictions that the inquiry is plainly about.' }], content: [{ type: 'text', text: content }], maxTokens: 2500 });
+  const json = parseJsonLoose(out.text);
+  await logEvent(fieldId, 'suggest_core', { n: predictions.length, core: (json.items || []).filter((i) => i.verdict === 'core').length, usage: out.usage });
+  res.json({ items: json.items || [] });
+}));
+// Plausible alternatives no study has used, per design dimension (step 7: the tool proposes, the person adds)
+app.post('/api/alternatives', wrap(async (req, res) => {
+  const { key } = resolveKey(req);
+  const { fieldId, prediction, dims, judgments, gaps } = req.body || {};
+  if (!prediction?.text || !dims?.length) return res.status(400).json({ error: 'prediction and dims required' });
+  const D = dims.map((d) => `- ${d.id} (${d.name}): used so far: ${(d.options || []).join(' | ') || 'nothing recorded'}`).join('\n');
+  const J = (judgments || []).map((j) => `- [${j.judgment}] ${j.text}`).join('\n') || '(none)';
+  const content = `PREDICTION: ${prediction.text}${prediction.statement ? ' — ' + prediction.statement : ''}\n\nDESIGN DIMENSIONS AND THE OPTIONS PRIOR STUDIES USED:\n${D}\n\nTHE RESEARCHER'S JUDGMENTS OF WHAT THE FIELD ASSUMES\n${J}\n\nGAPS ALREADY NOTED: ${(gaps || []).join('; ') || '(none)'}\n\nPropose, for each dimension where it makes sense (skip dimensions where nothing credible is missing), 1 to 3 plausible, feasible alternative options that NO prior study used and that a reasonable scholar in this field could argue for. Prefer alternatives that would relax a questionable or violated assumption. Each option is a short label as it would appear in a design table (max 8 words) plus a reason (max 20 words). Return only JSON: {"alternatives":[{"dim":"<dimension id>","option":"...","reason":"...","relaxes":"<assumption text or null>"}]}`;
+  const out = await callModel({ key, system: systemBlocks(), content: [{ type: 'text', text: content }], maxTokens: 2500 });
+  const json = parseJsonLoose(out.text);
+  await logEvent(fieldId, 'alternatives', { prediction: prediction.id, n: (json.alternatives || []).length, usage: out.usage });
+  res.json({ alternatives: (json.alternatives || []).filter((a) => a.dim && a.option) });
+}));
 app.post('/api/compare', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, reference, choices } = req.body || {};

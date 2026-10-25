@@ -46,7 +46,10 @@ try {
   await page.screenshot({ path: path.join(shots, 'e2e-3-predictions.png') });
   await page.click('#confirmAllP'); await wait(200);
   if ((await page.locator('.status.confirmed').count()) < 2) throw new Error('confirm all failed');
-  if (!(await page.locator('input[data-core-p]:checked').count())) throw new Error('core prediction not ticked from extraction');
+  if (!(await page.locator('button.corebtn:not(.ghost)').count())) throw new Error('core prediction not marked from extraction');
+  await page.click('#suggestCore'); await page.waitForSelector('text=matches your inquiry', { timeout: 15000 }); await wait(200);
+  if (!(await page.locator('#rejectOutside').count())) throw new Error('reject-outside button missing');
+  if (!(await page.locator('.stepnav [data-go=designs]').count())) throw new Error('next-step button missing');
   // coach on predictions step
   await page.click('#starters button'); await page.waitForSelector('#chat .cite', { timeout: 15000 }); await page.waitForSelector('#chat .msg.bot .meta', { timeout: 15000 });
   if (!(await page.locator('#chat .cite.bad').count())) throw new Error('invalid citation not marked');
@@ -78,6 +81,8 @@ try {
   // epistemic map & teams
   await page.click('li[data-step=multiverse]'); await page.waitForSelector('#mvPred');
   await page.fill('[data-opt-in=identification]', 'instrumental variable'); await page.click('[data-add-opt=identification]'); await wait(200);
+  await page.click('#suggestAlt'); await page.waitForSelector('[data-take-alt]', { timeout: 15000 }); await page.click('[data-take-alt="0"]'); await wait(200);
+  if ((await page.locator('.opt.alt').count()) < 2) throw new Error('suggested alternative not added');
   if (!(await page.locator('.opt.alt').count())) throw new Error('alternative option not added');
   await page.fill('#teamName', 'Team A'); await page.click('#addTeam'); await wait(200); await page.fill('#teamName', 'Team B'); await page.click('#addTeam'); await wait(200);
   await page.selectOption('#allocMode', 'split'); await page.click('#allocate'); await wait(400);
