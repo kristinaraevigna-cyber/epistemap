@@ -67,7 +67,7 @@ try {
   const nPred = (await (await fetch(`${base}/api/fields`)).json()); if (nPred[0].predictions !== 3) { const fx = await (await fetch(`${base}/api/fields/${nPred[0].id}`)).json(); throw new Error('expected 3 predictions after consolidation, got ' + nPred[0].predictions + ' :: ' + fx.predictions.map((x) => x.text.slice(0, 30) + '@' + x.study).join(' | ') + ' studies=' + fx.studies.map((x) => x.id + ':' + !!x.extraction + ':' + !!x.imported).join(',')); }
   // assumptions & decision
   await page.click('li[data-step=assumptions]'); await page.waitForSelector('[data-unearth]'); await page.click('[data-unearth]'); await page.waitForSelector('select[data-judge]', { timeout: 15000 });
-  await page.selectOption('select[data-judge]', 'violated'); await page.click('input[value=replication]'); await wait(300); await page.waitForSelector('.decision a.plan-link, .decision', { timeout: 5000 });
+  await page.selectOption('select[data-judge]', 'violated'); await wait(200); await page.click('[data-assess]'); await page.waitForSelector('text=You judged', { timeout: 15000 }); await page.click('input[value=replication]'); await wait(300); await page.waitForSelector('.decision a.plan-link, .decision', { timeout: 5000 });
   await page.fill('input[data-dreason]', 'All designs are correlational on the same database.'); await wait(500);
   if (!(await page.locator('#chat').count())) throw new Error('coach missing');
   await page.screenshot({ path: path.join(shots, 'e2e-5-assumptions.png'), fullPage: true });
@@ -84,7 +84,7 @@ try {
   await page.click('#suggestAlt'); await page.waitForSelector('[data-take-alt]', { timeout: 15000 }); await page.click('[data-take-alt="0"]'); await wait(200);
   if ((await page.locator('.opt.alt').count()) < 2) throw new Error('suggested alternative not added');
   if (!(await page.locator('.opt.alt').count())) throw new Error('alternative option not added');
-  await page.click('li[data-step=teams]'); await page.waitForSelector('#addTeam');
+  await page.click('li[data-step=teams]'); await page.waitForSelector('input[name=manyMode]'); await page.check('input[name=manyMode][value=teams]'); await page.waitForSelector('#addTeam');
   await page.fill('#teamName', 'Team A'); await page.click('#addTeam'); await wait(200); await page.fill('#teamName', 'Team B'); await page.click('#addTeam'); await wait(200);
   await page.selectOption('#allocMode', 'split'); await page.click('#allocate'); await wait(400);
   const link = await page.getAttribute('[data-copy]', 'data-copy'); if (!link || !/\/team\//.test(link)) throw new Error('team link missing');

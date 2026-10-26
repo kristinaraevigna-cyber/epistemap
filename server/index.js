@@ -150,6 +150,19 @@ app.post('/api/alternatives', wrap(async (req, res) => {
   await logEvent(fieldId, 'alternatives', { prediction: prediction.id, n: (json.alternatives || []).length, usage: out.usage });
   res.json({ alternatives: (json.alternatives || []).filter((a) => a.dim && a.option) });
 }));
+// Assessment of the decision from the researcher's own judgments (step 5): the tool proposes a route, the person decides
+app.post('/api/assess', wrap(async (req, res) => {
+  const { key } = resolveKey(req);
+  const { fieldId, prediction, judgments, tests } = req.body || {};
+  if (!prediction?.text || !judgments?.length) return res.status(400).json({ error: 'prediction and judgments required' });
+  const J = judgments.map((j) => `- [${String(j.judgment).toUpperCase()}] ${j.text}${j.source?.length ? ` (${j.source.join(', ')})` : ''}${j.relax ? ` — would be relaxed by: ${j.relax}` : ''}`).join('\n');
+  const T = (tests || []).map((t) => `- ${t.study}: ${Object.entries(t.design || {}).map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(', ') : v ?? 'n/a'}`).join('; ')} → ${t.result?.direction || '?'}/${t.result?.support || '?'}`).join('\n') || '(none)';
+  const content = `PREDICTION: ${prediction.text}${prediction.statement ? ' — ' + prediction.statement : ''}\n\nTHE RESEARCHER'S OWN JUDGMENTS of the assumptions the existing designs rest on (these are the premise of your assessment; do not re-judge them):\n${J}\n\nEXISTING TESTS:\n${T}\n\nAssess, starting explicitly from the researcher's judgments, which route is warranted: (1) a multiverse on existing data (varies analytical choices; cannot repair a design flaw shared by all studies), (2) a replication of a specific study with one design decision varied, (3) a new design (when assumptions judged violated cannot be relaxed on the existing data), (4) stop. Rule: the more assumptions judged VIOLATED and tied to data source, sample, identification or measurement, the less a multiverse can settle; QUESTIONABLE assumptions tied to estimator, controls or functional form favour a multiverse. Cite evidence cards in square brackets where they support a point. Return only JSON: {"summary":"two sentences that begin with 'You judged …'","routes":[{"route":"multiverse|replication|new design|stop","verdict":"recommended|possible|not warranted","why":"max 30 words"}],"violated_to_address":["assumption text", "..."]}`;
+  const out = await callModel({ key, system: systemBlocks(), content: [{ type: 'text', text: content }], maxTokens: 1500 });
+  const json = parseJsonLoose(out.text);
+  await logEvent(fieldId, 'assess', { prediction: prediction.id, judged: judgments.length, routes: (json.routes || []).map((r) => `${r.route}:${r.verdict}`), usage: out.usage });
+  res.json({ summary: json.summary || '', routes: json.routes || [], violated_to_address: json.violated_to_address || [], at: new Date().toISOString() });
+}));
 app.post('/api/compare', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, reference, choices } = req.body || {};
@@ -198,7 +211,7 @@ app.post('/api/coach', wrap(async (req, res) => {
   await logEvent(fieldId, 'coach', { step, invalid: citations.filter((c) => !c.valid).map((c) => c.id), n: citations.length, stop, chars: text.length });
   send({ type: 'done', citations, stop, model }); res.end();
 }));
-app.post('/api/event', wrap(async (req, res) => { const { fieldId, type, payload } = req.body || {}; const ok = ['coach_open', 'coach_close', 'nudge_shown', 'nudge_dismissed', 'loop_back', 'decision', 'judgment', 'allocation', 'run', 'search']; if (!ok.includes(type)) return res.status(400).json({ error: 'unknown event' }); await logEvent(fieldId, type, payload || {}); res.json({ ok: true }); }));
+app.post('/api/event', wrap(async (req, res) => { const { fieldId, type, payload } = req.body || {}; const ok = ['coach_open', 'coach_close', 'nudge_shown', 'nudge_dismissed', 'loop_back', 'decision', 'judgment', 'allocation', 'run', 'search', 'many_mode']; if (!ok.includes(type)) return res.status(400).json({ error: 'unknown event' }); await logEvent(fieldId, type, payload || {}); res.json({ ok: true }); }));
 app.post('/api/flag', wrap(async (req, res) => { const { fieldId, cardId, step, note } = req.body || {}; await logEvent(fieldId, 'citation_flag', { cardId: String(cardId || '').slice(0, 40), step, note: String(note || '').slice(0, 500) }); res.json({ ok: true }); }));
 
 // ---- exports ----
@@ -227,7 +240,7 @@ app.get('/api/fields/:id/specs.csv', wrap(async (req, res) => {
     const p = (f.predictions || []).find((q) => q.id === pid) || {};
     const dims = dd.filter((k) => sp.dims?.[k]?.include && (sp.dims[k].options || []).length);
     let combos = [[]]; for (const k of dims) combos = combos.flatMap((c) => sp.dims[k].options.map((o, i) => [...c, [k, o, i]]));
-    if (combos.length > 5000) continue;
+    if (combos.length > 10000) continue;
     for (const c of combos) { const id = `${pid}:${c.map((z) => z[2]).join('.')}`; const spec = Object.fromEntries(c.map((z) => [z[0], z[1]])); const prior = (f.tests || []).filter((t) => t.prediction === pid && dims.every((k) => String(Array.isArray(t.design?.[k]) ? t.design[k].join(', ') : t.design?.[k] || '').trim() === spec[k])).map((t) => t.study); rows.push([pid, p.text, id, ...dd.map((k) => spec[k] ?? '(fixed)'), prior.join('; '), (assigned[id] || []).join('; ')]); }
   }
   const pn = only ? ((f.predictions || []).find((q) => q.id === only) || {}).text : null;
