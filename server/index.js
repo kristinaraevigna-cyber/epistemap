@@ -209,8 +209,10 @@ app.get('/api/fields/:id/runs.csv', wrap(async (req, res) => {
   const dd = designDimensions.map((d) => d.id);
   const rows = [['run_id', 'prediction_id', 'prediction', 'spec_id', ...dd, 'team', 'analyst', 'estimate', 'se', 'n', 'direction', 'support', 'notes', 'submitted']];
   const teams = new Map((f.teams || []).map((t) => [t.id, t.name]));
-  for (const r of f.runs || []) { const p = (f.predictions || []).find((q) => q.id === r.prediction) || {}; rows.push([r.id, r.prediction, p.text, r.spec_id, ...dd.map((k) => (r.spec || {})[k]), teams.get(r.team) || r.team, r.by, r.estimate, r.se, r.n, r.direction, r.support, r.notes, r.at]); }
-  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', 'attachment; filename="runs.csv"');
+  const only = req.query.prediction; const slug = (t) => String(t || 'map').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  for (const r of (f.runs || []).filter((x) => !only || x.prediction === only)) { const p = (f.predictions || []).find((q) => q.id === r.prediction) || {}; rows.push([r.id, r.prediction, p.text, r.spec_id, ...dd.map((k) => (r.spec || {})[k]), teams.get(r.team) || r.team, r.by, r.estimate, r.se, r.n, r.direction, r.support, r.notes, r.at]); }
+  const pn = only ? ((f.predictions || []).find((q) => q.id === only) || {}).text : null;
+  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', `attachment; filename="results-${slug(pn || f.name)}.csv"`);
   res.send(rows.map((r) => r.map(esc).join(',')).join('\n'));
 }));
 app.get('/api/fields/:id/specs.csv', wrap(async (req, res) => {
@@ -220,14 +222,16 @@ app.get('/api/fields/:id/specs.csv', wrap(async (req, res) => {
   const rows = [['prediction_id', 'prediction', 'spec_id', ...dd, 'prior_studies', 'assigned_to']];
   const teams = new Map((f.teams || []).map((t) => [t.id, t.name]));
   const assigned = {}; for (const [tid, ids] of Object.entries(f.allocation?.assignments || {})) for (const sid of ids) (assigned[sid] ||= []).push(teams.get(tid) || tid);
-  for (const [pid, sp] of Object.entries(f.space || {})) {
+  const only = req.query.prediction; const slug = (t) => String(t || 'map').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  for (const [pid, sp] of Object.entries(f.space || {}).filter(([k]) => !only || k === only)) {
     const p = (f.predictions || []).find((q) => q.id === pid) || {};
     const dims = dd.filter((k) => sp.dims?.[k]?.include && (sp.dims[k].options || []).length);
     let combos = [[]]; for (const k of dims) combos = combos.flatMap((c) => sp.dims[k].options.map((o, i) => [...c, [k, o, i]]));
     if (combos.length > 5000) continue;
     for (const c of combos) { const id = `${pid}:${c.map((z) => z[2]).join('.')}`; const spec = Object.fromEntries(c.map((z) => [z[0], z[1]])); const prior = (f.tests || []).filter((t) => t.prediction === pid && dims.every((k) => String(Array.isArray(t.design?.[k]) ? t.design[k].join(', ') : t.design?.[k] || '').trim() === spec[k])).map((t) => t.study); rows.push([pid, p.text, id, ...dd.map((k) => spec[k] ?? '(fixed)'), prior.join('; '), (assigned[id] || []).join('; ')]); }
   }
-  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', 'attachment; filename="specifications.csv"');
+  const pn = only ? ((f.predictions || []).find((q) => q.id === only) || {}).text : null;
+  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', `attachment; filename="specifications-${slug(pn || f.name)}.csv"`);
   res.send(rows.map((r) => r.map(esc).join(',')).join('\n'));
 }));
 app.get('/api/fields/:id/designs.csv', wrap(async (req, res) => {

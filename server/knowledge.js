@@ -74,10 +74,11 @@ const STEP_HELP = {
   corpus: 'Step 1, Corpus: bounding the field and choosing the core empirical studies (seminal, recent, rising; reviews flagged). Relevant: target selection and replication value (isager2021).',
   studies: 'Step 2, Studies: reading PDFs; the model extracts the paper type, its predictions, the design used to test each one, the result, and analytical choices. Relevant: documenting the original precisely (brandt2014, forrt2025).',
   predictions: 'Step 3, Predictions: confirming each prediction (X → Y, construct level), merging the same prediction across studies, marking core ones. Relevant: construct validity (flake2023), theory and replication type (irvine2021, anderson2016).',
-  multiverse: 'Step 7, Epistemic map and teams: the assumption space for a core prediction (which design dimensions vary, which options, including alternatives no study has used), the legend (which prior study used which assumption set; the researcher\'s credibility judgments from step 5), the list of specifications, and the allocation of specifications to analyst teams (many-analysts / multiverse). Relevant: epistemic maps (king2021-01, king2021-03, king2021-04, king2021-05, king2021-06, king2021-07), the replication that needed a map (goldfarb2021-01, goldfarb2021-02, goldfarb2021-03), multiverse (forrt2025).',
+  teams: 'Step 8, Teams and results: allocating the specification list to analyst teams (many-analysts design: Delios et al. 2025 in management; Silberzahn et al. 2018, Breznau et al. 2022, Huntington-Klein et al. 2021 elsewhere), collecting their estimates per specification, reading the specification curve as the completed epistemic map. Relevant: publish the complete mapping (king2021-07), credibility weights in the legend (king2021-05), maps as a diagnostic (goldfarb2021-03).',
+  multiverse: 'Step 7, Multiverse: the assumption space for a core prediction (which design dimensions vary, which options, including alternatives no study has used), the legend (which prior study used which assumption set; the researcher\'s credibility judgments from step 5), the list of specifications, and the allocation of specifications to analyst teams (many-analysts / multiverse). Relevant: epistemic maps (king2021-01, king2021-03, king2021-04, king2021-05, king2021-06, king2021-07), the replication that needed a map (goldfarb2021-01, goldfarb2021-02, goldfarb2021-03), multiverse (forrt2025).',
   designs: 'Step 4, Epistemic map: for each core prediction, the range of designs used (data, sample, period, measures, estimator, controls, form, identification) and the results under each. Relevant: differences between studies (brandt2014), design and analysis (bonett2021, forrt2025).',
   choices: 'Step 6, Choice space: the analytical choices found across papers and the benchmark against a reference list. Relevant: analysis and robustness (forrt2025, bonett2021, anderson2016).',
-  export: 'Step 8, Export: core predictions, the design decisions that matter most, and the hand-off to Replication Navigator. Relevant: replication value (isager2021), choosing the replication type that teaches most (anderson2016, irvine2021).'
+  export: 'Step 9, Export: core predictions, the design decisions that matter most, and the hand-off to Replication Navigator. Relevant: replication value (isager2021), choosing the replication type that teaches most (anderson2016, irvine2021).'
 };
 
 // Compact, bounded summary of the field for the coach.
@@ -100,6 +101,17 @@ export function fieldContext(field, step) {
     }
     if (preds.length > 15) lines.push(`(+${preds.length - 15} more predictions)`);
   }
+  // The researcher's own judgments and decisions (step 5): the coach must build on these, not only on the designs.
+  const AB = field.assumptions_by_prediction || {}, DEC = field.decisions || {};
+  for (const [pid, ab] of Object.entries(AB)) {
+    const judged = (ab.assumptions || []).filter((a) => a.judgment);
+    if (!judged.length && !DEC[pid]) continue;
+    const p = preds.find((x) => x.id === pid);
+    lines.push(`\nRESEARCHER'S JUDGMENTS for prediction ${pid}${p ? ` (${clip(p.text, 100)})` : ''}:`);
+    for (const a of judged.slice(0, 12)) lines.push(`  - [${a.judgment.toUpperCase()}] ${clip(a.text, 160)}${a.sensitivity ? ` (sensitivity ${a.sensitivity})` : ''}`);
+    if (DEC[pid]?.choice) lines.push(`  DECISION: ${DEC[pid].choice}${DEC[pid].reason ? ` — ${clip(DEC[pid].reason, 200)}` : ''}`);
+  }
+  if (Object.keys(AB).length) lines.push(`(When the researcher asks what to do next, start from THEIR judgments above and say so explicitly: e.g. "You judged X violated, so…". If no judgments are recorded yet, say that your advice does not yet reflect their judgment.)`);
   for (const c of claims.slice(0, 12)) {
     lines.push(`\nCLAIM ${c.id} [${c.status}] (${short(sById.get(c.study))}): ${clip(c.text, 200)}`);
     for (const a of as.filter((x) => x.claim === c.id).slice(0, 12)) {

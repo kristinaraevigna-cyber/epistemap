@@ -299,8 +299,8 @@ body.on-home .home-nav{display:flex;gap:1.6rem;justify-content:center}
 /* stepper banner */
 .steps-lede{margin:-.2rem auto 1.4rem}
 .stepper{background:#fff;border:1px solid #E6EDF3;border-radius:16px;box-shadow:0 12px 30px rgba(27,35,40,.06);overflow:hidden}
-.track{list-style:none;margin:0;padding:1.4rem 1.2rem .9rem;display:grid;grid-template-columns:repeat(9,1fr);position:relative}
-.track::before{content:"";position:absolute;left:calc(5.6% + 1.2rem);right:calc(5.6% + 1.2rem);top:calc(1.4rem + 17px);height:2px;background:#E1E8F0}
+.track{list-style:none;margin:0;padding:1.4rem 1.2rem .9rem;display:grid;grid-template-columns:repeat(10,1fr);position:relative}
+.track::before{content:"";position:absolute;left:calc(5% + 1.2rem);right:calc(5% + 1.2rem);top:calc(1.4rem + 17px);height:2px;background:#E1E8F0}
 .track li{position:relative;text-align:center}
 .track button{background:none;border:0;padding:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--muted);cursor:pointer;font-size:.78rem;line-height:1.2}
 .track .node{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid #D6DFE9;color:#5F6B78;font-weight:700;font-size:.85rem;transition:all .25s}
@@ -322,7 +322,7 @@ body.on-home .home-nav{display:flex;gap:1.6rem;justify-content:center}
 /* example card in blues */
 .mini-fig .mini-cell{color:#1F4E8C}.mini-fig .mini-cell span{color:#4A6C96}
 .mini-fig .mini-cell.covered{background:#E3EEFB}.mini-fig .mini-cell.partly{background:#D4E4F8}.mini-fig .mini-cell.none{background:#2F80ED;color:#fff}.mini-fig .mini-cell.none span{color:rgba(255,255,255,.85)}
-@media (max-width:900px){.track{grid-template-columns:repeat(3,1fr);gap:1rem .4rem}.track::before{display:none}}
+@media (max-width:900px){.track{grid-template-columns:repeat(5,1fr);gap:1rem .4rem}.track::before{display:none}}
 @media (max-width:760px){.step-card{grid-template-columns:1fr;padding:1.2rem 1rem 1.6rem}.step-arrow{display:none}.track .lbl{font-size:.72rem}}
 /* hero B: deep blue with floating cards */
 .hero-b{background:radial-gradient(900px 520px at 80% 15%,#2F80ED 0%,#1D4F9E 45%,#12305F 100%)}
