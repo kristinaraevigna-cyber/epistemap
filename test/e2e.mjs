@@ -95,6 +95,10 @@ try {
   await page.fill('form.runform >> nth=0 >> [name=estimate]', '0.12'); await page.fill('form.runform >> nth=0 >> [name=se]', '0.05'); await page.click('form.runform >> nth=0 >> button'); await page.waitForSelector('.status.confirmed'); await wait(400);
   await page.screenshot({ path: path.join(shots, 'e2e-7b-team.png'), fullPage: true });
   await page.goto(`${base}/#field/${fieldId}/teams`); await page.waitForSelector('svg.speccurve'); await wait(300);
+  // CSV upload of results
+  const specCsv0 = await (await fetch(`${base}/api/fields/${fieldId}/specs.csv?prediction=${encodeURIComponent(await page.inputValue('#mvPred'))}`)).text(); const firstSpec = specCsv0.split('\n')[1].split(',')[2].replace(/"/g, '');
+  const up = path.join(dir, 'results.csv'); writeFileSync(up, `spec_id,estimate,se,n,analyst\n${firstSpec},0.08,0.03,900,Rscript\nnope:1,0.1,0.1,1,x\n`);
+  await page.setInputFiles('#runsCsv', up); await page.waitForSelector('text=1 result added', { timeout: 5000 }); await wait(300);
   const specCsv = await (await fetch(`${base}/api/fields/${fieldId}/specs.csv?prediction=${encodeURIComponent(await page.inputValue('#mvPred'))}`)).text(); if (specCsv.split("\n").length < 3 || !specCsv.includes("instrumental variable")) throw new Error('specs csv does not reflect the assumption space');
   // export
   await page.click('li[data-step=export]'); await page.waitForSelector('#notes');

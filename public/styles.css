@@ -359,3 +359,6 @@ tr.rejected td{opacity:.55}
 .ok{color:var(--ok)}
 @media (max-width:760px){.stepnav{grid-template-columns:1fr;text-align:center}.stepnav>div:last-child{text-align:center}.stepnav button{width:100%}}
 .choice-cell{margin-bottom:.35rem}.choice-cell .x{border:0;background:none;cursor:pointer;color:var(--accent);padding:0 .15rem}
+.hscroll{overflow-x:auto;scrollbar-width:thin;padding-bottom:.2rem}
+table.choices td{min-width:170px}
+a.ref{color:var(--accent-dk);text-decoration:underline dotted;text-underline-offset:2px}
