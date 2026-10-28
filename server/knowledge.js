@@ -89,7 +89,8 @@ export function fieldContext(field, step) {
   const sById = new Map(studies.map((s) => [s.id, s]));
   const short = (s) => s ? `${(s.authors || '').split(',')[0] || 'Unknown'}${s.year ? ` (${s.year})` : ''}` : '?';
   const lines = [];
-  if (field.inquiry?.statement || field.inquiry?.priors) lines.push(`Researcher's inquiry: ${clip(field.inquiry.statement, 500)}${field.inquiry.priors ? ` | What they believe the field assumes: ${clip(field.inquiry.priors, 400)}` : ''}`);
+  if (field.inquiry?.statement) lines.push(`Researcher's inquiry: ${clip(field.inquiry.statement, 500)}`);
+  if (field.inquiry?.priors) lines.push(`Researcher's PRIOR SUSPICIONS about the field, written before reading (treat as hypotheses to test, NOT as facts; when the field's tests or designs do not support them, say so plainly; do not confirm them out of politeness): ${clip(field.inquiry.priors, 400)}`);
   lines.push(`Field: ${clip(field.name, 120)}. Studies: ${studies.length} (${studies.filter((s) => s.core).length} core, ${studies.filter((s) => s.extraction).length} read). Claims: ${claims.length} (${claims.filter((c) => c.status === 'confirmed').length} confirmed). Assumptions: ${as.length} (${as.filter((a) => a.status === 'confirmed').length} confirmed). Coverage tags: ${cov.length}. Analytical choices: ${ch.length}.`);
   const preds = field.predictions || [], tests = field.tests || [];
   if (preds.length) {

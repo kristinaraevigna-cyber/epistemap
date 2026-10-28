@@ -24,7 +24,7 @@ try {
   await page.fill('#newName', 'Social and financial performance');
   await page.click('#newField button');
   await page.waitForSelector('#iqStatement');
-  await page.fill('#iqStatement', 'Does social performance pay, and does it depend on how it is measured?'); await page.fill('#iqTerms', '"social performance" AND "financial performance"'); await page.fill('#iqSeeds', 'Waddock & Graves (1997) SMJ 10.1002/(SICI)1097-0266(199704)18:4<303::AID-SMJ869>3.0.CO;2-G');
+  await page.fill('#iqStatement', 'Does social performance pay, and does it depend on how it is measured?'); await page.fill('#iqPriors', 'Most studies use KLD; nobody has tested the effect within firms over time.'); await page.fill('#iqTerms', '"social performance" AND "financial performance"'); await page.fill('#iqSeeds', 'Waddock & Graves (1997) SMJ 10.1002/(SICI)1097-0266(199704)18:4<303::AID-SMJ869>3.0.CO;2-G');
   await page.click('#iqAddSeeds'); await wait(300); await page.click('#iqToSearch'); await page.waitForSelector('#oa');
   const g1 = await page.inputValue('#oa [name=g1]'), g2 = await page.inputValue('#oa [name=g2]'); if (!g1.includes('social performance') || !g2.includes('financial performance')) throw new Error('search not prefilled from inquiry: ' + g1 + ' / ' + g2);
   await page.screenshot({ path: path.join(shots, 'e2e-0-inquiry.png') });
@@ -67,7 +67,7 @@ try {
   const nPred = (await (await fetch(`${base}/api/fields`)).json()); if (nPred[0].predictions !== 3) { const fx = await (await fetch(`${base}/api/fields/${nPred[0].id}`)).json(); throw new Error('expected 3 predictions after consolidation, got ' + nPred[0].predictions + ' :: ' + fx.predictions.map((x) => x.text.slice(0, 30) + '@' + x.study).join(' | ') + ' studies=' + fx.studies.map((x) => x.id + ':' + !!x.extraction + ':' + !!x.imported).join(',')); }
   // assumptions & decision
   await page.click('li[data-step=assumptions]'); await page.waitForSelector('[data-unearth]'); await page.click('[data-unearth]'); await page.waitForSelector('select[data-judge]', { timeout: 15000 });
-  await page.selectOption('select[data-judge]', 'violated'); await wait(200); await page.click('[data-assess]'); await page.waitForSelector('text=You judged', { timeout: 15000 }); await page.click('input[value=replication]'); await wait(300); await page.waitForSelector('.decision a.plan-link, .decision', { timeout: 5000 });
+  await page.selectOption('select[data-judge]', 'violated'); await wait(200); await page.click('[data-priors]'); await page.waitForSelector('text=compared with what the tool unearthed', { timeout: 15000 }); if (!(await page.locator('.status.rejected:has-text("contradicted")').count())) throw new Error('priors check not shown'); await page.click('[data-assess]'); await page.waitForSelector('text=You judged', { timeout: 15000 }); await page.click('input[value=replication]'); await wait(300); await page.waitForSelector('.decision a.plan-link, .decision', { timeout: 5000 });
   await page.fill('input[data-dreason]', 'All designs are correlational on the same database.'); await wait(500);
   if (!(await page.locator('#chat').count())) throw new Error('coach missing');
   await page.screenshot({ path: path.join(shots, 'e2e-5-assumptions.png'), fullPage: true });

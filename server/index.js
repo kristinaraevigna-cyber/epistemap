@@ -131,7 +131,7 @@ app.post('/api/suggest-core', wrap(async (req, res) => {
   const { fieldId, inquiry, predictions } = req.body || {};
   if (!inquiry?.statement || !predictions?.length) return res.status(400).json({ error: 'inquiry and predictions required' });
   const P = predictions.map((p) => `P ${p.id}: ${p.text}${p.statement ? ' — ' + p.statement : ''}${p.n ? ` [tested in ${p.n} stud${p.n === 1 ? 'y' : 'ies'}]` : ''}`).join('\n');
-  const content = `A researcher stated this inquiry:\n<inquiry>${inquiry.statement}${inquiry.priors ? '\nWhat they think the field assumes: ' + inquiry.priors : ''}</inquiry>\n\nThese predictions were extracted from the papers:\n${P}\n\nFor EACH prediction, say whether it is central to the inquiry ("core"), related but secondary ("related"), or outside the inquiry ("outside"), with a reason of at most 15 words. Core predictions are the ones the inquiry is about; recurring across studies counts in favour. Return only JSON: {"items":[{"id":"...","verdict":"core|related|outside","reason":"..."}]}`;
+  const content = `A researcher stated this inquiry:\n<inquiry>${inquiry.statement}</inquiry>\n\nThese predictions were extracted from the papers:\n${P}\n\nFor EACH prediction, say whether it is central to the inquiry ("core"), related but secondary ("related"), or outside the inquiry ("outside"), with a reason of at most 15 words. Core predictions are the ones the inquiry is about; recurring across studies counts in favour. Return only JSON: {"items":[{"id":"...","verdict":"core|related|outside","reason":"..."}]}`;
   const out = await callModel({ key, system: [{ type: 'text', text: 'You help a researcher focus a field map on their inquiry. Be conservative: mark as core only predictions that the inquiry is plainly about.' }], content: [{ type: 'text', text: content }], maxTokens: 2500 });
   const json = parseJsonLoose(out.text);
   await logEvent(fieldId, 'suggest_core', { n: predictions.length, core: (json.items || []).filter((i) => i.verdict === 'core').length, usage: out.usage });
@@ -162,6 +162,20 @@ app.post('/api/assess', wrap(async (req, res) => {
   const json = parseJsonLoose(out.text);
   await logEvent(fieldId, 'assess', { prediction: prediction.id, judged: judgments.length, routes: (json.routes || []).map((r) => `${r.route}:${r.verdict}`), usage: out.usage });
   res.json({ summary: json.summary || '', routes: json.routes || [], violated_to_address: json.violated_to_address || [], at: new Date().toISOString() });
+}));
+// Compare the researcher's sealed step-0 suspicions with the assumptions the tool unearthed WITHOUT seeing them.
+// The unearthing call never receives the priors, so this is a disconfirmation check, not an echo.
+app.post('/api/priors-check', wrap(async (req, res) => {
+  const { key } = resolveKey(req);
+  const { fieldId, prediction, priors, assumptions, tests } = req.body || {};
+  if (!priors || !assumptions?.length) return res.status(400).json({ error: 'priors and assumptions required' });
+  const A = assumptions.map((x, i) => `A${i + 1}: ${x.text}${x.source?.length ? ` (${x.source.join(', ')})` : ''}`).join('\n');
+  const T = (tests || []).map((t) => `- ${t.study}: ${Object.entries(t.design || {}).map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(', ') : v ?? 'n/a'}`).join('; ')} → ${t.result?.direction || '?'}/${t.result?.support || '?'}`).join('\n') || '(none)';
+  const content = `PREDICTION: ${prediction?.text || ''}\n\nBEFORE reading any paper, the researcher wrote down what they SUSPECT the field takes for granted:\n<suspicions>${String(priors).slice(0, 3000)}</suspicions>\n\nINDEPENDENTLY of that text, the assumptions unearthed from the papers' designs were:\n${A}\n\nThe tests:\n${T}\n\nYour job is adversarial: split the suspicions into separate claims and, for each, say whether the papers' designs SUPPORT it (an unearthed assumption or the designs match it), CONTRADICT it (the designs or results show otherwise), or do NOT ADDRESS it (nothing in these papers bears on it). Do not agree out of politeness; where the suspicion is vaguer or stronger than what the papers show, say so in the evidence field. Write without abbreviations. Return only JSON: {"items":[{"prior":"one suspicion in the researcher's words","verdict":"supported|contradicted|not addressed","evidence":"max 30 words naming the assumption (A1…) or study"}],"not_mentioned":["unearthed assumption the researcher did not mention", "..."]}`;
+  const out = await callModel({ key, system: [{ type: 'text', text: 'You check a researcher\'s prior beliefs about a literature against evidence extracted from that literature. You are an adversarial reviewer: your value lies in disagreeing when the evidence does not support the belief.' }], content: [{ type: 'text', text: content }], maxTokens: 1800 });
+  const json = parseJsonLoose(out.text);
+  await logEvent(fieldId, 'priors_check', { prediction: prediction?.id, n: (json.items || []).length, verdicts: (json.items || []).map((x) => x.verdict), usage: out.usage });
+  res.json({ items: json.items || [], not_mentioned: json.not_mentioned || [] });
 }));
 app.post('/api/compare', wrap(async (req, res) => {
   const { key } = resolveKey(req);
