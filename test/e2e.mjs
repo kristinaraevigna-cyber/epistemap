@@ -67,7 +67,7 @@ try {
   const nPred = (await (await fetch(`${base}/api/fields`)).json()); if (nPred[0].predictions !== 3) { const fx = await (await fetch(`${base}/api/fields/${nPred[0].id}`)).json(); throw new Error('expected 3 predictions after consolidation, got ' + nPred[0].predictions + ' :: ' + fx.predictions.map((x) => x.text.slice(0, 30) + '@' + x.study).join(' | ') + ' studies=' + fx.studies.map((x) => x.id + ':' + !!x.extraction + ':' + !!x.imported).join(',')); }
   // assumptions & decision
   await page.click('li[data-step=assumptions]'); await page.waitForSelector('[data-unearth]'); await page.click('[data-unearth]'); await page.waitForSelector('select[data-judge]', { timeout: 15000 });
-  await page.selectOption('select[data-judge]', 'violated'); await wait(200); await page.click('[data-priors]'); await page.waitForSelector('text=compared with what the tool unearthed', { timeout: 15000 }); if (!(await page.locator('.status.rejected:has-text("contradicted")').count())) throw new Error('priors check not shown'); await page.click('[data-assess]'); await page.waitForSelector('text=You judged', { timeout: 15000 }); await page.click('input[value=replication]'); await wait(300); await page.waitForSelector('.decision a.plan-link, .decision', { timeout: 5000 });
+  await page.selectOption('select[data-judge]', 'violated'); await wait(200); await page.click('summary:has-text("Independent judgments")'); await page.fill('[data-judge-name]', 'Jost'); await page.click('[data-add-judge]'); await wait(200); const jl = await page.getAttribute('[data-copy]', 'data-copy'); if (!/\/judge\//.test(jl || '')) throw new Error('judge link missing'); await page.click('[data-priors]'); await page.waitForSelector('text=compared with what the tool unearthed', { timeout: 15000 }); if (!(await page.locator('.status.rejected:has-text("contradicted")').count())) throw new Error('priors check not shown'); await page.click('[data-assess]'); await page.waitForSelector('text=You judged', { timeout: 15000 }); await page.click('input[value=replication]'); await wait(300); await page.waitForSelector('.decision a.plan-link, .decision', { timeout: 5000 });
   await page.fill('input[data-dreason]', 'All designs are correlational on the same database.'); await wait(500);
   if (!(await page.locator('#chat').count())) throw new Error('coach missing');
   await page.screenshot({ path: path.join(shots, 'e2e-5-assumptions.png'), fullPage: true });
@@ -89,6 +89,9 @@ try {
   await page.selectOption('#allocMode', 'split'); await page.click('#allocate'); await wait(400);
   const link = await page.getAttribute('[data-copy]', 'data-copy'); if (!link || !/\/team\//.test(link)) throw new Error('team link missing');
   await page.screenshot({ path: path.join(shots, 'e2e-7-map.png'), fullPage: true });
+  // colleague judge view
+  await page.goto(jl.replace(/^https?:\/\/[^/]+/, base)); await page.waitForSelector('#judgeForm'); await page.selectOption('#judgeForm select >> nth=0', 'reasonable'); await page.click('#judgeForm button'); await page.waitForSelector('text=your judgments were recorded', { timeout: 5000 }); await wait(400);
+  await page.goto(`${base}/#field/${location_field(page)}/assumptions`); await page.waitForSelector('text=mean agreement', { timeout: 5000 });
   // team view: submit one result through the team link
   const fieldId = location_field(page); await page.goto(link.replace(/^https?:\/\/[^/]+/, base)); await page.waitForSelector('#analyst');
   await page.fill('#analyst', 'Maria'); const forms = await page.locator('form.runform').count(); if (!forms) throw new Error('no specifications assigned to team');

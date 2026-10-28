@@ -230,6 +230,17 @@ app.post('/api/flag', wrap(async (req, res) => { const { fieldId, cardId, step, 
 
 // ---- exports ----
 app.get('/api/fields/:id/export.json', wrap(async (req, res) => { const f = await getField(req.params.id); if (!f) return res.status(404).end(); res.setHeader('content-disposition', `attachment; filename="${(f.name || 'field').replace(/[^\w-]+/g, '_')}.json"`); res.json(f); }));
+app.get('/api/fields/:id/judgments.csv', wrap(async (req, res) => {
+  const f = await getField(req.params.id); if (!f) return res.status(404).end();
+  const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = [['prediction_id', 'prediction', 'assumption_key', 'assumption', 'judge', 'role', 'judgment', 'note', 'at']];
+  for (const [pid, ab] of Object.entries(f.assumptions_by_prediction || {})) {
+    const p = (f.predictions || []).find((q) => q.id === pid) || {};
+    (ab.assumptions || []).forEach((a, i) => { const key = a.key || String(i); rows.push([pid, p.text, key, a.text, 'owner', 'owner', a.judgment || '', a.note || '', '']); for (const j of (f.judges || []).filter((x) => x.prediction === pid && x.judgments)) rows.push([pid, p.text, key, a.text, j.name, 'colleague', j.judgments[key] || '', (j.notes || {})[key] || '', j.at || '']); });
+  }
+  res.setHeader('content-type', 'text/csv'); res.setHeader('content-disposition', 'attachment; filename="judgments.csv"');
+  res.send(rows.map((r) => r.map(esc).join(',')).join('\n'));
+}));
 app.get('/api/fields/:id/runs.csv', wrap(async (req, res) => {
   const f = await getField(req.params.id); if (!f) return res.status(404).end();
   const esc = (v) => `"${String(Array.isArray(v) ? v.join('; ') : v ?? '').replace(/"/g, '""')}"`;
