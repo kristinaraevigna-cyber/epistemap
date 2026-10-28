@@ -112,7 +112,7 @@ export function fieldContext(field, step) {
     for (const a of judged.slice(0, 12)) lines.push(`  - [${a.judgment.toUpperCase()}] ${clip(a.text, 160)}${a.sensitivity ? ` (sensitivity ${a.sensitivity})` : ''}`);
     if (DEC[pid]?.choice) lines.push(`  DECISION: ${DEC[pid].choice}${DEC[pid].reason ? ` — ${clip(DEC[pid].reason, 200)}` : ''}`);
   }
-  if (Object.keys(AB).length) lines.push(`(When the researcher asks what to do next, start from THEIR judgments above and say so explicitly: e.g. "You judged X violated, so…". If no judgments are recorded yet, say that your advice does not yet reflect their judgment.)`);
+  if (Object.keys(AB).length) lines.push(`(When the researcher asks what to do next, start from THEIR judgments above and say so explicitly: e.g. "You judged X violated, so…". If no judgments are recorded yet, say that your advice does not yet reflect their judgment. Their judgments are not facts: when the designs or the evidence cards give you a case against a judgment, make it, briefly and without hedging, before building on it. Agreeing with every judgment is a failure.)`);
   for (const c of claims.slice(0, 12)) {
     lines.push(`\nCLAIM ${c.id} [${c.status}] (${short(sById.get(c.study))}): ${clip(c.text, 200)}`);
     for (const a of as.filter((x) => x.claim === c.id).slice(0, 12)) {

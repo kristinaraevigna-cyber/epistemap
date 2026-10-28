@@ -177,6 +177,21 @@ app.post('/api/priors-check', wrap(async (req, res) => {
   await logEvent(fieldId, 'priors_check', { prediction: prediction?.id, n: (json.items || []).length, verdicts: (json.items || []).map((x) => x.verdict), usage: out.usage });
   res.json({ items: json.items || [], not_mentioned: json.not_mentioned || [] });
 }));
+// Push back on the researcher's judgments: argue the other side where there is a case (step 5). The person keeps or changes each judgment; both are logged.
+app.post('/api/challenge', wrap(async (req, res) => {
+  const { key } = resolveKey(req);
+  const { fieldId, prediction, assumptions, tests } = req.body || {};
+  const judged = (assumptions || []).filter((a) => a.judgment);
+  if (!prediction?.text || !judged.length) return res.status(400).json({ error: 'prediction and judged assumptions required' });
+  const A = judged.map((a) => `- key ${a.key}: "${a.text}" | researcher's judgment: ${a.judgment.toUpperCase()}${a.note ? ` (their reason: ${a.note})` : ''} | your earlier sensitivity rating: ${a.sensitivity ?? '?'} | from: ${(a.source || []).join(', ')} | would be relaxed by: ${a.relaxed_by || '?'}`).join('\n');
+  const T = (tests || []).map((t) => `- ${t.study}: ${Object.entries(t.design || {}).map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(', ') : v ?? 'n/a'}`).join('; ')} → ${t.result?.direction || '?'}/${t.result?.support || '?'}`).join('\n') || '(none)';
+  const content = `PREDICTION: ${prediction.text}${prediction.statement ? ' — ' + prediction.statement : ''}\n\nHOW THE RESEARCHER JUDGED EACH ASSUMPTION\n${A}\n\nTHE TESTS:\n${T}\n\nYou are the researcher's sparring partner, not their echo. For EACH judged assumption, decide whether you AGREE or DISAGREE with the researcher's judgment, and make the strongest honest case for the OTHER side in at most 45 words, grounded in the designs and results above and in the evidence cards (cite ids in square brackets). Disagree whenever a reasonable methodologist would: an assumption judged "reasonable" that all studies share, that your sensitivity rating marks as decisive, or that the designs cannot have tested, deserves a challenge; an assumption judged "violated" that the designs do address deserves a defence. Agreeing with everything is a failure. Write without abbreviations. Return only JSON: {"items":[{"key":"...","stance":"agree|disagree","case":"...","would_change_if":"what evidence from these or new studies would change your view (max 25 words)"}]}`;
+  const out = await callModel({ key, system: systemBlocks(), content: [{ type: 'text', text: content }], maxTokens: 2500 });
+  const json = parseJsonLoose(out.text);
+  const items = (json.items || []).filter((x) => x.key && x.stance);
+  await logEvent(fieldId, 'challenge', { prediction: prediction.id, judged: judged.length, disagree: items.filter((x) => x.stance === 'disagree').length, usage: out.usage });
+  res.json({ items });
+}));
 app.post('/api/compare', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, reference, choices } = req.body || {};
