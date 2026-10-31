@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'k
 const load = (f) => JSON.parse(readFileSync(path.join(root, f), 'utf8'));
 
 // EpisteMap's own evidence base: page-verified cards from the epistemic-map, multiverse, many-analysts,
-// replication and quasi-experimental-design literature (knowledge/epimap-cards.json). Replication Navigator
+// replication and quasi-experimental-design literature (knowledge/epimap-cards.json). Evidence Navigator
 // keeps its separate base of replication cards; the two are not mixed.
 export const cards = load('epimap-cards.json');
 export const sources = load('epimap-sources.json');
@@ -52,7 +52,7 @@ export function extractCitations(text) {
 // ---- Coach: full evidence base (cached system block) and field context ----
 const EVIDENCE_LINES = topics.map((t) => `## ${t.name}\n` + cardsForTopic(t.id).map((c) => `[${c.id}] (${c.kind}; ${sources.find((s) => s.key === c.source)?.short || c.source}, p. ${c.printed_page ?? c.pdf_page}) ${c.title}. ${c.guidance} ACTION: ${c.action}`).join('\n')).join('\n\n');
 
-export const COACH_RULES = `Write without abbreviations: instrumental variable, difference-in-differences, fixed effects, standard error (never IV, DiD, FE, SE). You are the EpisteMap coach, a methods mentor for researchers who are mapping a field's core PREDICTIONS (X → Y) and the RANGE OF RESEARCH DESIGNS used to test them, in order to decide which design decisions matter most and which test to run next (the inputs to a multiverse or specification map). You work alongside Replication Navigator, which plans a single replication.
+export const COACH_RULES = `Write without abbreviations: instrumental variable, difference-in-differences, fixed effects, standard error (never IV, DiD, FE, SE). You are the EpisteMap coach, a methods mentor for researchers who are mapping a field's core PREDICTIONS (X → Y) and the RANGE OF RESEARCH DESIGNS used to test them, in order to decide which design decisions matter most and which test to run next (the inputs to a multiverse or specification map). You work alongside Evidence Navigator, which plans a single replication.
 
 GROUNDING RULES (these override everything else):
 1. Your ONLY source of substantive methodological guidance is the EVIDENCE BASE below: evidence cards drawn from ${sources.length} peer-reviewed sources on epistemic maps, multiverse and many-analysts designs, replication and meta-science, and quasi-experimental design (instrumental variables, difference-in-differences, regression discontinuity, controls). Do not bring in methodological claims, recommendations, statistics, thresholds or references from outside it.
@@ -90,7 +90,7 @@ const STEP_HELP = {
   choices: 'Step 6, Choice space: the analytical choices found across papers and the benchmark against a reference list (Berchicci and King, 2022). Relevant: every analytical decision is a dimension of model uncertainty (king2021-04), researcher degrees of freedom and forking paths (gelman2014, hill2021-06), which choices are arbitrary and which principled (delgiudice2021-06, delgiudice2021-12).',
   multiverse: 'Step 7, Multiverse: the assumption space for a core prediction (which design dimensions vary, which options, including alternatives no study has used), the legend (which prior study used which assumption set; the researcher\'s credibility judgments from step 5), the list of specifications. Relevant: epistemic maps and their legend (king2021-01, king2021-05, king2021-06), Occam\'s window (berchicci2022-06), how to build and read a multiverse (gotz2026, gotz2024), equivalence of specifications (delgiudice2021-01, delgiudice2021-06, delgiudice2021-14), implausible clusters (gotz2026-08).',
   teams: 'Step 8, Many analysts (optional): allocating the specification list to analyst teams, collecting their estimates per specification, reading the specification curve as the completed epistemic map. Relevant: many-analysts designs in management (delios2025), analyst-induced variation and why re-analysts differ (delios2025-14, delios2025-09), publish the complete mapping (king2021-07), credibility weights in the legend (king2021-05), maps as a diagnostic (goldfarb2021-03).',
-  export: 'Step 9, Export: decisions with reasons, the design decisions that matter most, the hand-off to Replication Navigator, the field as JSON and CSV. Relevant: replication types and what each can teach (delios2022-01, wu2023-05, dreber2025-04), power for the replication (dreber2025-13), reporting deviations and sharing (delios2025-01, wulff2023-04).'
+  export: 'Step 9, Export: decisions with reasons, the design decisions that matter most, the hand-off to Evidence Navigator, the field as JSON and CSV. Relevant: replication types and what each can teach (delios2022-01, wu2023-05, dreber2025-04), power for the replication (dreber2025-13), reporting deviations and sharing (delios2025-01, wulff2023-04).'
 };
 
 // Compact, bounded summary of the field for the coach.
