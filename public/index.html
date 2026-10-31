@@ -6,7 +6,7 @@
 <title>EpisteMap</title>
 <meta name="description" content="Map which assumptions of a field's core claims the evidence has tested.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Newsreader:opsz,wght@6..72,300;6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="icon" type="image/svg+xml" href="brand/favicon.svg"><link rel="alternate icon" type="image/png" href="brand/favicon.png">
 </head>
@@ -17,7 +17,7 @@
     <strong>EpisteMap</strong>
   </a>
   <div class="crumbs"><span id="fieldName" class="pill" hidden></span>
-    <nav class="home-nav" id="homeNav" aria-label="Site"><a href="#hero" class="active">Home</a><a href="#how">How it works</a><a href="#what">What it is</a><a href="#the-steps">The steps</a><a id="topNav" href="#" hidden target="_blank" rel="noopener">Navigator</a></nav></div>
+    <nav class="home-nav" id="homeNav" aria-label="Site"><a href="#how">Why</a><a href="#what-it-does">What it does</a><a href="#the-steps">The steps</a><a href="#what">Epistemic maps</a><a id="topNav" href="#" hidden target="_blank" rel="noopener">Navigator</a></nav></div>
   <div class="top-right">
     <span id="dbState" class="dot-label" title="Where fields are stored" hidden></span>
     <button id="settingsBtn" class="ghost">Settings</button>
@@ -25,90 +25,66 @@
 </header>
 
 <main id="home" class="home">
-  <section class="hero4 hero-b" id="hero">
-    <div class="hero-cards" aria-hidden="true">
-      <div class="hcard hcard-back"><b>Study 3 · Doe (2015)</b><span>CSP → CFP (+) · OLS · KLD · US firms</span><div class="hrow"><i></i><i></i><i class="k"></i><i></i><i></i></div></div>
-      <div class="hcard hcard-front"><b>Social performance → financial performance (+)</b><span>6 studies · 5 design dimensions · 1 decision that matters</span><div class="hrow"><i></i><i></i><i class="k"></i><i></i><i></i></div><div class="hrow"><i></i><i class="k"></i><i></i><i></i><i></i></div><div class="hrow"><i></i><i></i><i></i><i class="m"></i><i></i></div></div>
+  <section class="k-hero" id="hero">
+    <svg class="k-bokeh" viewBox="0 0 1600 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+    <div class="k-hero-inner">
+      <h1>See what a field has<br>really tested.</h1>
     </div>
-    <div class="hero4-inner">
-      <h1>See what a field has <strong>really tested.</strong></h1>
-      <p class="lede">An instrument for epistemic mapping: every prediction a field has tested, the assumptions behind every test, and the evidence under each. Judge what the field takes for granted. Decide what to test next, alone or with teams.</p>
-      <form id="newField" class="row hero-form">
-        <input id="newName" placeholder="Name a field, e.g. CEO narcissism and risk-taking" required aria-label="Field name">
-        <button type="submit" class="cta">Start mapping</button>
-      </form>
-      <p class="small hero-hint">Free · no account · your papers are read once and never stored</p>
+    <div class="k-hero-band">
+      <div class="k-hero-band-inner">
+        <p class="k-lede">An instrument for epistemic mapping: every prediction a field has tested, the assumptions behind every test, and the evidence under each. Judge what the field takes for granted. Decide what to test next, alone or with teams.</p>
+        <form id="newField" class="k-form">
+          <input id="newName" placeholder="Name a field, e.g. CEO narcissism and risk-taking" required aria-label="Field name">
+          <button type="submit" class="k-btn k-btn-light">Start mapping</button>
+          <span class="k-hint">Free · no account · your papers are read once and never stored</span>
+        </form>
+      </div>
     </div>
-    <svg class="hero4-curve" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60 L0 30 Q300 60 600 28 T1200 22 L1200 60 Z" fill="#fff"/></svg>
   </section>
 
-  <section class="card" id="fieldsCard">
-    <div class="card-head"><h2>Your fields</h2><span class="muted small" id="fieldCount"></span></div>
+  <section class="k-wrap k-fields" id="fieldsCard" hidden>
+    <div class="k-eyebrow">Your fields</div>
+    <div class="k-fields-head"><h2 class="k-h2">Pick up where you left off.</h2><span class="muted small" id="fieldCount"></span></div>
     <ul id="fieldList" class="list"></ul>
   </section>
 
-  <section class="welcome" id="how">
-    <div class="welcome-grid">
-      <div>
-        <h2 class="h-light">Welcome to your first step in <strong>seeing your field whole.</strong></h2>
-        <p class="muted">EpisteMap is an instrument for epistemic mapping (King, Goldfarb &amp; Simcoe, 2021): the correspondence between the assumptions a field has made and the evidence it obtained under each. It reads the core papers with you, lines up what each study predicted and how each test was designed, shows where the evidence agrees, disagrees and has never looked, and turns the open cells into a multiverse that one researcher or many analyst teams can run.</p>
-        <p class="lead-in">The tool helps you with the following</p>
-      </div>
-      <figure class="hero-fig mini-fig reveal" aria-label="Example design map: one prediction, design dimensions across six studies">
-        <div class="mini-claim">Social performance → financial performance (+)</div>
-        <div class="mini-sub muted small">6 studies · 5 design dimensions</div>
-        <div class="mini-grid">
-          <div class="mini-cell covered"><b>1</b><span>Data source</span></div>
-          <div class="mini-cell partly"><b>5</b><span>Measure of X</span></div>
-          <div class="mini-cell partly"><b>2</b><span>Measure of Y</span></div>
-          <div class="mini-cell none"><b>2 ≠</b><span>Estimator</span></div>
-          <div class="mini-cell partly"><b>3</b><span>Form</span></div>
-        </div>
-        <figcaption>Where studies chose differently and disagree, a design decision matters.</figcaption>
-      </figure>
-    </div>
-    <div class="circles">
-      <article class="circle reveal c1">
-        <div class="circle-art"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22"/><path d="M10 32h44M32 10c-8 8-8 36 0 44M32 10c8 8 8 36 0 44M14 22h36M14 42h36"/><circle class="pin" cx="40" cy="24" r="3.2"/><circle class="pin" cx="22" cy="38" r="3.2"/></svg></div>
-        <h3>Map</h3>
-        <p>State your inquiry and the studies you know. The tool bounds the field, reads the core papers, and lines up every prediction with the design of every test.</p>
+  <section class="k-why reveal" id="how">
+    <span class="k-pill">Why EpisteMap</span>
+    <h2 class="k-display">We help researchers see a field whole: what it predicted, how each test was designed, and what every design took for granted.</h2>
+    <p class="k-sub">An epistemic map (King, Goldfarb &amp; Simcoe, 2021) is the correspondence between the assumptions a field has made and the evidence it obtained under each. EpisteMap reads the core papers with you, lines up every prediction with the design of every test, shows where the evidence agrees, disagrees and has never looked, and turns the open cells into a multiverse that one researcher or many analyst teams can run.</p>
+    <a class="k-link" href="#the-steps">The ten steps</a>
+  </section>
+
+  <section class="k-wrap k-services reveal" id="what-it-does">
+    <span class="k-pill">What the tool does</span>
+    <h2 class="k-display left">The AI reads and proposes, with a quote and a page for everything. You confirm, judge and decide; nothing enters the map until you do.</h2>
+    <div class="k-cards">
+      <article class="k-card">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22"/><path d="M10 32h44M32 10c-8 8-8 36 0 44M32 10c8 8 8 36 0 44M14 22h36M14 42h36"/><circle class="pin" cx="40" cy="24" r="3"/></svg>
+        <h3>Map every test</h3>
+        <p>State your inquiry and the studies you know; seal what you suspect the field assumes. The tool bounds the field, reads the core papers, and lines up every prediction with the design of every test on nine dimensions.</p>
+        <a class="k-btn k-btn-outline" href="#the-steps">Steps 0 to 4</a>
       </article>
-      <article class="circle reveal c2">
-        <div class="circle-art"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="20"/><circle cx="32" cy="32" r="11"/><circle class="pin" cx="32" cy="32" r="3"/><path d="M32 6v10M32 48v10M6 32h10M48 32h10"/></svg></div>
-        <h3>Judge</h3>
-        <p>Claims are visible; assumptions are hidden. The tool unearths what the designs rest on and how sensitive each result is. You judge what is reasonable, questionable or violated; colleagues judge blind; and the tool argues the other side of every judgment, with a verdict that follows its argument.</p>
+      <article class="k-card">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="13"/><circle cx="32" cy="32" r="4"/></svg>
+        <h3>Judge what it assumes</h3>
+        <p>The tool unearths what the designs rest on and how sensitive each result is. You judge each assumption reasonable, questionable or violated; colleagues judge blind; the tool argues the other side, with a verdict that follows its argument. Then you decide.</p>
+        <a class="k-btn k-btn-outline" href="#the-steps">Step 5</a>
       </article>
-      <article class="circle reveal c3">
-        <div class="circle-art"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 44c6-26 18-26 24-12s14 14 18-6"/><circle class="pin" cx="12" cy="44" r="3.2"/><circle class="pin" cx="36" cy="32" r="3.2"/><circle class="pin" cx="54" cy="26" r="3.8"/><path d="M14 54h36"/></svg></div>
-        <h3>Test</h3>
-        <p>Decide per prediction: a multiverse on existing data, run alone or allocated to analyst teams through the map, or a new study with a different design planned in Evidence Navigator. Either way the result comes back into the map.</p>
+      <article class="k-card">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 10L54 50H10z"/><path d="M32 10v40M32 50L10 50M32 50l22 0M32 10L10 50M32 10l22 40"/></svg>
+        <h3>Decide what to test next</h3>
+        <p>A multiverse on existing data, run alone or allocated to analyst teams through the map; a replication of one study with one decision varied, planned in Evidence Navigator; both; or a new design. The result comes back into the map.</p>
+        <a class="k-btn k-btn-outline" href="#the-steps">Steps 6 to 9</a>
       </article>
     </div>
   </section>
 
-  <section class="what reveal" id="what">
-    <img class="watermark" src="brand/logo.svg" alt="" aria-hidden="true">
-    <h2 class="h-light">What is <strong>an epistemic map?</strong></h2>
-    <p class="muted center">A map of a field at the level of its tests: which predictions recur, which assumption sets were used to test them, where results disagree, and which assumptions no study has yet varied. The researcher is the cartographer, not the claims-maker: the map stays neutral, and the judgments live in its legend.</p>
-    <div class="petals" aria-hidden="true">
-      <svg viewBox="0 0 640 300">
-        <defs><linearGradient id="pg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#DCEBFA"/><stop offset="1" stop-color="#2F80ED" stop-opacity=".55"/></linearGradient></defs>
-        <path d="M320 290 C250 230 230 150 320 80 C410 150 390 230 320 290Z" fill="url(#pg)"/>
-        <path d="M320 290 C200 260 150 190 200 120 C300 140 330 220 320 290Z" fill="url(#pg)" opacity=".8"/>
-        <path d="M320 290 C440 260 490 190 440 120 C340 140 310 220 320 290Z" fill="url(#pg)" opacity=".8"/>
-        <path d="M200 120 Q320 40 440 120" fill="none" stroke="#2F80ED" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/>
-        <circle cx="200" cy="120" r="7" fill="#fff" stroke="#2F80ED" stroke-width="3"/><circle cx="320" cy="80" r="7" fill="#fff" stroke="#2F80ED" stroke-width="3"/><circle cx="440" cy="120" r="7" fill="#fff" stroke="#2F80ED" stroke-width="3"/>
-      </svg>
-      <span class="petal-label l1">Map <strong>every test</strong></span>
-      <span class="petal-label l2">Judge <strong>what it assumes</strong></span>
-      <span class="petal-label l3">Decide <strong>what to test next</strong></span>
-    </div>
-  </section>
-
-  <section class="steps4 reveal" id="the-steps" aria-label="The steps">
-    <div class="steps4-inner">
-      <h2 class="h-light">The steps, <strong>in order</strong></h2>
-      <p class="muted center steps-lede">Ten steps, numbered 0 to 9 because you go first, with the tool proposing and you deciding at each. The banner moves on its own; click any step to stop and read it.</p>
+  <section class="k-steps reveal" id="the-steps" aria-label="The steps">
+    <div class="k-wrap">
+      <span class="k-pill">The steps</span>
+      <h2 class="k-display left">Ten steps, numbered 0 to 9 because you go first.</h2>
+      <p class="k-sub left">The tool proposes and you decide at each. The banner moves on its own; click any step to stop and read it.</p>
       <div class="stepper" id="stepper" data-titles='["Your inquiry", "Corpus", "Studies", "Predictions", "Design map", "Assumptions & decision", "Choice space", "Multiverse", "Many analysts", "Reproduce & replicate"]' data-subs='["You go first, sealed", "Bound the field", "Read the papers", "Confirm what was tested", "Line up the designs", "Judge, be challenged, decide", "Benchmark the choices", "Fix the assumption space", "Many analysts, one map", "Hand off and export"]'>
         <ol class="track" id="rail"><li><button type="button" data-i="0" class="active"><span class="node">0</span><span class="lbl">Your inquiry</span></button></li><li><button type="button" data-i="1"><span class="node">1</span><span class="lbl">Corpus</span></button></li><li><button type="button" data-i="2"><span class="node">2</span><span class="lbl">Studies</span></button></li><li><button type="button" data-i="3"><span class="node">3</span><span class="lbl">Predictions</span></button></li><li><button type="button" data-i="4"><span class="node">4</span><span class="lbl">Design map</span></button></li><li><button type="button" data-i="5"><span class="node">5</span><span class="lbl">Assumptions &amp; decision</span></button></li><li><button type="button" data-i="6"><span class="node">6</span><span class="lbl">Choice space</span></button></li><li><button type="button" data-i="7"><span class="node">7</span><span class="lbl">Multiverse</span></button></li><li><button type="button" data-i="8"><span class="node">8</span><span class="lbl">Many analysts</span></button></li><li><button type="button" data-i="9"><span class="node">9</span><span class="lbl">Reproduce &amp; replicate</span></button></li></ol>
         <div class="step-card" id="railDetail" data-details='["What you want to understand, your search terms, the studies you already know, and what you suspect the field takes for granted. Your suspicions are sealed: the tool never sees them while it reads, and later checks them against what it found on its own.", "Bound the field with OpenAlex or a Web of Science / Scopus export. Seminal, recent and rising studies; reviews flagged. You decide which are core.", "Attach PDFs. The tool extracts each paper’s hypotheses, research questions or propositions, the design of every test per study, the result and the analytical choices, with quotes and pages.", "Confirm, edit, merge or reject each prediction; add your own; mark the core ones. Not satisfied? Send the tool back to the search.", "For each core prediction: the range of designs used across studies and the result under each. Where studies chose differently and disagree, a design decision matters.", "The tool unearths the assumptions behind the designs and how sensitive each result is. You judge each one reasonable, questionable or violated; colleagues can judge the same assumptions blind, through their own link. The tool then argues the other side of every judgment, citing its evidence, with a verdict that follows its own judgment, never a polite label. You keep or change each judgment and decide: multiverse on existing data, replicate one study, both, a new design, or stop.", "The analytical choices found across papers, benchmarked against a published reference map (Berchicci &amp; King, 2022 built in).", "Fix the assumption space for a prediction: which dimensions vary, which options, and the alternatives no study has used. The tool proposes alternatives that relax the assumptions you judged questionable, shows the legend (where prior studies sit, what you judged) and lists the specifications: the multiverse plan.", "Optional: run the map with several analyst teams, each with its own link and allocation, or record your own results; estimates return as a specification curve, the completed epistemic map.", "Hand the chosen test to the study-level planner, Evidence Navigator: reproduction code drafted from the original paper, then a preregistered replication. Export the map, the judgments and the decisions as JSON and CSV; the finished study comes back into the map."]'>
@@ -121,33 +97,58 @@
           <button type="button" class="step-arrow" id="stepNext" aria-label="Next step">&rsaquo;</button>
           <div class="step-progress"><i id="stepBar"></i></div>
         </div>
-      </div>
+    </div>
+  </section>
+
+  <section class="k-numbers reveal" id="numbers">
+    <div class="k-wrap">
+      <span class="k-pill dark">Built to be checked</span>
+      <p class="k-numbers-lede">Grounded, logged, and yours to contest</p>
       <div class="stats">
         <div><b>341</b><span>page-verified evidence cards from 26 methodological sources</span></div>
-        <div><b>9</b><span>design dimensions per test</span></div>
+        <div><b>9</b><span>design dimensions on which every test is described</span></div>
         <div><b>3</b><span>checks against the tool agreeing with you: sealed suspicions, colleagues who judge blind, the case against each judgment</span></div>
-        <div><b>5</b><span>routes out of your decision, per prediction: multiverse, replicate, both, new design or stop, each logged with its reason</span></div>
+        <div><b>5</b><span>routes out of your decision, each logged with its reason</span></div>
       </div>
     </div>
   </section>
 
-  <section class="band4 band-b reveal" id="band">
-    <svg class="band-lines" viewBox="0 0 1280 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none" stroke="#fff" stroke-width="1.2">
-      <g stroke-opacity=".18"><path d="M700 300C760 220 820 240 900 180S1040 140 1120 100 1280 60 1280 60"/><path d="M620 300C700 200 800 220 880 140S1020 90 1100 40 1280 -10 1280 -10"/><path d="M780 300C820 260 880 260 960 220S1080 190 1160 160 1280 130 1280 130"/><path d="M860 300C900 280 940 280 1020 260S1140 240 1200 220 1280 200 1280 200"/></g>
-      <g stroke-opacity=".35"><ellipse cx="1040" cy="150" rx="90" ry="60"/><ellipse cx="1040" cy="150" rx="60" ry="38"/><ellipse cx="1040" cy="150" rx="30" ry="18"/></g>
-      <g fill="#fff" stroke="none"><circle cx="1040" cy="150" r="6"/><circle cx="940" cy="250" r="5" opacity=".7"/><circle cx="1160" cy="70" r="5" opacity=".7"/><circle cx="880" cy="100" r="4" opacity=".5"/></g>
-    </svg>
-    <div class="band4-inner">
-      <h2>Challenge <strong>your field</strong></h2>
-      <p>Grounded, private, and yours: every quote has a page, papers are never stored, and nothing enters the map until you confirm it.</p>
-      <a href="#top" class="cta-link" id="ctaTop">Start mapping</a>
+  <section class="k-why reveal" id="what">
+    <span class="k-pill">What is an epistemic map?</span>
+    <h2 class="k-display">A map of a field at the level of its tests.</h2>
+    <p class="k-sub">Which predictions recur, which assumption sets were used to test them, where results disagree, and which assumptions no study has yet varied. The researcher is the cartographer, not the claims-maker: the map stays neutral, and the judgments live in its legend.</p>
+    <div class="petals" aria-hidden="true">
+      <svg viewBox="0 0 640 300">
+        <defs><linearGradient id="pg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E9F4DA"/><stop offset="1" stop-color="#2A4328" stop-opacity=".55"/></linearGradient></defs>
+        <path d="M320 290 C250 230 230 150 320 80 C410 150 390 230 320 290Z" fill="url(#pg)"/>
+        <path d="M320 290 C200 260 150 190 200 120 C300 140 330 220 320 290Z" fill="url(#pg)" opacity=".8"/>
+        <path d="M320 290 C440 260 490 190 440 120 C340 140 310 220 320 290Z" fill="url(#pg)" opacity=".8"/>
+        <path d="M200 120 Q320 40 440 120" fill="none" stroke="#2A4328" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/>
+        <circle cx="200" cy="120" r="7" fill="#fff" stroke="#2A4328" stroke-width="3"/><circle cx="320" cy="80" r="7" fill="#fff" stroke="#2A4328" stroke-width="3"/><circle cx="440" cy="120" r="7" fill="#fff" stroke="#2A4328" stroke-width="3"/>
+      </svg>
+      <span class="petal-label l1">Map <strong>every test</strong></span>
+      <span class="petal-label l2">Judge <strong>what it assumes</strong></span>
+      <span class="petal-label l3">Decide <strong>what to test next</strong></span>
     </div>
+    <a href="#top" class="k-btn k-btn-dark" id="ctaTop">Start mapping</a>
   </section>
 
-  <footer class="foot4">
-    <img src="brand/logo-dark.svg" alt="" width="44" height="44" class="foot-logo">
-    <p><a href="#how">How it works</a><a href="#the-steps">The steps</a><a id="footNav" href="#" hidden target="_blank" rel="noopener">Evidence Navigator</a><a href="https://github.com/kristinaraevigna-cyber" target="_blank" rel="noopener">Source</a></p>
-    <p class="small">EpisteMap · an AI-enabled instrument for meta-science · Code MIT, evidence cards CC BY 4.0</p>
+  <footer class="k-foot">
+    <div class="k-wrap k-foot-grid">
+      <div>
+        <img src="brand/logo-dark.svg" alt="" width="44" height="44" class="foot-logo">
+        <p class="k-foot-tag">Map every test.<br>Judge what it assumes.<br>Decide what to test next.</p>
+      </div>
+      <div class="k-foot-links">
+        <b>EpisteMap</b>
+        <a href="#how">Why</a><a href="#what-it-does">What it does</a><a href="#the-steps">The steps</a><a href="#what">Epistemic maps</a>
+      </div>
+      <div class="k-foot-links">
+        <b>Elsewhere</b>
+        <a id="footNav" href="#" hidden target="_blank" rel="noopener">Evidence Navigator</a><a href="https://github.com/kristinaraevigna-cyber/epistemap" target="_blank" rel="noopener">Source on GitHub</a>
+      </div>
+    </div>
+    <div class="k-wrap k-foot-base"><span>EpisteMap · an AI-enabled instrument for meta-science</span><span>Code MIT · evidence cards CC BY 4.0</span></div>
   </footer>
 </main>
 

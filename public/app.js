@@ -96,17 +96,15 @@ function updateCounts() {
 // ---------- home ----------
 let homeBound = false;
 function drawConstellation() {
-  const svg = $('#constellation'); if (!svg || svg.dataset.done) return; svg.dataset.done = '1';
-  const W = 1200, H = 520, N = 42, pts = []; let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-  for (let i = 0; i < N; i++) pts.push({ x: rnd() * W, y: rnd() * H, r: 2 + rnd() * 4, d: 6 + rnd() * 10, p: rnd() * 6 });
-  const cols = ['#5EEAD4', '#818CF8', '#FDE68A', '#FFFFFF'];
-  let html = '';
-  for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) { const a = pts[i], b = pts[j]; const dd = Math.hypot(a.x - b.x, a.y - b.y); if (dd < 170) html += `<line x1="${a.x.toFixed(0)}" y1="${a.y.toFixed(0)}" x2="${b.x.toFixed(0)}" y2="${b.y.toFixed(0)}" stroke="#fff" stroke-opacity="${(0.35 * (1 - dd / 170)).toFixed(2)}" stroke-width="1"/>`; }
-  for (const p of pts) html += `<circle cx="${p.x.toFixed(0)}" cy="${p.y.toFixed(0)}" r="${p.r.toFixed(1)}" fill="${cols[Math.floor(p.p) % cols.length]}" opacity=".9"><animate attributeName="opacity" values=".4;1;.4" dur="${p.d.toFixed(1)}s" repeatCount="indefinite"/></circle>`;
+  // soft bokeh behind the hero: seeded so it is the same on every load
+  const svg = $('.k-bokeh'); if (!svg || svg.dataset.done) return; svg.dataset.done = '1';
+  const W = 1600, H = 700, N = 70; let seed = 11; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  let html = '<defs><radialGradient id="bk"><stop offset="0" stop-color="#DCEFC4" stop-opacity=".55"/><stop offset="1" stop-color="#DCEFC4" stop-opacity="0"/></radialGradient></defs>';
+  for (let i = 0; i < N; i++) { const r = 3 + rnd() * 26, x = rnd() * W, y = rnd() * H, d = 8 + rnd() * 12, o = .15 + rnd() * .45; html += `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(1)}" fill="url(#bk)" opacity="${o.toFixed(2)}"><animate attributeName="opacity" values="${(o * .5).toFixed(2)};${o.toFixed(2)};${(o * .5).toFixed(2)}" dur="${d.toFixed(1)}s" repeatCount="indefinite"/></circle>`; }
   svg.innerHTML = html;
 }
 function bindHome() {
-  if (homeBound) return; homeBound = true;
+  if (homeBound) return; homeBound = true; drawConstellation();
   $('#ctaTop')?.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => $('#newName')?.focus(), 400); });
   const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.15 }) : null;
   document.querySelectorAll('.reveal').forEach((el) => io ? io.observe(el) : el.classList.add('in'));

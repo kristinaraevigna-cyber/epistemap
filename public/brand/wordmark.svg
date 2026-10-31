@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" width="330" height="64" role="img" aria-label="EpisteMap">
   <g transform="translate(0,0) scale(0.64)">
-    <path d="M12 24 L38 16 L62 24 L88 16 V76 L62 84 L38 76 L12 84 Z" fill="#EAF2FC" stroke="#2F80ED" stroke-width="4" stroke-linejoin="round"/>
-    <path d="M38 16 V76 M62 24 V84" stroke="#2F80ED" stroke-width="3"/>
-    <path d="M22 60 C30 48 44 58 50 46 S70 40 78 34" fill="none" stroke="#2F80ED" stroke-width="3.5" stroke-dasharray="5 4" stroke-linecap="round"/>
+    <path d="M12 24 L38 16 L62 24 L88 16 V76 L62 84 L38 76 L12 84 Z" fill="#E9F4DA" stroke="#2A4328" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M38 16 V76 M62 24 V84" stroke="#2A4328" stroke-width="3"/>
+    <path d="M22 60 C30 48 44 58 50 46 S70 40 78 34" fill="none" stroke="#2A4328" stroke-width="3.5" stroke-dasharray="5 4" stroke-linecap="round"/>
     <path d="M78 34 c-8 0 -12 -7 -12 -13 a12 12 0 0 1 24 0 c0 6 -4 13 -12 13z" fill="#F5A524"/>
     <circle cx="78" cy="21" r="4.5" fill="#fff"/>
-    <circle cx="22" cy="60" r="4" fill="#2F80ED"/>
+    <circle cx="22" cy="60" r="4" fill="#2A4328"/>
   </g>
-  <text x="76" y="43" font-family="Source Serif 4, Georgia, serif" font-size="30" font-weight="700" fill="#12305F">EpisteMap</text>
+  <text x="76" y="43" font-family="Source Serif 4, Georgia, serif" font-size="30" font-weight="700" fill="#1C2A1D">EpisteMap</text>
 </svg>
