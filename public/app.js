@@ -1,4 +1,4 @@
-/* Evidence Atlas front end. Plain JS, no build step. One field = one JSON document kept in `F`. */
+/* EpisteMap front end. Plain JS, no build step. One field = one JSON document kept in `F`. */
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const REFS = {
@@ -184,7 +184,7 @@ function planLink(p, focus) {
   const range = DD().map((d) => { const opts = [...new Set(ts.map((t) => (t.design || {})[d.id]).filter(Boolean).map((v) => Array.isArray(v) ? v.join(', ') : v))]; return opts.length > 1 ? `${d.name}: ${opts.join(' | ')}` : null; }).filter(Boolean).join('; ');
   const coverage = `Tested in ${ts.length} stud${ts.length === 1 ? 'y' : 'ies'}: ${ts.map((t) => `${short(study(t.study))} (${t.result?.direction || '?'}, ${t.result?.support || '?'})`).join('; ')}. Design choices that vary across studies: ${range || 'none recorded'}.`;
   const dec = (F.decisions || {})[p.id]; const viol = ((F.assumptions_by_prediction || {})[p.id]?.assumptions || []).filter((a) => a.judgment === 'violated' || a.judgment === 'questionable');
-  const aim = focus?.choice ? `Decision in Evidence Atlas: ${focus.choice}${focus.reason ? ' — ' + focus.reason : ''}. ${viol.length ? 'Assumptions judged questionable or violated: ' + viol.map((a) => a.text + (a.relaxed_by ? ' (relax by: ' + a.relaxed_by + ')' : '')).join('; ') : ''}` : null;
+  const aim = focus?.choice ? `Decision in EpisteMap: ${focus.choice}${focus.reason ? ' — ' + focus.reason : ''}. ${viol.length ? 'Assumptions judged questionable or violated: ' + viol.map((a) => a.text + (a.relaxed_by ? ' (relax by: ' + a.relaxed_by + ')' : '')).join('; ') : ''}` : null;
   const plan = { field: F.name, claimId: p.id, assumptionId: focus?.id || null, citation, claim: p.statement || p.text, dimension: focus?.id ? ddName(focus.id) : 'research design', assumption: aim || (focus?.id ? `${ddName(focus.id)}: options used so far: ${focus.options.join(' | ')}` : `Which design decision matters most for "${p.text}"?`), coverage: coverage + (dec?.reason && !aim ? ` Decision: ${dec.choice} — ${dec.reason}` : '') };
   const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(plan)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return `<a class="plan-link" href="${CFG.navigatorUrl}/?plan=${b64}" target="_blank" rel="noopener" title="Open Replication Navigator with this study, prediction and design decision pre-filled. The Navigator plans a new study against this one, whether you call it a replication, an extension or a new design.">Plan the new study in Navigator →</a>`;

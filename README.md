@@ -1,12 +1,14 @@
-# Evidence Atlas
+# EpisteMap
+
+*Epistemic maps for management research: map what a field has tested, judge what it assumes, decide what to test next.*
 
 **An AI-enabled instrument for epistemic mapping.** Map what a field has tested and what each test assumed, judge what the field takes for granted, and decide what to test next: a multiverse on existing data (alone or allocated to analyst teams through the map), or a new study planned in Replication Navigator. The result returns to the map.
 
-An *epistemic map* is a correspondence between sets of assumptions and the evidence obtained under each (King, Goldfarb & Simcoe, 2021, *AMR*); Goldfarb & Yan (2021, *SMJ*) show what it does for a replication. Evidence Atlas builds the map from the literature (steps 0–5), then turns it into a specification list and allocates it to teams (step 7), so the researcher is the cartographer and the judgments stay in the legend.
+An *epistemic map* is a correspondence between sets of assumptions and the evidence obtained under each (King, Goldfarb & Simcoe, 2021, *AMR*); Goldfarb & Yan (2021, *SMJ*) show what it does for a replication. EpisteMap builds the map from the literature (steps 0–5), then turns it into a specification list and allocates it to teams (step 7), so the researcher is the cartographer and the judgments stay in the legend.
 
-*Formerly Coverage Map (v0.1–v0.3).*
+*Formerly Coverage Map (v0.1–v0.3) and Evidence Atlas (v0.4–v0.5). The GitHub repository may still be called `coverage-map`; the name does not affect the app.*
 
-Replications are usually counted per paper. Evidence Atlas records something more useful: for each core claim in a field, *which of its assumptions* the existing studies and replications have actually varied, and which remain untested. The result is a coverage map (claims × assumptions) whose empty cells show where the next test would be most informative.
+Replications are usually counted per paper. EpisteMap records something more useful: for each core claim in a field, *which of its assumptions* the existing studies and replications have actually varied, and which remain untested. The result is a coverage map (claims × assumptions) whose empty cells show where the next test would be most informative.
 
 This is a separate project from [Replication Navigator](https://github.com/kristinaraevigna-cyber/replication-navigator) (single-study planning). It reuses the Navigator's verified evidence base but shares no code, so the two can evolve independently.
 

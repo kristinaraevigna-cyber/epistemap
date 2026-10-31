@@ -1,6 +1,6 @@
 # Method notes (v0.4)
 
-These notes record the design decisions behind Evidence Atlas so they can go into the technical appendix of the Organization Science proposal.
+These notes record the design decisions behind EpisteMap so they can go into the technical appendix of the Organization Science proposal.
 
 ## 0. Change of focus in v0.2 (16 October 2026)
 

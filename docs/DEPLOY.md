@@ -1,4 +1,4 @@
-# Deploying Evidence Atlas (GitHub + Render + Supabase)
+# Deploying EpisteMap (GitHub + Render + Supabase)
 
 The same setup as Replication Navigator, so the steps will be familiar. Allow about 20 minutes.
 
@@ -16,7 +16,7 @@ You can use the same Supabase project as the Navigator; the table names do not c
 
 ## 3. Render
 
-1. **New → Blueprint**, select the `evidence-atlas` repository. Render reads `render.yaml` and creates one free web service.
+1. **New → Blueprint**, select the repository (it may still be called `coverage-map`; the name does not matter to Render). Render reads `render.yaml` and creates one free web service.
 2. When asked for environment variables, set:
    - `ANTHROPIC_API_KEY`: your key (the same one as the Navigator is fine; both count against the same budget)
    - `DATABASE_URL`: the Supabase session-pooler string

@@ -36,7 +36,7 @@ export async function searchOpenAlex({ query, fromYear, toYear, perPage = 50, pa
   const params = new URLSearchParams({ filter: filters.join(','), sort, per_page: String(Math.min(perPage, 200)), page: String(page), select: SELECT });
   if (scope === 'fulltext') params.set('search', normaliseQuery(query));
   if (process.env.CONTACT_EMAIL) params.set('mailto', process.env.CONTACT_EMAIL);
-  const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `evidence-atlas (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
+  const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `epistemap (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
   if (!r.ok) { let msg = ''; try { msg = (await r.json()).message || ''; } catch {} throw new Error(`OpenAlex ${r.status}${msg ? `: ${msg}` : ''}${r.status === 400 ? ' — check the query: OpenAlex accepts quoted phrases and AND / OR / NOT, but not parentheses or wildcards. Use the two term boxes to combine groups.' : ''}`); }
   const j = await r.json();
   return {
@@ -85,7 +85,7 @@ export async function resolveDois(dois) {
   if (!list.length) return [];
   const params = new URLSearchParams({ filter: `doi:${list.join('|')}`, per_page: '50', select: SELECT });
   if (process.env.CONTACT_EMAIL) params.set('mailto', process.env.CONTACT_EMAIL);
-  const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `evidence-atlas (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
+  const r = await fetch(`${OPENALEX}/works?${params}`, { headers: { 'user-agent': `epistemap (${process.env.CONTACT_EMAIL || 'mailto unset'})` } });
   if (!r.ok) throw new Error(`OpenAlex ${r.status}`);
   const j = await r.json();
   return j.results.map(workToStudy);
