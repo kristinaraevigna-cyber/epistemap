@@ -125,7 +125,7 @@ app.post('/api/assumptions', wrap(async (req, res) => {
   res.json({ assumptions: json.assumptions || [], gaps: json.gaps || [], overlaps: json.overlaps || [] });
 }));
 
-// Which predictions match the researcher's inquiry? (step 3: reduce clutter; the person still decides)
+// Which predictions match the researcher's inquiry? (step 4: reduce clutter; the person still decides)
 app.post('/api/suggest-core', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, inquiry, predictions } = req.body || {};
@@ -137,7 +137,7 @@ app.post('/api/suggest-core', wrap(async (req, res) => {
   await logEvent(fieldId, 'suggest_core', { n: predictions.length, core: (json.items || []).filter((i) => i.verdict === 'core').length, usage: out.usage });
   res.json({ items: json.items || [] });
 }));
-// Plausible alternatives no study has used, per design dimension (step 7: the tool proposes, the person adds)
+// Plausible alternatives no study has used, per design dimension (step 8: the tool proposes, the person adds)
 app.post('/api/alternatives', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, prediction, dims, judgments, gaps } = req.body || {};
@@ -150,7 +150,7 @@ app.post('/api/alternatives', wrap(async (req, res) => {
   await logEvent(fieldId, 'alternatives', { prediction: prediction.id, n: (json.alternatives || []).length, usage: out.usage });
   res.json({ alternatives: (json.alternatives || []).filter((a) => a.dim && a.option) });
 }));
-// Assessment of the decision from the researcher's own judgments (step 5): the tool proposes a route, the person decides
+// Assessment of the decision from the researcher's own judgments (step 6): the tool proposes a route, the person decides
 app.post('/api/assess', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, prediction, judgments, tests } = req.body || {};
@@ -163,7 +163,7 @@ app.post('/api/assess', wrap(async (req, res) => {
   await logEvent(fieldId, 'assess', { prediction: prediction.id, judged: judgments.length, routes: (json.routes || []).map((r) => `${r.route}:${r.verdict}`), usage: out.usage });
   res.json({ summary: json.summary || '', routes: json.routes || [], violated_to_address: json.violated_to_address || [], at: new Date().toISOString() });
 }));
-// Compare the researcher's sealed step-0 suspicions with the assumptions the tool unearthed WITHOUT seeing them.
+// Compare the researcher's sealed step-1 suspicions with the assumptions the tool unearthed WITHOUT seeing them.
 // The unearthing call never receives the priors, so this is a disconfirmation check, not an echo.
 app.post('/api/priors-check', wrap(async (req, res) => {
   const { key } = resolveKey(req);
@@ -177,7 +177,7 @@ app.post('/api/priors-check', wrap(async (req, res) => {
   await logEvent(fieldId, 'priors_check', { prediction: prediction?.id, n: (json.items || []).length, verdicts: (json.items || []).map((x) => x.verdict), usage: out.usage });
   res.json({ items: json.items || [], not_mentioned: json.not_mentioned || [] });
 }));
-// Push back on the researcher's judgments: argue the other side where there is a case (step 5). The person keeps or changes each judgment; both are logged.
+// Push back on the researcher's judgments: argue the other side where there is a case (step 6). The person keeps or changes each judgment; both are logged.
 app.post('/api/challenge', wrap(async (req, res) => {
   const { key } = resolveKey(req);
   const { fieldId, prediction, assumptions, tests } = req.body || {};
