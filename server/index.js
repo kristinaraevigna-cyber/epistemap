@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { initStore, storeMode, newField, listFields, getField, saveField, deleteField, logEvent, exportAll } from './store.js';
-import { dimensions, designDimensions, cards, sources, benchmarks, cardById, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
+import { dimensions, designDimensions, cards, sources, topics, benchmarks, cardById, groundingBlock, extractCitations, coachSystemBlocks, KNOWLEDGE_VERSION } from './knowledge.js';
 import { EXTRACT_PROMPT, CONSOLIDATE_PROMPT, COMPARE_PROMPT, ASSUMPTIONS_PROMPT, parseJsonLoose } from './prompts.js';
 import { searchOpenAlex, searchGroups, resolveDois, localCitations, parseExport, mergeStudies } from './corpus.js';
 
@@ -65,7 +65,7 @@ const wrap = (fn) => (req, res) => fn(req, res).catch((e) => { console.error(e);
 // ---- config & knowledge ----
 app.get('/healthz', (_, res) => res.send('ok'));
 app.get('/api/config', (_, res) => res.json({ navigatorUrl: NAVIGATOR_URL, store: storeMode, requiresAccessCode: !!ACCESS_CODE, serverKeyAvailable: !!process.env.ANTHROPIC_API_KEY, model: MODEL, maxPdfMb: MAX_PDF_MB, knowledgeVersion: KNOWLEDGE_VERSION, dimensions, designDimensions }));
-app.get('/api/knowledge', (_, res) => res.json({ dimensions, cards, sources, benchmarks }));
+app.get('/api/knowledge', (_, res) => res.json({ dimensions, topics, cards, sources, benchmarks }));
 app.get('/api/benchmarks', (_, res) => res.json(benchmarks));
 app.post('/api/check-code', (req, res) => res.json({ ok: !ACCESS_CODE || req.body?.code === ACCESS_CODE }));
 
@@ -185,12 +185,33 @@ app.post('/api/challenge', wrap(async (req, res) => {
   if (!prediction?.text || !judged.length) return res.status(400).json({ error: 'prediction and judged assumptions required' });
   const A = judged.map((a) => `- key ${a.key}: "${a.text}" | researcher's judgment: ${a.judgment.toUpperCase()}${a.note ? ` (their reason: ${a.note})` : ''} | your earlier sensitivity rating: ${a.sensitivity ?? '?'} | from: ${(a.source || []).join(', ')} | would be relaxed by: ${a.relaxed_by || '?'}`).join('\n');
   const T = (tests || []).map((t) => `- ${t.study}: ${Object.entries(t.design || {}).map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(', ') : v ?? 'n/a'}`).join('; ')} → ${t.result?.direction || '?'}/${t.result?.support || '?'}`).join('\n') || '(none)';
-  const content = `PREDICTION: ${prediction.text}${prediction.statement ? ' — ' + prediction.statement : ''}\n\nHOW THE RESEARCHER JUDGED EACH ASSUMPTION\n${A}\n\nTHE TESTS:\n${T}\n\nYou are the researcher's sparring partner, not their echo. For EACH judged assumption, decide whether you AGREE or DISAGREE with the researcher's judgment, and make the strongest honest case for the OTHER side in at most 45 words, grounded in the designs and results above and in the evidence cards (cite ids in square brackets). Disagree whenever a reasonable methodologist would: an assumption judged "reasonable" that all studies share, that your sensitivity rating marks as decisive, or that the designs cannot have tested, deserves a challenge; an assumption judged "violated" that the designs do address deserves a defence. Agreeing with everything is a failure. Write without abbreviations. Return only JSON: {"items":[{"key":"...","stance":"agree|disagree","case":"...","would_change_if":"what evidence from these or new studies would change your view (max 25 words)"}]}`;
+  const content = `PREDICTION: ${prediction.text}${prediction.statement ? ' — ' + prediction.statement : ''}\n\nHOW THE RESEARCHER JUDGED EACH ASSUMPTION\n${A}\n\nTHE TESTS:\n${T}\n\nYou are the researcher's sparring partner, not their echo. For EACH judged assumption, first write the strongest honest case about the researcher's judgment in at most 45 words, grounded in the designs and results above and in the evidence cards (cite ids in square brackets): where a reasonable methodologist would judge differently, argue for that different judgment; where the researcher is right, say why the strongest objection fails. THEN state your own judgment of the assumption (reasonable, questionable or violated) as the conclusion of that case; the two must not contradict each other. Disagree whenever a reasonable methodologist would: an assumption judged "reasonable" that all studies share, that your sensitivity rating marks as decisive, or that the designs cannot have tested, deserves a challenge; an assumption judged "violated" that the designs do address deserves a defence. Agreeing with everything is a failure. Write without abbreviations. Return only JSON: {"items":[{"key":"...","case":"...","tool_judgment":"reasonable|questionable|violated","would_change_if":"what evidence from these or new studies would change your view (max 25 words)"}]}`;
   const out = await callModel({ key, system: systemBlocks(), content: [{ type: 'text', text: content }], maxTokens: 2500 });
   const json = parseJsonLoose(out.text);
-  const items = (json.items || []).filter((x) => x.key && x.stance);
-  await logEvent(fieldId, 'challenge', { prediction: prediction.id, judged: judged.length, disagree: items.filter((x) => x.stance === 'disagree').length, usage: out.usage });
-  res.json({ items });
+  const J = new Map(judged.map((a) => [String(a.key), a.judgment]));
+  const norm = (v) => String(v || '').toLowerCase().trim();
+  // The verdict is derived from the tool's own judgment, never read as a free-standing label: AGREES only when the tool
+  // would judge the assumption as the researcher did.
+  let items = (json.items || []).filter((x) => x.key && J.has(String(x.key))).map((x) => {
+    const tj = ['reasonable', 'questionable', 'violated'].includes(norm(x.tool_judgment)) ? norm(x.tool_judgment) : null;
+    const stance = tj ? (tj === J.get(String(x.key)) ? 'agree' : 'disagree') : (norm(x.stance) === 'disagree' ? 'disagree' : 'agree');
+    return { key: String(x.key), case: String(x.case || ''), tool_judgment: tj, stance, would_change_if: x.would_change_if || '' };
+  });
+  // Second pass, label fidelity: an independent reading of each case decides whether it argues for keeping or changing the
+  // judgment. A mismatch flips the verdict and is logged (label_corrected), so the audit protocol can count them.
+  let corrected = 0;
+  if (items.length) {
+    const L = items.map((x) => `- key ${x.key}: researcher judged ${String(J.get(x.key)).toUpperCase()}; proposed verdict ${x.stance.toUpperCase()}; the case: "${x.case.replace(/\s+/g, ' ')}"`).join('\n');
+    const check = `LABEL CHECK. For each item below, read ONLY the case text and decide what it argues: AGREE if it supports keeping the researcher's judgment as stated, DISAGREE if it argues that the assumption deserves a different judgment (for example it says the assumption is doubtful, untested, violated or stronger than the designs can bear when the researcher judged it reasonable, or defends an assumption the researcher judged violated). Ignore the proposed verdict; judge the text. Return only JSON: {"items":[{"key":"...","stance":"agree|disagree"}]}\n\n${L}`;
+    try {
+      const chk = await callModel({ key, system: [{ type: 'text', text: 'You classify short methodological arguments. Be literal: the label must describe what the text argues.' }], content: [{ type: 'text', text: check }], maxTokens: 800 });
+      const cj = parseJsonLoose(chk.text);
+      const read = new Map((cj.items || []).map((x) => [String(x.key), norm(x.stance)]));
+      items = items.map((x) => { const r = read.get(x.key); if ((r === 'agree' || r === 'disagree') && r !== x.stance) { corrected++; return { ...x, stance: r, label_corrected: true, label_was: x.stance }; } return x; });
+    } catch (e) { console.warn('label check skipped:', e.message); }
+  }
+  await logEvent(fieldId, 'challenge', { prediction: prediction.id, judged: judged.length, disagree: items.filter((x) => x.stance === 'disagree').length, label_corrected: corrected, items: items.map((x) => ({ key: x.key, researcher: J.get(x.key), tool: x.tool_judgment, stance: x.stance, corrected: !!x.label_corrected })), usage: out.usage });
+  res.json({ items, label_corrected: corrected });
 }));
 app.post('/api/compare', wrap(async (req, res) => {
   const { key } = resolveKey(req);

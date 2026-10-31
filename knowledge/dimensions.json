@@ -8,15 +8,11 @@
    "reverse causality is ruled out",
    "a rival theory predicts the opposite sign"
   ],
-  "card_stages": [
-   "aim",
-   "foundations"
-  ],
-  "card_sources": [
-   "irvine2021",
-   "anderson2016"
-  ],
-  "literature": "Irvine (2021); Anderson & Maxwell (2016)"
+  "literature": "King, Goldfarb & Simcoe (2021); Nosek et al. (2022); Delios et al. (2022)",
+  "topics": [
+   "epistemic_trust",
+   "replication_metascience"
+  ]
  },
  {
   "id": "constructs",
@@ -27,14 +23,10 @@
    "a single-item measure is adequate",
    "the scale is valid in the study population"
   ],
-  "card_stages": [
-   "measures"
-  ],
-  "card_sources": [
-   "flake2023",
-   "goldfarb2021"
-  ],
-  "literature": "Flake et al. (2022)"
+  "literature": "Goldfarb & Yan (2021); Hill et al. (2021); Roth et al. (2023)",
+  "topics": [
+   "measurement"
+  ]
  },
  {
   "id": "design",
@@ -45,15 +37,12 @@
    "a cross-sectional design captures a causal process",
    "the sample is large enough to detect the effect"
   ],
-  "card_stages": [
-   "sample",
-   "differences"
-  ],
-  "card_sources": [
-   "brandt2014",
-   "bonett2021"
-  ],
-  "literature": "Brandt et al. (2014); Bonett (2021)"
+  "literature": "Antonakis et al. (2010); Baker et al. (2026); Cattaneo & Titiunik (2022)",
+  "topics": [
+   "identification_endogeneity",
+   "sample_context",
+   "difference_in_differences"
+  ]
  },
  {
   "id": "analysis",
@@ -64,18 +53,13 @@
    "a particular treatment of outliers",
    "a specific lag structure"
   ],
-  "card_stages": [
-   "analysis",
-   "reproduce"
-  ],
-  "card_sources": [
-   "king2021",
-   "goldfarb2021",
-   "forrt2025",
-   "bonett2021",
-   "anderson2016"
-  ],
-  "literature": "Götz et al. (2026); Berchicci & King (2022); Steegen et al. (2016)"
+  "literature": "Götz et al. (2026); Berchicci & King (2022); Del Giudice & Gangestad (2021); Gelman & Loken (2014)",
+  "topics": [
+   "multiverse",
+   "forking_paths",
+   "controls_specification",
+   "many_analysts"
+  ]
  },
  {
   "id": "context",
@@ -86,15 +70,10 @@
    "a particular institutional setting",
    "a specific industry"
   ],
-  "card_stages": [
-   "differences",
-   "target"
-  ],
-  "card_sources": [
-   "brandt2014",
-   "forrt2025",
-   "isager2021"
-  ],
-  "literature": "Delios et al. (2022)"
+  "literature": "Delios et al. (2022); Wu et al. (2023); Dreber & Johannesson (2025)",
+  "topics": [
+   "sample_context",
+   "replication_metascience"
+  ]
  }
 ]

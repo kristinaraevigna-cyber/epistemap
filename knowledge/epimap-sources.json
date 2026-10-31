@@ -1,0 +1,210 @@
+[
+ {
+  "key": "king2021",
+  "short": "King, Goldfarb & Simcoe (2021)",
+  "citation": "King, A. A., Goldfarb, B., & Simcoe, T. (2021). Learning from testimony on quantitative research in management. Academy of Management Review, 46(3), 465–488.",
+  "url": "https://doi.org/10.5465/amr.2018.0421",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the publisher PDF (page 1 = p. 465)."
+ },
+ {
+  "key": "goldfarb2021",
+  "short": "Goldfarb & Yan (2021)",
+  "citation": "Goldfarb, B., & Yan, L. (2021). Revisiting Zuckerman's (1999) categorical imperative: An application of epistemic maps for replication. Strategic Management Journal, 42(11), 1963–1992.",
+  "url": "https://doi.org/10.1002/smj.3290",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the publisher PDF (page 1 = p. 1963)."
+ },
+ {
+  "key": "berchicci2022",
+  "short": "Berchicci & King (2022)",
+  "citation": "Berchicci, L., & King, A. A. (2022). Building knowledge by mapping model uncertainty in six studies of social and financial performance. Strategic Management Journal, 43(7), 1319–1346. https://doi.org/10.1002/smj.3374",
+  "url": "https://doi.org/10.1002/smj.3374",
+  "access": "open",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 1319; printed_page = pdf_page + 1318)."
+ },
+ {
+  "key": "gotz2026",
+  "short": "Götz, Carnes, Hill & O'Boyle (2026)",
+  "citation": "Götz, M., Carnes, C. M., Hill, A. D., & O'Boyle, E. H. (2026). Multiverse analysis to advance theory and practice: Illustrating and investigating variability in CEO gender pay inequality. Academy of Management Journal, 69(4), 857–887. https://doi.org/10.5465/amj.2024.0355",
+  "url": "https://doi.org/10.5465/amj.2024.0355",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 857; printed_page = pdf_page + 856)."
+ },
+ {
+  "key": "gotz2024",
+  "short": "Götz, Sarma & O'Boyle (2024)",
+  "citation": "Götz, M., Sarma, A., & O'Boyle, E. H. (2024). The multiverse of universes: A tutorial to plan, execute and interpret multiverses analyses using the R package multiverse. International Journal of Psychology, 59(6), 1003–1014. https://doi.org/10.1002/ijop.13229",
+  "url": "https://doi.org/10.1002/ijop.13229",
+  "access": "open",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 1003; printed_page = pdf_page + 1002)."
+ },
+ {
+  "key": "delios2025",
+  "short": "Delios, Hu, Yu, Zhou et al. (2025, supplement)",
+  "citation": "Delios, A., Hu, T., Yu, S., Zhou, N., the many analysts, & Uhlmann, E. L. (2025). Supplements for \"The insights from the crowd: Drawing inferences from many approaches to key empirical questions in international business\" [Supplementary material]. Journal of International Business Studies.",
+  "url": "https://link.springer.com/journal/41267",
+  "access": "open",
+  "page_note": "This file is the online supplement only (Supplements 1-9). printed_page = supplement page number; pdf_page = page index in the PDF (page 1 = supplement p. 1; printed_page = pdf_page). Supplement 9 is an extended version of Table 5 of the main article; its cells are quoted from the table layout. DOI of the main article is not stated in the file."
+ },
+ {
+  "key": "delios2022",
+  "short": "Delios et al. (2022)",
+  "citation": "Delios, A., Clemente, E. G., Wu, T., Tan, H., Wang, Y., Gordon, M., Viganola, D., Chen, Z., Dreber, A., Johannesson, M., Pfeiffer, T., Generalizability Tests Forecasting Collaboration, & Uhlmann, E. L. (2022). Examining the generalizability of research findings from archival data. Proceedings of the National Academy of Sciences, 119(30), e2120377119. https://doi.org/10.1073/pnas.2120377119",
+  "url": "https://doi.org/10.1073/pnas.2120377119",
+  "access": "open",
+  "page_note": "Article is paginated '1 of 9' to '9 of 9' (article number e2120377119); printed_page uses that form; pdf_page = page index in the PDF (page 1 = '1 of 9')."
+ },
+ {
+  "key": "wulff2023",
+  "short": "Wulff et al. (2023)",
+  "citation": "Wulff, J. N., Sajons, G. B., Pogrebna, G., Lonati, S., Bastardoz, N., Banks, G. C., & Antonakis, J. (2023). Common methodological mistakes. The Leadership Quarterly, 34(1), 101677. https://doi.org/10.1016/j.leaqua.2023.101677",
+  "url": "https://doi.org/10.1016/j.leaqua.2023.101677",
+  "access": "open",
+  "page_note": "printed_page = article page (1–25 of article 101677); pdf_page = page index in the PDF (page 1 = p. 1)."
+ },
+ {
+  "key": "gelman2014",
+  "short": "Gelman & Loken (2014)",
+  "citation": "Gelman, A., & Loken, E. (2014). The statistical crisis in science: Data-dependent analysis—a \"garden of forking paths\"—explains why many statistically significant comparisons don't hold up. American Scientist, 102(6), 460–465. https://doi.org/10.1511/2014.111.460",
+  "url": "https://doi.org/10.1511/2014.111.460",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = JSTOR cover sheet; page 2 = p. 460)."
+ },
+ {
+  "key": "hoffmann2021",
+  "short": "Hoffmann et al. (2021)",
+  "citation": "Hoffmann, S., Schönbrodt, F., Elsas, R., Wilson, R., Strasser, U., & Boulesteix, A.-L. (2021). The multiplicity of analysis strategies jeopardizes replicability: Lessons learned across disciplines. Royal Society Open Science, 8(4), 201925. https://doi.org/10.1098/rsos.201925",
+  "url": "https://doi.org/10.1098/rsos.201925",
+  "access": "open",
+  "page_note": "Article number 201925, paginated 1-14; printed_page = article page number; pdf_page = page index in the PDF (page 1 = p. 1; printed_page = pdf_page)."
+ },
+ {
+  "key": "delgiudice2021",
+  "short": "Del Giudice & Gangestad (2021)",
+  "citation": "Del Giudice, M., & Gangestad, S. W. (2021). A traveler's guide to the multiverse: Promises, pitfalls, and a framework for the evaluation of analytic decisions. Advances in Methods and Practices in Psychological Science, 4(1), 1–15. https://doi.org/10.1177/2515245920954925",
+  "url": "https://doi.org/10.1177/2515245920954925",
+  "access": "open",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 1; pdf_page equals printed_page)."
+ },
+ {
+  "key": "nosek2022",
+  "short": "Nosek et al. (2022)",
+  "citation": "Nosek, B. A., Hardwicke, T. E., Moshontz, H., Allard, A., Corker, K. S., Dreber, A., Fidler, F., Hilgard, J., Kline Struhl, M., Nuijten, M. B., Rohrer, J. M., Romero, F., Scheel, A. M., Scherer, L. D., Schönbrodt, F. D., & Vazire, S. (2022). Replicability, robustness, and reproducibility in psychological science. Annual Review of Psychology, 73, 719–748. https://doi.org/10.1146/annurev-psych-020821-114157",
+  "url": "https://doi.org/10.1146/annurev-psych-020821-114157",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 719)."
+ },
+ {
+  "key": "munafo2017",
+  "short": "Munafò et al. (2017)",
+  "citation": "Munafò, M. R., Nosek, B. A., Bishop, D. V. M., Button, K. S., Chambers, C. D., Percie du Sert, N., Simonsohn, U., Wagenmakers, E.-J., Ware, J. J., & Ioannidis, J. P. A. (2017). A manifesto for reproducible science. Nature Human Behaviour, 1(1), 0021. https://doi.org/10.1038/s41562-016-0021",
+  "url": "https://doi.org/10.1038/s41562-016-0021",
+  "access": "open",
+  "page_note": "printed_page = article page (1–9 of article 0021); pdf_page = page index in the PDF (page 1 = p. 1)."
+ },
+ {
+  "key": "ioannidis2018",
+  "short": "Ioannidis (2018)",
+  "citation": "Ioannidis, J. P. A. (2018). Meta-research: Why research on research matters. PLOS Biology, 16(3), e2005468. https://doi.org/10.1371/journal.pbio.2005468",
+  "url": "https://doi.org/10.1371/journal.pbio.2005468",
+  "access": "open",
+  "page_note": "printed_page = article page (1–6 of e2005468); pdf_page = page index in the PDF (page 1 = p. 1)."
+ },
+ {
+  "key": "dreber2025",
+  "short": "Dreber & Johannesson (2025)",
+  "citation": "Dreber, A., & Johannesson, M. (2025). A framework for evaluating reproducibility and replicability in economics. Economic Inquiry, 63(2), 338–356. https://doi.org/10.1111/ecin.13244",
+  "url": "https://doi.org/10.1111/ecin.13244",
+  "access": "open",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 338; printed_page = pdf_page + 337)."
+ },
+ {
+  "key": "hill2021",
+  "short": "Hill et al. (2021)",
+  "citation": "Hill, A. D., Johnson, S. G., Greco, L. M., O'Boyle, E. H., & Walter, S. L. (2021). Endogeneity: A review and agenda for the methodology-practice divide affecting micro and macro research. Journal of Management, 47(1), 105–143. https://doi.org/10.1177/0149206320960533",
+  "url": "https://doi.org/10.1177/0149206320960533",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 105)."
+ },
+ {
+  "key": "wu2023",
+  "short": "Wu, Delios, Chen & Wang (2023)",
+  "citation": "Wu, T., Delios, A., Chen, Z., & Wang, X. (2023). Rethinking corruption in international business: An empirical review. Journal of World Business, 58(2), 101410. https://doi.org/10.1016/j.jwb.2022.101410",
+  "url": "https://doi.org/10.1016/j.jwb.2022.101410",
+  "access": "subscription",
+  "page_note": "Article number 101410, paginated 1-62 including appendix tables; printed_page = page number printed on the page; pdf_page = page index in the PDF (page 1 = p. 1; printed_page = pdf_page)."
+ },
+ {
+  "key": "baker2026",
+  "short": "Baker et al. (2026)",
+  "citation": "Baker, A., Callaway, B., Cunningham, S., Goodman-Bacon, A., & Sant'Anna, P. H. C. (2026). Difference-in-differences designs: A practitioner's guide. Journal of Economic Literature, 64(2), 498–557. https://doi.org/10.1257/jel.20251650",
+  "url": "https://doi.org/10.1257/jel.20251650",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 498)."
+ },
+ {
+  "key": "ankelpeters2023",
+  "short": "Ankel-Peters, Fiala & Neubauer (2023)",
+  "citation": "Ankel-Peters, J., Fiala, N., & Neubauer, F. (2023). Do economists replicate? Journal of Economic Behavior & Organization, 212, 219–232. https://doi.org/10.1016/j.jebo.2023.05.009",
+  "url": "https://doi.org/10.1016/j.jebo.2023.05.009",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 219; printed_page = pdf_page + 218)."
+ },
+ {
+  "key": "wilholt2013",
+  "short": "Wilholt (2013)",
+  "citation": "Wilholt, T. (2013). Epistemic trust in science. The British Journal for the Philosophy of Science, 64(2), 233–253. https://doi.org/10.1093/bjps/axs007",
+  "url": "https://doi.org/10.1093/bjps/axs007",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = JSTOR cover sheet; page 2 = p. 233; pdf_page = printed_page - 231)."
+ },
+ {
+  "key": "antonakis2010",
+  "short": "Antonakis et al. (2010)",
+  "citation": "Antonakis, J., Bendahan, S., Jacquart, P., & Lalive, R. (2010). On making causal claims: A review and recommendations. The Leadership Quarterly, 21(6), 1086–1120. https://doi.org/10.1016/j.leaqua.2010.10.010",
+  "url": "https://doi.org/10.1016/j.leaqua.2010.10.010",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 1086)."
+ },
+ {
+  "key": "bastardoz2023",
+  "short": "Bastardoz et al. (2023)",
+  "citation": "Bastardoz, N., Matthews, M. J., Sajons, G. B., Ransom, T., Kelemen, T. K., & Matthews, S. H. (2023). Instrumental variables estimation: Assumptions, pitfalls, and guidelines. The Leadership Quarterly, 34(1), 101673. https://doi.org/10.1016/j.leaqua.2022.101673",
+  "url": "https://doi.org/10.1016/j.leaqua.2022.101673",
+  "access": "subscription",
+  "page_note": "printed_page = article page number printed in the footer of the in-press version (article 101673, pages 1-18); pdf_page = page index in the PDF (page 1 = p. 1)."
+ },
+ {
+  "key": "lal2024",
+  "short": "Lal et al. (2024)",
+  "citation": "Lal, A., Lockhart, M., Xu, Y., & Zu, Z. (2024). How much should we trust instrumental variable estimates in political science? Practical advice based on 67 replicated studies. Political Analysis, 32(4), 521–540. https://doi.org/10.1017/pan.2024.2",
+  "url": "https://doi.org/10.1017/pan.2024.2",
+  "access": "open",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 521)."
+ },
+ {
+  "key": "roth2023",
+  "short": "Roth et al. (2023)",
+  "citation": "Roth, J., Sant'Anna, P. H. C., Bilinski, A., & Poe, J. (2023). What's trending in difference-in-differences? A synthesis of the recent econometrics literature. Journal of Econometrics, 235(2), 2218–2244. https://doi.org/10.1016/j.jeconom.2023.03.008",
+  "url": "https://doi.org/10.1016/j.jeconom.2023.03.008",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 2218)."
+ },
+ {
+  "key": "cattaneo2022",
+  "short": "Cattaneo & Titiunik (2022)",
+  "citation": "Cattaneo, M. D., & Titiunik, R. (2022). Regression discontinuity designs. Annual Review of Economics, 14, 821–851. https://doi.org/10.1146/annurev-economics-051520-021409",
+  "url": "https://doi.org/10.1146/annurev-economics-051520-021409",
+  "access": "subscription",
+  "page_note": "printed_page = journal page; pdf_page = page index in the PDF (page 1 = p. 821)."
+ },
+ {
+  "key": "cattaneo2024",
+  "short": "Cattaneo, Idrobo & Titiunik (2024)",
+  "citation": "Cattaneo, M. D., Idrobo, N., & Titiunik, R. (2024). A practical introduction to regression discontinuity designs: Extensions (Elements in Quantitative and Computational Methods for the Social Sciences). Cambridge University Press. https://doi.org/10.1017/9781009441896 (arXiv:2301.08958v2)",
+  "url": "https://doi.org/10.1017/9781009441896",
+  "access": "open",
+  "page_note": "printed_page = page number printed in the footer of the arXiv v2 manuscript (March 2024); pdf_page = page index in the PDF (page 5 = p. 3; the Cambridge Element pagination differs)."
+ }
+]

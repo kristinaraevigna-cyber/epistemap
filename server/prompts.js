@@ -45,7 +45,7 @@ For each assumption give: text (one sentence: what must be true); source (which 
 Then two short lists: "gaps" (design options that no study has used but that the literature would consider reasonable, one phrase each) and "overlaps" (predictions in <other_predictions>, if any, that may be the same construct relationship under different names).
 
 Return ONLY a JSON object:
-{ "assumptions": [ { "key": "a1", "text": "...", "source": ["identification"], "shared_by": "all", "sensitivity": 3, "relaxed_by": "...", "grounding": ["forrt2025-22"] } ], "gaps": ["..."], "overlaps": [ { "prediction": "<id>", "why": "..." } ] }
+{ "assumptions": [ { "key": "a1", "text": "...", "source": ["identification"], "shared_by": "all", "sensitivity": 3, "relaxed_by": "...", "grounding": ["antonakis2010-01"] } ], "gaps": ["..."], "overlaps": [ { "prediction": "<id>", "why": "..." } ] }
 Be conservative: 4–10 assumptions, the most consequential first. Do not invent studies or results.`;
 
 export const CONSOLIDATE_PROMPT = `You are consolidating predictions across studies in one field. You will receive list C (canonical predictions already in the map, each with an id) and list N (new predictions extracted from one paper, each with a key). For each item in N, decide whether it states the SAME prediction as an item in C: same constructs X and Y at the construct level and compatible direction, even if worded differently or measured differently. Different measures of the same construct are the same prediction. A moderation or mediation of the same X → Y is a DIFFERENT prediction from the main effect.

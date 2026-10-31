@@ -9,9 +9,10 @@
    "hand-collected survey",
    "lab experiment"
   ],
-  "cards": [
-   "brandt2014",
-   "forrt2025"
+  "topics": [
+   "sample_context",
+   "transparency_reporting",
+   "measurement"
   ]
  },
  {
@@ -24,10 +25,9 @@
    "excluding financial firms",
    "CEOs of listed firms"
   ],
-  "cards": [
-   "bonett2021",
-   "brandt2014",
-   "goldfarb2021"
+  "topics": [
+   "sample_context",
+   "identification_endogeneity"
   ]
  },
  {
@@ -40,9 +40,9 @@
    "manufacturing",
    "post-crisis"
   ],
-  "cards": [
-   "forrt2025",
-   "isager2021"
+  "topics": [
+   "sample_context",
+   "difference_in_differences"
   ]
  },
  {
@@ -55,10 +55,8 @@
    "narcissism from speech",
    "overconfidence from option holding"
   ],
-  "cards": [
-   "flake2023",
-   "goldfarb2021",
-   "king2021"
+  "topics": [
+   "measurement"
   ]
  },
  {
@@ -71,10 +69,8 @@
    "market value added",
    "survey-rated performance"
   ],
-  "cards": [
-   "flake2023",
-   "goldfarb2021",
-   "king2021"
+  "topics": [
+   "measurement"
   ]
  },
  {
@@ -88,10 +84,9 @@
    "GMM",
    "2SLS / instrument"
   ],
-  "cards": [
-   "forrt2025",
-   "bonett2021",
-   "king2021"
+  "topics": [
+   "controls_specification",
+   "multiverse"
   ]
  },
  {
@@ -105,10 +100,9 @@
    "year FE",
    "industry FE"
   ],
-  "cards": [
-   "forrt2025",
-   "king2021",
-   "goldfarb2021"
+  "topics": [
+   "controls_specification",
+   "identification_endogeneity"
   ]
  },
  {
@@ -122,10 +116,9 @@
    "one-year lag",
    "lagged DV"
   ],
-  "cards": [
-   "anderson2016",
-   "bonett2021",
-   "king2021"
+  "topics": [
+   "controls_specification",
+   "forking_paths"
   ]
  },
  {
@@ -139,10 +132,11 @@
    "difference-in-differences",
    "randomised experiment"
   ],
-  "cards": [
-   "irvine2021",
-   "anderson2016",
-   "king2021"
+  "topics": [
+   "identification_endogeneity",
+   "instrumental_variables",
+   "difference_in_differences",
+   "regression_discontinuity"
   ]
  }
 ]

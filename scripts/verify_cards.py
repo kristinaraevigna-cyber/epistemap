@@ -2,7 +2,7 @@
 """Verify that every evidence-card quote appears verbatim on its stated PDF page.
 
 Usage:  python3 scripts/verify_cards.py --pdf-dir /path/to/pdfs
-The folder must contain one PDF per source, named <source-key>.pdf (e.g. brandt2014.pdf).
+The folder must contain one PDF per source, named <source-key>.pdf (e.g. roth2023.pdf).
 Requires poppler's `pdftotext`. PDFs are NOT part of this repository (copyright).
 
 Matching is robust to line breaks, hyphenation at line ends, ligatures (ﬁ→fi), curly quotes
@@ -29,7 +29,7 @@ def pages(pdf):
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--pdf-dir', required=True)
-ap.add_argument('--cards', default=str(Path(__file__).parent.parent / 'knowledge' / 'evidence-cards.json'))
+ap.add_argument('--cards', default=str(Path(__file__).parent.parent / 'knowledge' / 'epimap-cards.json'))
 a = ap.parse_args()
 cards = json.load(open(a.cards))
 cache, fails, missing = {}, [], set()

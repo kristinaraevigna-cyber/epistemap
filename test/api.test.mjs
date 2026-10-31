@@ -82,7 +82,7 @@ test('coach streams NDJSON with validated citations', async () => {
   assert.equal(r.status, 200); assert.ok(r.headers.get('content-type').includes('ndjson'));
   const lines = (await r.text()).trim().split('\n').map((l) => JSON.parse(l));
   const done = lines.find((l) => l.type === 'done'); assert.ok(done); assert.ok(lines.filter((l) => l.type === 'delta').length > 3);
-  assert.deepEqual(done.citations.map((c) => [c.id, c.valid]), [['flake2023-01', true], ['isager2021-02', true], ['fake2020-01', false]]);
+  assert.deepEqual(done.citations.map((c) => [c.id, c.valid]), [['king2021-04', true], ['bastardoz2023-12', true], ['fake2020-01', false]]);
   const empty = await j('/api/coach', { fieldId: f.id, step: 'claims', messages: [] }); assert.equal(empty.status, 400);
   const fl = await j('/api/flag', { fieldId: f.id, cardId: 'fake2020-01', step: 'claims' }); assert.equal(fl.body.ok, true);
 });
@@ -116,4 +116,21 @@ test('suggest-core and alternatives', async () => {
   assert.equal(r.status, 200); assert.deepEqual(r.body.items.map((i) => [i.id, i.verdict]), [['p_a', 'core'], ['p_b', 'outside']]);
   const al = await j('/api/alternatives', { fieldId: f.id, prediction: { id: 'p_a', text: 'gender diversity → performance (+)' }, dims: [{ id: 'identification', name: 'Identification', options: ['none'] }], judgments: [], gaps: [] });
   assert.equal(al.status, 200); assert.equal(al.body.alternatives[0].dim, 'identification');
+});
+
+test('challenge: verdict follows the tool\'s own judgment; mismatched labels are re-read and logged', async () => {
+  const k = await j('/api/knowledge'); assert.equal(k.body.topics.length, 14); assert.ok(k.body.cards.every((c) => c.topic && c.quote));
+  const f = await j('/api/fields', { name: 'C' });
+  const body = { fieldId: f.body.id, prediction: { id: 'p1', text: 'X → Y' }, assumptions: [
+    { key: 'a1', text: 'No omitted variable', judgment: 'reasonable', sensitivity: 3, source: ['identification'] },
+    { key: 'a2', text: 'The proxy measures the construct', judgment: 'reasonable', sensitivity: 2, source: ['constructs'] },
+    { key: 'a3', text: 'Within-firm variation suffices', judgment: 'questionable', sensitivity: 1, source: ['design'] } ], tests: [] };
+  const r = await j('/api/challenge', body); assert.equal(r.status, 200);
+  const by = Object.fromEntries(r.body.items.map((x) => [x.key, x]));
+  assert.equal(by.a1.stance, 'disagree'); assert.equal(by.a1.tool_judgment, 'violated'); // derived: violated ≠ reasonable
+  assert.equal(by.a3.stance, 'agree'); assert.equal(by.a3.tool_judgment, 'questionable');
+  // a2: the model echoed the researcher's judgment (agree) but its case argues the measure is doubtful → the label check flips it
+  assert.equal(by.a2.stance, 'disagree'); assert.equal(by.a2.label_corrected, true); assert.equal(by.a2.label_was, 'agree');
+  assert.equal(r.body.label_corrected, 1);
+  const ex = await j('/api/admin/export', null, 'GET', { 'x-admin-token': 'adm' }); const ch = ex.body.events.filter((e) => e.type === 'challenge').pop(); assert.equal(ch.payload.label_corrected, 1);
 });

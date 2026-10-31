@@ -10,7 +10,7 @@ An *epistemic map* is a correspondence between sets of assumptions and the evide
 
 Replications are usually counted per paper. EpisteMap records something more useful: for each core claim in a field, *which of its assumptions* the existing studies and replications have actually varied, and which remain untested. The result is a coverage map (claims × assumptions) whose empty cells show where the next test would be most informative.
 
-This is a separate project from [Replication Navigator](https://github.com/kristinaraevigna-cyber/replication-navigator) (single-study planning). It reuses the Navigator's verified evidence base but shares no code, so the two can evolve independently.
+This is a separate project from [Replication Navigator](https://github.com/kristinaraevigna-cyber/replication-navigator) (single-study planning). The two share no code and no evidence base: the Navigator's 322 cards come from the replication literature and stay as they are; EpisteMap has its own base of 341 page-verified cards from 26 sources on epistemic maps, multiverse and many-analysts designs, replication and meta-science, and quasi-experimental design (`knowledge/epimap-cards.json`, grouped into 14 topics in `knowledge/topics.json`; every quote is checked against the PDF page with `scripts/verify_cards.py`).
 
 ## What it maps (v0.2: empirical focus)
 
@@ -47,7 +47,7 @@ The human goes first and disposes last. Step 0 records the researcher's inquiry 
 8. **Many analysts (optional).** An explicit choice: run the map alone and record results, or as a many-analysts study. Why and how to run the map with many analysts (Delios et al., 2025; Silberzahn et al., 2018; Breznau et al., 2022; Huntington-Klein et al., 2021). Add teams and allocate the specifications with a seed: every team runs everything, a random split, one forking dimension per team, or free choice. Each team gets a link to an analyst view with a form per specification; a field owner working alone can add results by hand or upload a CSV of results from R, Python or Stata (the specification list plus `estimate`, `se`, `n` columns). Estimates return as a specification curve, the completed epistemic map, and as `results-<prediction>.csv`.
 9. **Reproduce, replicate, export.** Decisions with their reasons; hand-off to Replication Navigator (whose reproduction stage generates analysis code from the original paper and whose later stages plan a preregistered replication); JSON and CSV for a multiverse.
 
-An **AI coach** sits beside every step, as in Replication Navigator: it streams short, answer-first replies, sees the field's predictions, tests and designs and the researcher's own step-5 judgments and decisions (not the PDFs), and is told to build its advice on those judgments and say so, may only use the 333 evidence cards, cites card ids that the server validates, and lets users open the cited card or flag a citation. Every AI proposal is created with status `ai` and must be confirmed by a person.
+An **AI coach** sits beside every step, as in Replication Navigator: it streams short, answer-first replies, sees the field's predictions, tests and designs and the researcher's own step-5 judgments and decisions (not the PDFs), and is told to build its advice on those judgments and say so, may only use the 341 evidence cards, cites card ids that the server validates, and lets users open the cited card or flag a citation. Every AI proposal is created with status `ai` and must be confirmed by a person.
 
 ## Running locally
 
