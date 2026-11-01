@@ -1,6 +1,6 @@
 # Method notes (v0.4)
 
-These notes record the design decisions behind EpisteMap so they can go into the technical appendix of the Organization Science proposal.
+These notes record the design decisions behind EpisteMapper so they can go into the technical appendix of the Organization Science proposal.
 
 ## 0. Change of focus in v0.2 (16 October 2026)
 
@@ -44,14 +44,14 @@ A prediction is **core** when it recurs across studies and later work builds on 
 | 5 Assumptions & decision | hidden assumptions behind the designs, sensitivity, what would relax each, gaps, overlaps | judges each assumption (reasonable / questionable / violated), adds own, decides multiverse vs new study vs both vs stop, with reason |
 | 6 Choice space | alignment of AI-found choices with a reference | override matches; final benchmark coding |
 | 7 Epistemic map & teams | enumerates specifications; seeded allocation to teams; specification curve | assumption space (dimensions, options, alternatives); allocation mode; which results to keep |
-| 8 Reproduce, replicate, export | ranking of design decisions that vary | hand-off to Evidence Navigator with the decision; exports |
+| 8 Reproduce, replicate, export | ranking of design decisions that vary | hand-off to Empirical Navigator with the decision; exports |
 
 Every proposal carries `status: "ai"` until a person confirms it. Confirmed and rejected items are kept, so the agreement between AI proposals and human decisions can be computed from the exported JSON (acceptance rate per dimension, per study).
 
 ## 3. Grounding and verification
 
 - The extraction prompts require a verbatim quote (8–30 words) and page number for every claim, assumption, choice and tag. Reviewers check items against the PDF.
-- EpisteMap's evidence base (v0.2, 31 Oct 2026) is its own: 341 page-verified cards from 26 methodological sources, grouped into 14 topics (epistemic maps, forking paths, multiverse, many analysts, replication and meta-science, transparency and reporting, identification and endogeneity, instrumental variables, difference-in-differences, regression discontinuity, controls and specification, measurement, sample and context, epistemic trust). It replaced Evidence Navigator's (formerly Replication Navigator) replication cards, which were the wrong literature for judging field-level design assumptions; the Navigator keeps its 322 cards unchanged. `knowledge/dimensions.json` and `knowledge/design-dimensions.json` map each dimension to topics.
+- EpisteMapper's evidence base (v0.2, 31 Oct 2026) is its own: 341 page-verified cards from 26 methodological sources, grouped into 14 topics (epistemic maps, forking paths, multiverse, many analysts, replication and meta-science, transparency and reporting, identification and endogeneity, instrumental variables, difference-in-differences, regression discontinuity, controls and specification, measurement, sample and context, epistemic trust). It replaced Empirical Navigator's (formerly Replication Navigator) replication cards, which were the wrong literature for judging field-level design assumptions; the Navigator keeps its 322 cards unchanged. `knowledge/dimensions.json` and `knowledge/design-dimensions.json` map each dimension to topics.
 - Verdict fidelity in step 6 (`/api/challenge`): the tool first writes its case about each judgment and then states its own judgment of the assumption; the AGREES/DISAGREES verdict is derived on the server from whether that judgment matches the researcher's, and a second, independent reading of the case flips any verdict that contradicts its own argument. Flips are returned (`label_corrected`) and logged per assumption, so the planted-error audit can count detection, label fidelity and false alarms. The grounding block is sent as a cached system prompt, and card ids cited by the model are validated on the server (`/api/explain`).
 - The model never sees the reference list when extracting choices (step 3); the comparison (step 6) is a separate call, so the benchmark is not contaminated.
 

@@ -1,6 +1,6 @@
-# Deploying EpisteMap (GitHub + Render + Supabase)
+# Deploying EpisteMapper (GitHub + Render + Supabase)
 
-The same setup as Evidence Navigator, so the steps will be familiar. Allow about 20 minutes.
+The same setup as Empirical Navigator, so the steps will be familiar. Allow about 20 minutes.
 
 ## 1. GitHub
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EpisteMap</title>
+<title>EpisteMapper</title>
 <meta name="description" content="Map which assumptions of a field's core claims the evidence has tested.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Newsreader:opsz,wght@6..72,300;6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,9 +12,9 @@
 </head>
 <body>
 <header class="top" id="top">
-  <a class="brand" href="#home" aria-label="EpisteMap home">
+  <a class="brand" href="#home" aria-label="EpisteMapper home">
     <img src="brand/logo.svg" alt="" width="42" height="42" class="brand-logo">
-    <strong>EpisteMap</strong>
+    <strong>EpisteMapper</strong>
   </a>
   <div class="crumbs"><span id="fieldName" class="pill" hidden></span>
     <nav class="home-nav" id="homeNav" aria-label="Site"><a href="#how">Why</a><a href="#what-it-does">What it does</a><a href="#the-steps">The steps</a><a href="#what">Epistemic maps</a><a id="topNav" href="#" hidden target="_blank" rel="noopener">Navigator</a></nav></div>
@@ -49,9 +49,9 @@
   </section>
 
   <section class="k-why reveal" id="how">
-    <span class="k-pill">Why EpisteMap</span>
+    <span class="k-pill">Why EpisteMapper</span>
     <h2 class="k-display">We help researchers see a field whole: what it predicted, how each test was designed, and what every design took for granted.</h2>
-    <p class="k-sub">An epistemic map (King, Goldfarb &amp; Simcoe, 2021) is the correspondence between the assumptions a field has made and the evidence it obtained under each. EpisteMap reads the core papers with you, lines up every prediction with the design of every test, shows where the evidence agrees, disagrees and has never looked, and turns the open cells into a multiverse that one researcher or many analyst teams can run.</p>
+    <p class="k-sub">An epistemic map (King, Goldfarb &amp; Simcoe, 2021) is the correspondence between the assumptions a field has made and the evidence it obtained under each. EpisteMapper reads the core papers with you, lines up every prediction with the design of every test, shows where the evidence agrees, disagrees and has never looked, and turns the open cells into a multiverse that one researcher or many analyst teams can run.</p>
     <a class="k-link" href="#the-steps">The ten steps</a>
   </section>
 
@@ -74,7 +74,7 @@
       <article class="k-card">
         <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 10L54 50H10z"/><path d="M32 10v40M32 50L10 50M32 50l22 0M32 10L10 50M32 10l22 40"/></svg>
         <h3>Decide what to test next</h3>
-        <p>A multiverse on existing data, run alone or allocated to analyst teams through the map; a replication of one study with one decision varied, planned in Evidence Navigator; both; or a new design. The result comes back into the map.</p>
+        <p>A multiverse on existing data, run alone or allocated to analyst teams through the map; a replication of one study with one decision varied, planned in Empirical Navigator; both; or a new design. The result comes back into the map.</p>
         <a class="k-btn k-btn-outline" href="#the-steps">Steps 7 to 10</a>
       </article>
     </div>
@@ -87,7 +87,7 @@
       <p class="k-sub left">The tool proposes and you decide at each. The banner moves on its own; click any step to stop and read it.</p>
       <div class="stepper" id="stepper" data-titles='["Your inquiry", "Corpus", "Studies", "Predictions", "Design map", "Assumptions & decision", "Choice space", "Multiverse", "Many analysts", "Reproduce & replicate"]' data-subs='["You go first, sealed", "Bound the field", "Read the papers", "Confirm what was tested", "Line up the designs", "Judge, be challenged, decide", "Benchmark the choices", "Fix the assumption space", "Many analysts, one map", "Hand off and export"]'>
         <ol class="track" id="rail"><li><button type="button" data-i="0" class="active"><span class="node">1</span><span class="lbl">Your inquiry</span></button></li><li><button type="button" data-i="1"><span class="node">2</span><span class="lbl">Corpus</span></button></li><li><button type="button" data-i="2"><span class="node">3</span><span class="lbl">Studies</span></button></li><li><button type="button" data-i="3"><span class="node">4</span><span class="lbl">Predictions</span></button></li><li><button type="button" data-i="4"><span class="node">5</span><span class="lbl">Design map</span></button></li><li><button type="button" data-i="5"><span class="node">6</span><span class="lbl">Assumptions &amp; decision</span></button></li><li><button type="button" data-i="6"><span class="node">7</span><span class="lbl">Choice space</span></button></li><li><button type="button" data-i="7"><span class="node">8</span><span class="lbl">Multiverse</span></button></li><li><button type="button" data-i="8"><span class="node">9</span><span class="lbl">Many analysts</span></button></li><li><button type="button" data-i="9"><span class="node">10</span><span class="lbl">Reproduce &amp; replicate</span></button></li></ol>
-        <div class="step-card" id="railDetail" data-details='["What you want to understand, your search terms, the studies you already know, and what you suspect the field takes for granted. Your suspicions are sealed: the tool never sees them while it reads, and later checks them against what it found on its own.", "Bound the field with OpenAlex or a Web of Science / Scopus export. Seminal, recent and rising studies; reviews flagged. You decide which are core.", "Attach PDFs. The tool extracts each paper’s hypotheses, research questions or propositions, the design of every test per study, the result and the analytical choices, with quotes and pages.", "Confirm, edit, merge or reject each prediction; add your own; mark the core ones. Not satisfied? Send the tool back to the search.", "For each core prediction: the range of designs used across studies and the result under each. Where studies chose differently and disagree, a design decision matters.", "The tool unearths the assumptions behind the designs and how sensitive each result is. You judge each one reasonable, questionable or violated; colleagues can judge the same assumptions blind, through their own link. The tool then argues the other side of every judgment, citing its evidence, with a verdict that follows its own judgment, never a polite label. You keep or change each judgment and decide: multiverse on existing data, replicate one study, both, a new design, or stop.", "The analytical choices found across papers, benchmarked against a published reference map (Berchicci &amp; King, 2022 built in).", "Fix the assumption space for a prediction: which dimensions vary, which options, and the alternatives no study has used. The tool proposes alternatives that relax the assumptions you judged questionable, shows the legend (where prior studies sit, what you judged) and lists the specifications: the multiverse plan.", "Optional: run the map with several analyst teams, each with its own link and allocation, or record your own results; estimates return as a specification curve, the completed epistemic map.", "Hand the chosen test to the study-level planner, Evidence Navigator: reproduction code drafted from the original paper, then a preregistered replication. Export the map, the judgments and the decisions as JSON and CSV; the finished study comes back into the map."]'>
+        <div class="step-card" id="railDetail" data-details='["What you want to understand, your search terms, the studies you already know, and what you suspect the field takes for granted. Your suspicions are sealed: the tool never sees them while it reads, and later checks them against what it found on its own.", "Bound the field with OpenAlex or a Web of Science / Scopus export. Seminal, recent and rising studies; reviews flagged. You decide which are core.", "Attach PDFs. The tool extracts each paper’s hypotheses, research questions or propositions, the design of every test per study, the result and the analytical choices, with quotes and pages.", "Confirm, edit, merge or reject each prediction; add your own; mark the core ones. Not satisfied? Send the tool back to the search.", "For each core prediction: the range of designs used across studies and the result under each. Where studies chose differently and disagree, a design decision matters.", "The tool unearths the assumptions behind the designs and how sensitive each result is. You judge each one reasonable, questionable or violated; colleagues can judge the same assumptions blind, through their own link. The tool then argues the other side of every judgment, citing its evidence, with a verdict that follows its own judgment, never a polite label. You keep or change each judgment and decide: multiverse on existing data, replicate one study, both, a new design, or stop.", "The analytical choices found across papers, benchmarked against a published reference map (Berchicci &amp; King, 2022 built in).", "Fix the assumption space for a prediction: which dimensions vary, which options, and the alternatives no study has used. The tool proposes alternatives that relax the assumptions you judged questionable, shows the legend (where prior studies sit, what you judged) and lists the specifications: the multiverse plan.", "Optional: run the map with several analyst teams, each with its own link and allocation, or record your own results; estimates return as a specification curve, the completed epistemic map.", "Hand the chosen test to the study-level planner, Empirical Navigator: reproduction code drafted from the original paper, then a preregistered replication. Export the map, the judgments and the decisions as JSON and CSV; the finished study comes back into the map."]'>
           <button type="button" class="step-arrow" id="stepPrev" aria-label="Previous step">&lsaquo;</button>
           <div class="step-body">
             <span class="step-k" id="stepK">Step 1 of 10 · You go first</span>
@@ -140,15 +140,15 @@
         <p class="k-foot-tag">Map every test.<br>Judge what it assumes.<br>Decide what to test next.</p>
       </div>
       <div class="k-foot-links">
-        <b>EpisteMap</b>
+        <b>EpisteMapper</b>
         <a href="#how">Why</a><a href="#what-it-does">What it does</a><a href="#the-steps">The steps</a><a href="#what">Epistemic maps</a>
       </div>
       <div class="k-foot-links">
         <b>Elsewhere</b>
-        <a id="footNav" href="#" hidden target="_blank" rel="noopener">Evidence Navigator</a><a href="https://github.com/kristinaraevigna-cyber/epistemap" target="_blank" rel="noopener">Source on GitHub</a>
+        <a id="footNav" href="#" hidden target="_blank" rel="noopener">Empirical Navigator</a><a href="https://github.com/kristinaraevigna-cyber/epistemapper" target="_blank" rel="noopener">Source on GitHub</a>
       </div>
     </div>
-    <div class="k-wrap k-foot-base"><span>EpisteMap · an AI-enabled instrument for meta-science</span><span>Code MIT · evidence cards CC BY 4.0</span></div>
+    <div class="k-wrap k-foot-base"><span>EpisteMapper · an AI-enabled instrument for meta-science</span><span>Code MIT · evidence cards CC BY 4.0</span></div>
   </footer>
 </main>
 

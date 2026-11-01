@@ -327,5 +327,5 @@ app.get('/api/admin/export', wrap(async (req, res) => { if (!process.env.ADMIN_T
 app.get('*', (_, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index.html')));
 
 // Listen first so Render sees an open port; the store connects in the background (with file fallback).
-app.listen(PORT, () => console.log(`epistemap listening on ${PORT} (model ${MODEL}, knowledge ${KNOWLEDGE_VERSION})`));
+app.listen(PORT, () => console.log(`epistemapper listening on ${PORT} (model ${MODEL}, knowledge ${KNOWLEDGE_VERSION})`));
 initStore().catch((e) => console.error('[store] init failed', e.message));
