@@ -10,7 +10,7 @@ An *epistemic map* is a correspondence between sets of assumptions and the evide
 
 Replications are usually counted per paper. EpisteMapper records something more useful: for each core claim in a field, *which of its assumptions* the existing studies and replications have actually varied, and which remain untested. The result is a coverage map (claims × assumptions) whose empty cells show where the next test would be most informative.
 
-This is a separate project from [Empirical Navigator](https://github.com/kristinaraevigna-cyber/replication-navigator) (single-study planning). The two share no code and no evidence base: the Navigator's 322 cards come from the replication literature and stay as they are; EpisteMapper has its own base of 341 page-verified cards from 26 sources on epistemic maps, multiverse and many-analysts designs, replication and meta-science, and quasi-experimental design (`knowledge/epimap-cards.json`, grouped into 14 topics in `knowledge/topics.json`; every quote is checked against the PDF page with `scripts/verify_cards.py`).
+This is a separate project from [Empirical Navigator](https://anonymous.4open.science/r/replication-navigator-8E96/) (single-study planning). The two share no code and no evidence base: the Navigator's 322 cards come from the replication literature and stay as they are; EpisteMapper has its own base of 341 page-verified cards from 26 sources on epistemic maps, multiverse and many-analysts designs, replication and meta-science, and quasi-experimental design (`knowledge/epimap-cards.json`, grouped into 14 topics in `knowledge/topics.json`; every quote is checked against the PDF page with `scripts/verify_cards.py`).
 
 ## What it maps (v0.2: empirical focus)
 
