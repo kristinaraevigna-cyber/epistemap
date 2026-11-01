@@ -34,17 +34,18 @@ A prediction is **core** when it recurs across studies and later work builds on 
 
 ## 2. Where the human is in the loop
 
-| Step | AI proposes | Person decides |
+| Step | AI proposes | Researcher decides |
 |---|---|---|
-| 0 Inquiry | — | states the question, search terms, seed studies, priors |
-| 1 Corpus | candidate studies, citation counts | field boundary, core set; may loop back here from 3–5 |
-| 2 Studies | paper type; predictions; the design and result of each test; choices, with quotes; which predictions are the same as existing ones | — (review in step 4) |
-| 3 Predictions | merge proposals | confirm / edit / merge / reject; mark core |
-| 4 Design map | — | confirm / edit / reject each test |
-| 5 Assumptions & decision | hidden assumptions behind the designs, sensitivity, what would relax each, gaps, overlaps | judges each assumption (reasonable / questionable / violated), adds own, decides multiverse vs new study vs both vs stop, with reason |
-| 6 Choice space | alignment of AI-found choices with a reference | override matches; final benchmark coding |
-| 7 Epistemic map & teams | enumerates specifications; seeded allocation to teams; specification curve | assumption space (dimensions, options, alternatives); allocation mode; which results to keep |
-| 8 Reproduce, replicate, export | ranking of design decisions that vary | hand-off to Empirical Navigator with the decision; exports |
+| 1 Inquiry | — | states the question, search terms, seed studies; seals what they think the field takes for granted |
+| 2 Corpus | candidate studies, citation counts | field boundary, core set; may loop back here from 4–6 |
+| 3 Studies | paper type; predictions; the design and result of each test; choices, with quotes | — (reviewed in step 4) |
+| 4 Predictions | merge proposals | confirm / edit / merge / reject; mark core |
+| 5 Design map | the nine dimensions × the options used across studies, with each result | confirm / edit / reject each test |
+| 6 Assumptions & decision | hidden assumptions behind the designs, sensitivity, what would relax each; the case against each judgment (verdict derived from its own judgment); check of the sealed priors | judge each assumption; invite colleagues to judge blind; keep or change; decide: multiverse, replication, both, new design or stop |
+| 7 Choice space | choices found, one table per category; alignment with a reference list | confirm / reject; override matches |
+| 8 Multiverse | alternatives that relax questionable assumptions; legend; specification list | assumption space: which dimensions vary, which options |
+| 9 Many analysts (optional) | allocation of specifications to teams; collection of estimates; specification curve | run alone or add teams; choose the allocation |
+| 10 Export | decisions with reasons; ranking of the design decisions that matter; hand-off to Empirical Navigator; JSON and CSV | which test to take forward |
 
 Every proposal carries `status: "ai"` until a person confirms it. Confirmed and rejected items are kept, so the agreement between AI proposals and human decisions can be computed from the exported JSON (acceptance rate per dimension, per study).
 
